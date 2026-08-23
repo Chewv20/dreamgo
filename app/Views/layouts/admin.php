@@ -1,0 +1,67 @@
+<?php use Core\Auth; ?>
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><?= htmlspecialchars($meta['title'] ?? 'Panel administrativo | Dream Go', ENT_QUOTES, 'UTF-8') ?></title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/assets/icons/icon-96.png" type="image/png">
+<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body class="admin-body">
+<div class="admin-layout">
+  <button type="button" class="admin-sidebar-toggle" data-admin-sidebar-toggle aria-expanded="false" aria-controls="admin-sidebar">&#9776; Menu</button>
+
+  <aside class="admin-sidebar" id="admin-sidebar" data-admin-sidebar>
+    <div class="admin-sidebar__logo">
+      <img src="/assets/img/logo.avif" alt="Dream Go">
+    </div>
+    <nav class="admin-nav">
+      <a href="/admin">Panel</a>
+      <a href="/admin/paquetes">Paquetes</a>
+      <?php if (Auth::hasPermission('reservas.ver')): ?><a href="/admin/reservas">Reservas</a><?php endif; ?>
+      <?php if (Auth::hasPermission('cotizaciones.ver')): ?><a href="/admin/cotizaciones">Cotizaciones</a><?php endif; ?>
+      <?php if (Auth::hasPermission('ofertas.gestionar')): ?><a href="/admin/ofertas">Ofertas</a><?php endif; ?>
+      <?php if (Auth::hasPermission('usuarios.gestionar')): ?><a href="/admin/usuarios">Usuarios</a><?php endif; ?>
+      <?php if (Auth::hasPermission('roles.gestionar')): ?><a href="/admin/roles">Roles y permisos</a><?php endif; ?>
+      <?php if (Auth::hasPermission('configuracion.gestionar')): ?><a href="/admin/configuracion">Configuracion</a><?php endif; ?>
+    </nav>
+    <form method="post" action="/admin/logout" class="admin-sidebar__logout">
+      <?= \App\Helpers\Csrf::field() ?>
+      <button type="submit" class="btn btn-secundario" style="width:100%;">Cerrar sesion</button>
+    </form>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <h1><?= htmlspecialchars($meta['heading'] ?? ($meta['title'] ?? 'Panel'), ENT_QUOTES, 'UTF-8') ?></h1>
+      <span class="admin-topbar__usuario"><?= htmlspecialchars($adminNombre ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+    </header>
+
+    <?php foreach (\App\Helpers\Flash::pull() as $flash): ?>
+      <div class="admin-flash admin-flash--<?= htmlspecialchars($flash['tipo'], ENT_QUOTES, 'UTF-8') ?>">
+        <?= htmlspecialchars($flash['mensaje'], ENT_QUOTES, 'UTF-8') ?>
+      </div>
+    <?php endforeach; ?>
+
+    <main class="admin-content">
+      <?= $content ?>
+    </main>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var toggle = document.querySelector('[data-admin-sidebar-toggle]');
+  var sidebar = document.querySelector('[data-admin-sidebar]');
+  if (!toggle || !sidebar) return;
+  toggle.addEventListener('click', function () {
+    var isOpen = sidebar.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+});
+</script>
+</body>
+</html>
