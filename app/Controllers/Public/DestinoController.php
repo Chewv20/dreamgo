@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Public;
 
+use App\Models\BloquePagina;
 use App\Models\Categoria;
 use App\Models\Paquete;
 use Core\Controller;
@@ -10,8 +11,11 @@ class DestinoController extends Controller
 {
     public function index(): void
     {
+        $bloques = BloquePagina::porPagina('destinos');
+
         $this->view('public/destinos/index', [
             'categorias' => Categoria::activas(),
+            'intro' => $bloques[0] ?? null,
         ], [
             'title' => 'Destinos | Dream Go Operadora Turistica',
             'description' => 'Explora nuestros destinos nacionales e internacionales.',

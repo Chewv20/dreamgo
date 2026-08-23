@@ -46,10 +46,7 @@ class OfertaAdminController extends AdminController
 
     public function editarForm(int $id): void
     {
-        $oferta = CodigoDescuento::find($id);
-        if (!$oferta) {
-            $this->abort(404);
-        }
+        $oferta = $this->encontrarO404(CodigoDescuento::class, $id);
 
         $this->view('admin/ofertas/edit', [
             'oferta' => $oferta,
@@ -61,9 +58,7 @@ class OfertaAdminController extends AdminController
     {
         $this->verifyCsrf();
 
-        if (!CodigoDescuento::find($id)) {
-            $this->abort(404);
-        }
+        $this->encontrarO404(CodigoDescuento::class, $id);
 
         $datos = $this->datosFormulario();
 
@@ -87,9 +82,7 @@ class OfertaAdminController extends AdminController
     {
         $this->verifyCsrf();
 
-        if (!CodigoDescuento::find($id)) {
-            $this->abort(404);
-        }
+        $this->encontrarO404(CodigoDescuento::class, $id);
 
         CodigoDescuento::update($id, ['activo' => 0]);
         Flash::set('exito', 'Codigo desactivado.');

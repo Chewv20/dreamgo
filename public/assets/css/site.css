@@ -6,7 +6,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/assets/fonts/fraunces-500.woff2') format('woff2');
+  src: url('../fonts/fraunces-500.woff2') format('woff2');
 }
 
 @font-face {
@@ -14,7 +14,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/assets/fonts/fraunces-700.woff2') format('woff2');
+  src: url('../fonts/fraunces-700.woff2') format('woff2');
 }
 
 @font-face {
@@ -22,7 +22,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/assets/fonts/worksans-400.woff2') format('woff2');
+  src: url('../fonts/worksans-400.woff2') format('woff2');
 }
 
 @font-face {
@@ -30,7 +30,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/assets/fonts/worksans-500.woff2') format('woff2');
+  src: url('../fonts/worksans-500.woff2') format('woff2');
 }
 
 @font-face {
@@ -38,7 +38,7 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/assets/fonts/worksans-600.woff2') format('woff2');
+  src: url('../fonts/worksans-600.woff2') format('woff2');
 }
 
 :root {
@@ -301,6 +301,127 @@ input[type="radio"]:focus-visible,
   color: var(--color-blanco);
 }
 
+.hero--inicio {
+  background-image: linear-gradient(180deg, rgba(47, 62, 70, 0.55), rgba(47, 62, 70, 0.82)), url('../img/placeholders/hero-inicio.png');
+}
+
+.hero__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+/* --- Encabezados de seccion --- */
+.seccion__encabezado {
+  max-width: 640px;
+  margin-bottom: 2rem;
+}
+
+.seccion__encabezado p {
+  opacity: 0.8;
+  margin: 0;
+}
+
+/* --- Tarjetas de ventaja (home) --- */
+.tarjeta-ventaja {
+  background: var(--color-blanco);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  padding: 1.5rem;
+}
+
+.tarjeta-ventaja__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--color-fondo-alterno);
+  color: var(--color-primario-oscuro);
+  margin-bottom: 1rem;
+}
+
+.tarjeta-ventaja h3 {
+  margin-bottom: 0.4rem;
+}
+
+.tarjeta-ventaja p {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 0.95rem;
+}
+
+/* --- Tarjetas de destino (home) --- */
+.tarjeta-destino {
+  display: block;
+  padding: 1.5rem;
+}
+
+.tarjeta-destino__etiqueta {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-primario-oscuro);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.tarjeta-destino h3 {
+  margin-bottom: 0.25rem;
+}
+
+.tarjeta-destino__descripcion {
+  margin: 0;
+  color: var(--color-texto-oscuro);
+  opacity: 0.8;
+}
+
+/* --- Testimonios (home) --- */
+.tarjeta-testimonio {
+  background: var(--color-blanco);
+  border-radius: var(--radio);
+  padding: 1.75rem;
+  box-shadow: 0 2px 10px rgba(47, 62, 70, 0.06);
+  margin: 0;
+}
+
+.tarjeta-testimonio__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: var(--color-primario);
+  color: var(--color-texto-oscuro);
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.tarjeta-testimonio blockquote {
+  margin: 0 0 1rem;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+.tarjeta-testimonio figcaption {
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+/* --- CTA final (home) --- */
+.cta-final {
+  text-align: center;
+}
+
+.cta-final p {
+  max-width: 640px;
+  margin-inline: auto;
+}
+
 .animar-entrada {
   opacity: 0;
   transform: translateY(16px);
@@ -472,6 +593,36 @@ input[type="radio"]:focus-visible,
   .grid-tarjetas {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  .grid-tarjetas--4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .grid-tarjetas--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* --- Nosotros: intro a dos columnas --- */
+.nosotros-intro {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nosotros-intro__img {
+  width: 100%;
+  border-radius: var(--radio);
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
+
+@media (min-width: 900px) {
+  .nosotros-intro {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 3rem;
+  }
 }
 
 .paquete-detalle {
@@ -485,4 +636,33 @@ input[type="radio"]:focus-visible,
     grid-template-columns: 2fr 1fr;
     align-items: start;
   }
+}
+
+/* --- Paginacion: catalogo publico y listados admin --- */
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.paginacion__enlace {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radio);
+  background: var(--color-primario);
+  color: var(--color-primario-oscuro);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.paginacion__enlace--deshabilitado {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.paginacion__estado {
+  font-size: 0.9rem;
+  opacity: 0.8;
 }

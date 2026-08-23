@@ -8,19 +8,28 @@ class Reserva extends Model
 {
     protected static string $table = 'reservas';
 
-    public static function adminListado(): array
+    public static function adminListado(int $limite = 20, int $offset = 0): array
     {
-        $stmt = self::db()->query(
+        $stmt = self::db()->prepare(
             'SELECT r.*, c.nombre AS cliente_nombre, c.email AS cliente_email, c.telefono AS cliente_telefono,
                     s.fecha_salida, p.titulo AS paquete_titulo, p.id AS paquete_id
              FROM reservas r
              INNER JOIN clientes c ON c.id = r.cliente_id
              INNER JOIN salidas s ON s.id = r.salida_id
              INNER JOIN paquetes p ON p.id = s.paquete_id
-             ORDER BY r.creado_en DESC'
+             ORDER BY r.creado_en DESC
+             LIMIT :limite OFFSET :offset'
         );
+        $stmt->bindValue(':limite', $limite, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
 
         return $stmt->fetchAll();
+    }
+
+    public static function contarTotal(): int
+    {
+        return (int) self::db()->query('SELECT COUNT(*) FROM reservas')->fetchColumn();
     }
 
     public static function conDetalle(int $id): array|false

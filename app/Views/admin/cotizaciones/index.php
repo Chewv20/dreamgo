@@ -32,4 +32,5 @@
       </tbody>
     </table>
   </div>
+  <?php $rutaBase = '/admin/cotizaciones'; require __DIR__ . '/../../partials/paginacion.php'; ?>
 </div>

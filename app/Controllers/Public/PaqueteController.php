@@ -2,12 +2,16 @@
 
 namespace App\Controllers\Public;
 
+use App\Models\BloquePagina;
 use App\Models\Categoria;
 use App\Models\Paquete;
 use Core\Controller;
+use Core\Paginator;
 
 class PaqueteController extends Controller
 {
+    private const POR_PAGINA = 12;
+
     public function catalogo(): void
     {
         $categoriaSlug = (string) $this->request->query('categoria', '');
@@ -18,11 +22,21 @@ class PaqueteController extends Controller
             'tipo' => in_array($tipo, ['nacional', 'internacional'], true) ? $tipo : '',
         ]);
 
+        $bloques = BloquePagina::porPagina('paquetes');
+
+        $paginador = new Paginator(
+            Paginator::paginaDesde($this->request),
+            self::POR_PAGINA,
+            Paquete::contarPublicados($filtros)
+        );
+
         $this->view('public/paquetes/catalogo', [
-            'paquetes' => Paquete::publicadosConFiltros($filtros),
+            'paquetes' => Paquete::publicadosConFiltros($filtros, $paginador->porPagina, $paginador->offset()),
             'categorias' => Categoria::activas(),
             'categoriaActiva' => $categoriaSlug,
             'tipoActivo' => $tipo,
+            'intro' => $bloques[0] ?? null,
+            'paginador' => $paginador,
         ], [
             'title' => 'Paquetes y excursiones | Dream Go Operadora Turistica',
             'description' => 'Catalogo completo de paquetes y excursiones nacionales e internacionales.',
@@ -51,7 +65,7 @@ class PaqueteController extends Controller
                 'priceCurrency' => $paquete['moneda'],
                 'price' => $paquete['precio_desde'],
             ],
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 
         $this->view('public/paquetes/ficha', [
             'paquete' => $paquete,

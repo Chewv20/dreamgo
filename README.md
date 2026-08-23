@@ -11,21 +11,21 @@ patron MVC propio, MariaDB, JS/CSS sin frameworks pesados, PWA instalable.
 
 ## Puesta en marcha local
 
-1. **Virtual Host**: agrega el contenido de `vhost-dreamgo.local.conf` a
-   `C:\xampp\apache\conf\extra\httpd-vhosts.conf` y reinicia Apache desde el XAMPP Control Panel.
-2. **Archivo hosts**: agrega `127.0.0.1 dreamgo.local` a `C:\Windows\System32\drivers\etc\hosts`
-   (requiere abrir el editor como administrador).
-3. **Dependencias**: `composer install`
-4. **Variables de entorno**: copia `.env.example` a `.env` y ajusta `DB_USER`/`DB_PASS` con las
-   credenciales de tu MariaDB local.
-5. **Base de datos**:
+No se usa Virtual Host de Apache (para evitar conflictos con otros proyectos en XAMPP). En su
+lugar se corre con el servidor embebido de PHP, apuntando directo a `public/`:
+
+1. **Dependencias**: `composer install`
+2. **Variables de entorno**: copia `.env.example` a `.env`, ajusta `DB_USER`/`DB_PASS` con las
+   credenciales de tu MariaDB local y deja `APP_URL=http://localhost:8090`.
+3. **Base de datos**:
    ```
    mysql -u root -p -e "CREATE DATABASE dreamgo CHARACTER SET utf8mb4"
    mysql -u root -p dreamgo < database/schema.sql
    mysql -u root -p dreamgo < database/seeds/seed_demo.sql
    ```
-6. Abre `http://dreamgo.local/` — deberias ver el sitio con el contenido de ejemplo.
-7. Panel admin: `http://dreamgo.local/admin/login` — `admin@dreamgooperadoraturistica.com` / `DreamGo2026!`
+4. **Servidor**: desde la raiz del proyecto, `php -S localhost:8090 -t public`
+5. Abre `http://localhost:8090/` — deberias ver el sitio con el contenido de ejemplo.
+6. Panel admin: `http://localhost:8090/admin/login` — `admin@dreamgooperadoraturistica.com` / `DreamGo2026!`
    (cambiala en tu primer login desde `/admin/usuarios`).
 
 ## Estructura del proyecto

@@ -28,4 +28,5 @@
       </tbody>
     </table>
   </div>
+  <?php $rutaBase = '/admin/reservas'; require __DIR__ . '/../../partials/paginacion.php'; ?>
 </div>

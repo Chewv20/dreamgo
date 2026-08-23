@@ -26,6 +26,7 @@
       <?php if (Auth::hasPermission('ofertas.gestionar')): ?><a href="/admin/ofertas">Ofertas</a><?php endif; ?>
       <?php if (Auth::hasPermission('usuarios.gestionar')): ?><a href="/admin/usuarios">Usuarios</a><?php endif; ?>
       <?php if (Auth::hasPermission('roles.gestionar')): ?><a href="/admin/roles">Roles y permisos</a><?php endif; ?>
+      <?php if (Auth::hasPermission('contenido.gestionar')): ?><a href="/admin/contenido">Contenido del sitio</a><a href="/admin/colores">Colores del sitio</a><?php endif; ?>
       <?php if (Auth::hasPermission('configuracion.gestionar')): ?><a href="/admin/configuracion">Configuracion</a><?php endif; ?>
     </nav>
     <form method="post" action="/admin/logout" class="admin-sidebar__logout">

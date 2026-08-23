@@ -4,20 +4,19 @@ namespace App\Controllers\Admin;
 
 use App\Helpers\Flash;
 use App\Models\Cotizacion;
+use Core\Paginator;
 
 class CotizacionAdminController extends AdminController
 {
+    private const POR_PAGINA = 20;
+
     public function index(): void
     {
-        $stmt = $this->db->query(
-            'SELECT c.*, p.titulo AS paquete_titulo
-             FROM cotizaciones c
-             LEFT JOIN paquetes p ON p.id = c.paquete_id
-             ORDER BY c.creado_en DESC'
-        );
+        $paginador = new Paginator(Paginator::paginaDesde($this->request), self::POR_PAGINA, Cotizacion::contarTotal());
 
         $this->view('admin/cotizaciones/index', [
-            'cotizaciones' => $stmt->fetchAll(),
+            'cotizaciones' => Cotizacion::adminListado($paginador->porPagina, $paginador->offset()),
+            'paginador' => $paginador,
         ], ['title' => 'Cotizaciones | Dream Go', 'heading' => 'Cotizaciones']);
     }
 

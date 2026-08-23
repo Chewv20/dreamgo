@@ -36,10 +36,7 @@ class UsuarioAdminController extends AdminController
             ->requerido('password', 'La contrasena')
             ->requerido('rol_id', 'El rol');
 
-        if (!$validator->pasa()) {
-            Flash::set('error', 'Revisa los datos del formulario.');
-            $this->redirect('/admin/usuarios/crear');
-        }
+        $this->redirigirSiInvalido($validator, '/admin/usuarios/crear');
 
         if (strlen((string) $datos['password']) < 8) {
             Flash::set('error', 'La contrasena debe tener al menos 8 caracteres.');
@@ -65,10 +62,7 @@ class UsuarioAdminController extends AdminController
 
     public function editarForm(int $id): void
     {
-        $usuario = Usuario::find($id);
-        if (!$usuario) {
-            $this->abort(404);
-        }
+        $usuario = $this->encontrarO404(Usuario::class, $id);
 
         $this->view('admin/usuarios/edit', [
             'usuario' => $usuario,
@@ -80,10 +74,7 @@ class UsuarioAdminController extends AdminController
     {
         $this->verifyCsrf();
 
-        $usuario = Usuario::find($id);
-        if (!$usuario) {
-            $this->abort(404);
-        }
+        $usuario = $this->encontrarO404(Usuario::class, $id);
 
         $datos = [
             'nombre' => trim((string) $this->request->input('nombre', '')),

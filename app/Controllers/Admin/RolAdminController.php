@@ -50,10 +50,7 @@ class RolAdminController extends AdminController
     {
         $this->verifyCsrf();
 
-        $rol = Rol::find($id);
-        if (!$rol) {
-            $this->abort(404);
-        }
+        $rol = $this->encontrarO404(Rol::class, $id);
 
         if ((int) $rol['es_sistema'] === 1) {
             Flash::set('error', 'El rol Administrador no puede eliminarse.');

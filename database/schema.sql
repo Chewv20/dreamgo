@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS roles (
   nombre VARCHAR(80) NOT NULL,
   descripcion VARCHAR(255) NULL,
   es_sistema TINYINT(1) NOT NULL DEFAULT 0,
+  permisos_actualizado_en DATETIME NULL,
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -219,6 +220,23 @@ CREATE TABLE IF NOT EXISTS configuracion_sitio (
   valor TEXT NULL,
   descripcion VARCHAR(255) NULL,
   actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================================
+-- BLOQUES DE CONTENIDO EDITABLES (paginas publicas)
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS bloques_pagina (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  pagina VARCHAR(50) NOT NULL,
+  clave VARCHAR(50) NOT NULL,
+  orden SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  visible TINYINT(1) NOT NULL DEFAULT 1,
+  titulo VARCHAR(255) NULL,
+  subtitulo VARCHAR(500) NULL,
+  contenido LONGTEXT NULL,
+  color_fondo VARCHAR(20) NULL,
+  actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_pagina_clave (pagina, clave)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ==========================================================

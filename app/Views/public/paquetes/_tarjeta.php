@@ -7,7 +7,7 @@
       loading="lazy"
       width="480"
       height="320"
-      style="aspect-ratio:3/2;object-fit:cover;"
+      style="width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;"
     >
   </a>
   <div style="padding:1.25rem;">

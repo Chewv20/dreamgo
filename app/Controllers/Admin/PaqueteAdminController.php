@@ -11,13 +11,19 @@ use App\Models\Paquete;
 use App\Services\ImageUploadService;
 use App\Services\SitemapService;
 use Core\Auth;
+use Core\Paginator;
 
 class PaqueteAdminController extends AdminController
 {
+    private const POR_PAGINA = 20;
+
     public function index(): void
     {
+        $paginador = new Paginator(Paginator::paginaDesde($this->request), self::POR_PAGINA, Paquete::contarTotal());
+
         $this->view('admin/paquetes/index', [
-            'paquetes' => Paquete::adminListado(),
+            'paquetes' => Paquete::adminListado($paginador->porPagina, $paginador->offset()),
+            'paginador' => $paginador,
         ], ['title' => 'Paquetes | Dream Go', 'heading' => 'Paquetes']);
     }
 
@@ -68,10 +74,7 @@ class PaqueteAdminController extends AdminController
 
     public function editarForm(int $id): void
     {
-        $paquete = Paquete::find($id);
-        if (!$paquete) {
-            $this->abort(404);
-        }
+        $paquete = $this->encontrarO404(Paquete::class, $id);
 
         $this->view('admin/paquetes/edit', [
             'paquete' => $paquete,
@@ -84,10 +87,7 @@ class PaqueteAdminController extends AdminController
     {
         $this->verifyCsrf();
 
-        $paquete = Paquete::find($id);
-        if (!$paquete) {
-            $this->abort(404);
-        }
+        $paquete = $this->encontrarO404(Paquete::class, $id);
 
         $datos = $this->datosFormulario();
 
@@ -126,9 +126,7 @@ class PaqueteAdminController extends AdminController
     {
         $this->verifyCsrf();
 
-        if (!Paquete::find($id)) {
-            $this->abort(404);
-        }
+        $this->encontrarO404(Paquete::class, $id);
 
         Paquete::update($id, ['estado' => 'archivado']);
         Flash::set('exito', 'Paquete archivado.');

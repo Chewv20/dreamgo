@@ -17,6 +17,19 @@
 <link rel="icon" href="/assets/icons/icon-96.png" type="image/png">
 
 <link rel="stylesheet" href="/assets/css/site.css">
+<?php
+$coloresClaves = ['color_primario', 'color_primario_oscuro', 'color_texto_oscuro', 'color_fondo', 'color_fondo_alterno', 'color_exito', 'color_error'];
+$coloresPersonalizados = [];
+foreach ($coloresClaves as $claveColor) {
+    $valorColor = \App\Models\ConfiguracionSitio::get($claveColor, '');
+    if ($valorColor !== '' && preg_match('/^#[0-9a-f]{6}$/i', $valorColor)) {
+        $coloresPersonalizados[] = '--' . str_replace('_', '-', $claveColor) . ':' . $valorColor;
+    }
+}
+?>
+<?php if (!empty($coloresPersonalizados)): ?>
+<style>:root{<?= implode(';', $coloresPersonalizados) ?>}</style>
+<?php endif; ?>
 <?php if (!empty($meta['jsonLd'])): ?>
 <script type="application/ld+json"><?= $meta['jsonLd'] ?></script>
 <?php endif; ?>

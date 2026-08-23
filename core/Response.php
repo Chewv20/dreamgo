@@ -6,6 +6,10 @@ final class Response
 {
     public static function redirect(string $path): never
     {
+        if (defined('BASE_URL_PATH') && BASE_URL_PATH !== '' && str_starts_with($path, '/')) {
+            $path = BASE_URL_PATH . $path;
+        }
+
         header('Location: ' . $path);
         exit;
     }

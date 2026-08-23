@@ -11,10 +11,7 @@ class SalidaAdminController extends AdminController
 {
     public function index(int $paqueteId): void
     {
-        $paquete = Paquete::find($paqueteId);
-        if (!$paquete) {
-            $this->abort(404);
-        }
+        $paquete = $this->encontrarO404(Paquete::class, $paqueteId);
 
         $this->view('admin/salidas/index', [
             'paquete' => $paquete,
@@ -24,10 +21,7 @@ class SalidaAdminController extends AdminController
 
     public function crearForm(int $paqueteId): void
     {
-        $paquete = Paquete::find($paqueteId);
-        if (!$paquete) {
-            $this->abort(404);
-        }
+        $paquete = $this->encontrarO404(Paquete::class, $paqueteId);
 
         $this->view('admin/salidas/create', [
             'paquete' => $paquete,
@@ -38,10 +32,7 @@ class SalidaAdminController extends AdminController
     {
         $this->verifyCsrf();
 
-        $paquete = Paquete::find($paqueteId);
-        if (!$paquete) {
-            $this->abort(404);
-        }
+        $paquete = $this->encontrarO404(Paquete::class, $paqueteId);
 
         $datos = $this->request->only(['fecha_salida', 'fecha_regreso', 'cupo_maximo', 'precio_override']);
 
@@ -50,10 +41,7 @@ class SalidaAdminController extends AdminController
             ->requerido('cupo_maximo', 'El cupo maximo')
             ->entero('cupo_maximo', 'El cupo maximo');
 
-        if (!$validator->pasa()) {
-            Flash::set('error', 'Revisa los datos del formulario.');
-            $this->redirect("/admin/paquetes/{$paqueteId}/salidas/crear");
-        }
+        $this->redirigirSiInvalido($validator, "/admin/paquetes/{$paqueteId}/salidas/crear");
 
         Salida::insert([
             'paquete_id' => $paqueteId,
@@ -71,11 +59,8 @@ class SalidaAdminController extends AdminController
 
     public function editarForm(int $paqueteId, int $id): void
     {
-        $paquete = Paquete::find($paqueteId);
-        $salida = Salida::find($id);
-        if (!$paquete || !$salida) {
-            $this->abort(404);
-        }
+        $paquete = $this->encontrarO404(Paquete::class, $paqueteId);
+        $salida = $this->encontrarO404(Salida::class, $id);
 
         $this->view('admin/salidas/edit', [
             'paquete' => $paquete,
@@ -87,10 +72,7 @@ class SalidaAdminController extends AdminController
     {
         $this->verifyCsrf();
 
-        $salida = Salida::find($id);
-        if (!$salida) {
-            $this->abort(404);
-        }
+        $salida = $this->encontrarO404(Salida::class, $id);
 
         $cupoMaximo = (int) $this->request->input('cupo_maximo');
         $diferencia = $cupoMaximo - (int) $salida['cupo_maximo'];

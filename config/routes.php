@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 use App\Controllers\Admin\AuthController;
 use App\Controllers\Admin\ConfiguracionController;
+use App\Controllers\Admin\ContenidoController;
 use App\Controllers\Admin\CotizacionAdminController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\OfertaAdminController;
@@ -92,3 +93,13 @@ $router->post('/admin/roles/matriz', [RolAdminController::class, 'guardarMatriz'
 
 $router->get('/admin/configuracion', [ConfiguracionController::class, 'index'], ['auth' => true, 'permiso' => 'configuracion.gestionar']);
 $router->post('/admin/configuracion', [ConfiguracionController::class, 'guardar'], ['auth' => true, 'permiso' => 'configuracion.gestionar']);
+
+$router->get('/admin/contenido', [ContenidoController::class, 'index'], ['auth' => true, 'permiso' => 'contenido.gestionar']);
+$router->get('/admin/contenido/{pagina}', [ContenidoController::class, 'pagina'], ['auth' => true, 'permiso' => 'contenido.gestionar']);
+$router->post('/admin/contenido/{id}/visible', [ContenidoController::class, 'alternarVisible'], ['auth' => true, 'permiso' => 'contenido.gestionar']);
+$router->post('/admin/contenido/{id}/mover', [ContenidoController::class, 'mover'], ['auth' => true, 'permiso' => 'contenido.gestionar']);
+$router->get('/admin/contenido/{id}/editar', [ContenidoController::class, 'editarForm'], ['auth' => true, 'permiso' => 'contenido.gestionar']);
+$router->post('/admin/contenido/{id}/editar', [ContenidoController::class, 'editar'], ['auth' => true, 'permiso' => 'contenido.gestionar']);
+
+$router->get('/admin/colores', [ContenidoController::class, 'colores'], ['auth' => true, 'permiso' => 'contenido.gestionar']);
+$router->post('/admin/colores', [ContenidoController::class, 'guardarColores'], ['auth' => true, 'permiso' => 'contenido.gestionar']);

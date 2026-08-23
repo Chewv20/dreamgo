@@ -1,20 +1,28 @@
 // Service worker de Dream Go: cache-first para el shell estatico, network-first
 // para paginas dinamicas, con una pagina offline.html como respaldo final.
-const CACHE_VERSION = 'dreamgo-v1';
+// CACHE_VERSION: sube este numero cada vez que cambie SHELL_ASSETS o la logica
+// de este archivo, para que los navegadores con una version vieja instalada
+// descarten su cache automaticamente.
+const CACHE_VERSION = 'dreamgo-v2';
 const SHELL_CACHE = CACHE_VERSION + '-shell';
 const PAGES_CACHE = CACHE_VERSION + '-pages';
 
+// Ruta base donde vive este service worker (ej. "/dreamgo/public/" en local,
+// "/" en produccion). Se calcula en tiempo de ejecucion para que el mismo
+// archivo funcione sin importar la subcarpeta desde la que se sirva el sitio.
+const BASE = self.location.pathname.replace(/sw\.js$/, '');
+
 const SHELL_ASSETS = [
-  '/assets/css/site.css',
-  '/assets/js/site.js',
-  '/assets/img/logo.avif',
-  '/assets/fonts/fraunces-500.woff2',
-  '/assets/fonts/fraunces-700.woff2',
-  '/assets/fonts/worksans-400.woff2',
-  '/assets/fonts/worksans-500.woff2',
-  '/assets/fonts/worksans-600.woff2',
-  '/manifest.json',
-  '/offline.html',
+  BASE + 'assets/css/site.css',
+  BASE + 'assets/js/site.js',
+  BASE + 'assets/img/logo.avif',
+  BASE + 'assets/fonts/fraunces-500.woff2',
+  BASE + 'assets/fonts/fraunces-700.woff2',
+  BASE + 'assets/fonts/worksans-400.woff2',
+  BASE + 'assets/fonts/worksans-500.woff2',
+  BASE + 'assets/fonts/worksans-600.woff2',
+  BASE + 'manifest.json',
+  BASE + 'offline.html',
 ];
 
 self.addEventListener('install', function (event) {
@@ -40,7 +48,7 @@ self.addEventListener('activate', function (event) {
 });
 
 function esAssetEstatico(url) {
-  return /\/assets\//.test(url.pathname) || url.pathname === '/manifest.json';
+  return /\/assets\//.test(url.pathname) || url.pathname === BASE + 'manifest.json';
 }
 
 self.addEventListener('fetch', function (event) {
@@ -72,7 +80,7 @@ self.addEventListener('fetch', function (event) {
       })
       .catch(function () {
         return caches.match(request).then(function (cached) {
-          return cached || caches.match('/offline.html');
+          return cached || caches.match(BASE + 'offline.html');
         });
       })
   );

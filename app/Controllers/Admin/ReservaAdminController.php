@@ -8,14 +8,20 @@ use App\Models\Reserva;
 use App\Models\Salida;
 use App\Services\MailerService;
 use App\Services\ReservaService;
+use Core\Paginator;
 use RuntimeException;
 
 class ReservaAdminController extends AdminController
 {
+    private const POR_PAGINA = 20;
+
     public function index(): void
     {
+        $paginador = new Paginator(Paginator::paginaDesde($this->request), self::POR_PAGINA, Reserva::contarTotal());
+
         $this->view('admin/reservas/index', [
-            'reservas' => Reserva::adminListado(),
+            'reservas' => Reserva::adminListado($paginador->porPagina, $paginador->offset()),
+            'paginador' => $paginador,
         ], ['title' => 'Reservas | Dream Go', 'heading' => 'Reservas']);
     }
 
@@ -72,10 +78,7 @@ class ReservaAdminController extends AdminController
             ->requerido('telefono', 'El telefono')
             ->requerido('num_personas', 'El numero de personas')->entero('num_personas', 'El numero de personas');
 
-        if (!$validator->pasa()) {
-            Flash::set('error', 'Revisa los datos del formulario.');
-            $this->redirect('/admin/reservas/crear?salida_id=' . (int) $datos['salida_id']);
-        }
+        $this->redirigirSiInvalido($validator, '/admin/reservas/crear?salida_id=' . (int) $datos['salida_id']);
 
         $service = new ReservaService($this->db);
 

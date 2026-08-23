@@ -33,10 +33,37 @@
     elementos.forEach(function (el) { observer.observe(el); });
   }
 
+  function baseHref() {
+    var link = document.querySelector('link[rel="manifest"]');
+    if (!link) return '/';
+    var path = new URL(link.getAttribute('href'), window.location.origin).pathname;
+    return path.replace(/manifest\.json$/, '');
+  }
+
   function initServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
+
+    // Si el service worker activo cambia (nueva version tomo el control),
+    // recargamos una sola vez para mostrar el contenido actualizado sin
+    // que el usuario tenga que borrar la cache manualmente.
+    var recargando = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (recargando) return;
+      recargando = true;
+      window.location.reload();
+    });
+
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/sw.js').catch(function (err) {
+      navigator.serviceWorker.register(baseHref() + 'sw.js').then(function (registration) {
+        // Revisa si hay una version nueva del service worker al cargar la
+        // pagina y cada vez que la pestaña vuelve a estar visible.
+        registration.update();
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'visible') {
+            registration.update();
+          }
+        });
+      }).catch(function (err) {
         console.warn('No se pudo registrar el service worker:', err);
       });
     });

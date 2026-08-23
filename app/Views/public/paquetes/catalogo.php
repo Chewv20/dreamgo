@@ -1,7 +1,10 @@
-<?php /** @var array $paquetes */ /** @var array $categorias */ /** @var string $categoriaActiva */ /** @var string $tipoActivo */ ?>
+<?php /** @var array $paquetes */ /** @var array $categorias */ /** @var string $categoriaActiva */ /** @var string $tipoActivo */ /** @var array|null $intro */ ?>
 <section class="seccion contenedor">
-  <h1>Paquetes y excursiones</h1>
-  <p>Filtra por destino o por tipo de viaje para encontrar tu proxima excursion.</p>
+  <?php $introVisible = $intro && (int) $intro['visible'] === 1; ?>
+  <h1><?= htmlspecialchars($introVisible && !empty($intro['titulo']) ? $intro['titulo'] : 'Paquetes y excursiones', ENT_QUOTES, 'UTF-8') ?></h1>
+  <?php if ($introVisible && !empty($intro['subtitulo'])): ?>
+    <p><?= htmlspecialchars($intro['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p>
+  <?php endif; ?>
 
   <form method="get" action="/paquetes" style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;margin-block:2rem;">
     <div class="campo" style="flex:1;min-width:200px;margin-bottom:0;">
@@ -35,4 +38,5 @@
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
+  <?php $rutaBase = '/paquetes'; $queryExtra = array_filter(['categoria' => $categoriaActiva, 'tipo' => $tipoActivo]); require __DIR__ . '/../../partials/paginacion.php'; ?>
 </section>

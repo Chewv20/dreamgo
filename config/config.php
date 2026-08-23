@@ -6,6 +6,13 @@ if (!defined('BASE_PATH')) {
     define('BASE_PATH', dirname(__DIR__));
 }
 
+if (!defined('BASE_URL_PATH')) {
+    $scriptDir = PHP_SAPI !== 'cli' && isset($_SERVER['SCRIPT_NAME'])
+        ? str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']))
+        : '/';
+    define('BASE_URL_PATH', $scriptDir === '/' ? '' : rtrim($scriptDir, '/'));
+}
+
 require BASE_PATH . '/vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);

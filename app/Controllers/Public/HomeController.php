@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Public;
 
+use App\Models\BloquePagina;
 use App\Models\Categoria;
 use App\Models\ConfiguracionSitio;
 use App\Models\Paquete;
@@ -12,6 +13,7 @@ class HomeController extends Controller
     public function index(): void
     {
         $this->view('public/home/index', [
+            'bloques' => BloquePagina::porPagina('home'),
             'destacados' => Paquete::destacados(3),
             'categorias' => Categoria::activas(),
         ], [

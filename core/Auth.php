@@ -10,13 +10,15 @@ final class Auth
     private const SESSION_ROL = 'admin_rol_id';
     private const SESSION_PERMISOS = 'admin_permisos';
     private const SESSION_NOMBRE = 'admin_nombre';
+    private const SESSION_USUARIO_SELLO = 'admin_usuario_sello';
+    private const SESSION_PERMISOS_SELLO = 'admin_permisos_sello';
 
     public static function attempt(string $email, string $password): bool
     {
         $db = Database::connection();
 
         $stmt = $db->prepare(
-            'SELECT id, nombre, password_hash, rol_id, activo FROM usuarios_admin WHERE email = :email LIMIT 1'
+            'SELECT id, nombre, password_hash, rol_id, activo, actualizado_en FROM usuarios_admin WHERE email = :email LIMIT 1'
         );
         $stmt->execute(['email' => $email]);
         $usuario = $stmt->fetch();
@@ -38,13 +40,67 @@ final class Auth
     {
         session_regenerate_id(true);
 
+        $update = $db->prepare('UPDATE usuarios_admin SET ultimo_login = NOW() WHERE id = :id');
+        $update->execute(['id' => $usuario['id']]);
+
+        // El UPDATE anterior tambien recalcula actualizado_en (ON UPDATE CURRENT_TIMESTAMP),
+        // asi que releemos el valor final para que el sello guardado en sesion coincida
+        // con el que vera sesionVigente() en la siguiente peticion.
+        $selloActual = $db->prepare('SELECT actualizado_en FROM usuarios_admin WHERE id = :id');
+        $selloActual->execute(['id' => $usuario['id']]);
+
         $_SESSION[self::SESSION_KEY] = (int) $usuario['id'];
         $_SESSION[self::SESSION_NOMBRE] = $usuario['nombre'];
         $_SESSION[self::SESSION_ROL] = (int) $usuario['rol_id'];
         $_SESSION[self::SESSION_PERMISOS] = self::cargarPermisos((int) $usuario['rol_id'], $db);
+        $_SESSION[self::SESSION_USUARIO_SELLO] = $selloActual->fetchColumn();
+        $_SESSION[self::SESSION_PERMISOS_SELLO] = self::permisosSello((int) $usuario['rol_id'], $db);
+    }
 
-        $update = $db->prepare('UPDATE usuarios_admin SET ultimo_login = NOW() WHERE id = :id');
-        $update->execute(['id' => $usuario['id']]);
+    /**
+     * Verifica que la sesion siga reflejando el estado actual del usuario y
+     * su rol (activo, rol asignado, permisos del rol). Si algo cambio desde
+     * el login, cierra la sesion para forzar que se autentique de nuevo con
+     * los datos frescos.
+     */
+    public static function sesionVigente(): bool
+    {
+        if (!self::check()) {
+            return false;
+        }
+
+        $db = Database::connection();
+        $stmt = $db->prepare(
+            'SELECT rol_id, activo, actualizado_en FROM usuarios_admin WHERE id = :id LIMIT 1'
+        );
+        $stmt->execute(['id' => self::id()]);
+        $usuario = $stmt->fetch();
+
+        if (!$usuario || (int) $usuario['activo'] !== 1) {
+            return false;
+        }
+
+        if ((int) $usuario['rol_id'] !== ($_SESSION[self::SESSION_ROL] ?? null)) {
+            return false;
+        }
+
+        if ($usuario['actualizado_en'] !== ($_SESSION[self::SESSION_USUARIO_SELLO] ?? null)) {
+            return false;
+        }
+
+        if (self::permisosSello((int) $usuario['rol_id'], $db) !== ($_SESSION[self::SESSION_PERMISOS_SELLO] ?? null)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static function permisosSello(int $rolId, PDO $db): ?string
+    {
+        $stmt = $db->prepare('SELECT permisos_actualizado_en FROM roles WHERE id = :rol_id');
+        $stmt->execute(['rol_id' => $rolId]);
+
+        return $stmt->fetchColumn() ?: null;
     }
 
     private static function cargarPermisos(int $rolId, PDO $db): array
@@ -69,6 +125,23 @@ final class Auth
         }
 
         session_destroy();
+    }
+
+    /**
+     * Cierra la sesion administrativa sin destruir la sesion HTTP completa,
+     * para poder mostrar un mensaje flash en la siguiente carga (login).
+     * Usado cuando se detecta que los permisos o el rol del usuario cambiaron.
+     */
+    public static function forzarCierre(): void
+    {
+        unset(
+            $_SESSION[self::SESSION_KEY],
+            $_SESSION[self::SESSION_NOMBRE],
+            $_SESSION[self::SESSION_ROL],
+            $_SESSION[self::SESSION_PERMISOS],
+            $_SESSION[self::SESSION_USUARIO_SELLO],
+            $_SESSION[self::SESSION_PERMISOS_SELLO]
+        );
     }
 
     public static function check(): bool

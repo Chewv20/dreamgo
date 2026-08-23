@@ -26,4 +26,5 @@
       </tbody>
     </table>
   </div>
+  <?php $rutaBase = '/admin/paquetes'; require __DIR__ . '/../../partials/paginacion.php'; ?>
 </div>

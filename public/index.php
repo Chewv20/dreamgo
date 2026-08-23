@@ -14,6 +14,14 @@ require BASE_PATH . '/config/routes.php';
 
 $request = new Request();
 
+if (BASE_URL_PATH !== '') {
+    ob_start(static fn (string $html): string => preg_replace(
+        '/(href|src|action)="\/(?!\/)/',
+        '$1="' . BASE_URL_PATH . '/',
+        $html
+    ));
+}
+
 try {
     $router->dispatch($request);
 } catch (NotFoundException $e) {

@@ -26,7 +26,8 @@ INSERT INTO permisos (clave, modulo, descripcion) VALUES
   ('usuarios.gestionar', 'usuarios', 'Crear y editar usuarios del panel'),
   ('roles.gestionar', 'roles', 'Crear roles y asignar permisos'),
   ('configuracion.gestionar', 'configuracion', 'Editar la configuracion global del sitio'),
-  ('reportes.ver', 'reportes', 'Ver reportes y metricas del negocio');
+  ('reportes.ver', 'reportes', 'Ver reportes y metricas del negocio'),
+  ('contenido.gestionar', 'contenido', 'Editar textos, orden y colores de las paginas publicas');
 
 -- Administrador: todos los permisos
 INSERT INTO rol_permiso (rol_id, permiso_id)
@@ -163,4 +164,81 @@ INSERT INTO configuracion_sitio (clave, valor, descripcion) VALUES
   ('dias_recordatorio_viaje', '3', 'Dias de anticipacion para enviar el recordatorio de viaje'),
   ('email_equipo_reportes', 'admin@dreamgooperadoraturistica.com', 'Correo que recibe el reporte periodico y notificaciones de cotizacion'),
   ('meta_title_default', 'Dream Go Operadora Turistica | Excursiones y paquetes de viaje', 'Titulo SEO por defecto'),
-  ('meta_description_default', 'Excursiones y paquetes a los mejores destinos de Mexico y el mundo, con la confianza de un equipo experto.', 'Descripcion SEO por defecto');
+  ('meta_description_default', 'Excursiones y paquetes a los mejores destinos de Mexico y el mundo, con la confianza de un equipo experto.', 'Descripcion SEO por defecto'),
+  ('color_primario', '#d99e8e', 'Color primario (acentos, botones secundarios)'),
+  ('color_primario_oscuro', '#a85f4d', 'Color primario oscuro (botones principales, enlaces)'),
+  ('color_texto_oscuro', '#2f3e46', 'Color de texto principal y fondos oscuros (footer, hero)'),
+  ('color_fondo', '#fdfaf8', 'Color de fondo general del sitio'),
+  ('color_fondo_alterno', '#faf3ef', 'Color de fondo alterno (secciones destacadas)'),
+  ('color_exito', '#4f7a5c', 'Color para mensajes de exito'),
+  ('color_error', '#b3453a', 'Color para mensajes de error');
+
+-- ==========================================================
+-- BLOQUES DE CONTENIDO: HOME
+-- ==========================================================
+INSERT INTO bloques_pagina (pagina, clave, orden, visible, titulo, subtitulo, contenido, color_fondo) VALUES
+  ('home', 'hero', 1, 1,
+   'Descubre el mundo con la tranquilidad de viajar acompañado',
+   'Diseñamos excursiones y paquetes a los mejores destinos de Mexico y el mundo, con asesoria personalizada de principio a fin.',
+   '{"cta_primario_texto":"Cotiza tu viaje","cta_primario_link":"/cotizador","cta_secundario_texto":"Ver paquetes","cta_secundario_link":"/paquetes"}',
+   NULL),
+  ('home', 'ventajas', 2, 1,
+   'Por que viajar con Dream Go',
+   'Nos ocupamos de los detalles para que tu solo te preocupes de disfrutar el viaje.',
+   '{"items":[{"icono":"chat","titulo":"Asesoria personalizada","texto":"Te acompañamos desde la eleccion del destino hasta el regreso a casa, resolviendo cada duda en el camino."},{"icono":"mapa","titulo":"Itinerarios claros","texto":"Sin sorpresas: sabes exactamente que incluye cada paquete antes de reservar."},{"icono":"reloj","titulo":"Soporte en todo momento","texto":"Resolvemos tus dudas antes, durante y despues del viaje: nunca estas solo en el camino."},{"icono":"etiqueta","titulo":"Precios transparentes","texto":"Cotizaciones claras y sin cargos ocultos, para que planees tu presupuesto con confianza."}]}',
+   NULL),
+  ('home', 'destinos', 3, 1,
+   'Explora por destino',
+   'Recorre nuestras categorias nacionales e internacionales y encuentra tu proxima escapada.',
+   NULL,
+   NULL),
+  ('home', 'paquetes_destacados', 4, 1,
+   'Paquetes destacados',
+   'Una seleccion de las excursiones favoritas de nuestros viajeros.',
+   NULL,
+   '#faf3ef'),
+  ('home', 'testimonios', 5, 1,
+   'Lo que dicen quienes ya viajaron',
+   NULL,
+   '{"items":[{"inicial":"M","texto":"La asesoria fue clave: nos ayudaron a armar el itinerario perfecto para el tiempo que teniamos y todo salio como lo planeamos.","autor":"Cliente Dream Go — Paquete nacional"},{"inicial":"R","texto":"Viajamos en grupo y el equipo resolvio cada duda por WhatsApp casi al instante. Se siente el acompañamiento real.","autor":"Cliente Dream Go — Paquete internacional"},{"inicial":"L","texto":"Cotizacion clara desde el inicio, sin cargos escondidos. Ya vamos por nuestro segundo viaje con ellos.","autor":"Cliente Dream Go — Paquete nacional"}]}',
+   NULL),
+  ('home', 'cta_final', 6, 1,
+   'Tu proximo viaje empieza con una conversacion',
+   'Cuentanos que tienes en mente y te preparamos una cotizacion a la medida, sin compromiso.',
+   '{"boton_texto":"Solicita tu cotizacion","boton_link":"/cotizador"}',
+   NULL);
+
+-- ==========================================================
+-- BLOQUES DE CONTENIDO: NOSOTROS, CONTACTO, DESTINOS, PAQUETES
+-- ==========================================================
+INSERT INTO bloques_pagina (pagina, clave, orden, visible, titulo, subtitulo, contenido, color_fondo) VALUES
+  ('nosotros', 'intro', 1, 1,
+   'Sobre Dream Go',
+   'En Dream Go Operadora Turistica creemos que viajar debe ser una experiencia sin complicaciones. Somos un equipo de asesores de viaje dedicados a disenar excursiones nacionales e internacionales con itinerarios claros, acompañamiento real y la seguridad de trabajar con un operador establecido.',
+   '{"parrafo_2":"Desde nuestros primeros grupos hasta hoy, nuestro compromiso ha sido el mismo: que cada viajero se sienta acompañado antes, durante y despues de su viaje."}',
+   NULL),
+  ('nosotros', 'estadisticas', 2, 1,
+   NULL,
+   NULL,
+   '{"items":[{"numero":"+50","etiqueta":"Destinos disponibles"},{"numero":"+5,000","etiqueta":"Viajeros felices"},{"numero":"+10","etiqueta":"Anos de experiencia"}]}',
+   '#faf3ef'),
+  ('nosotros', 'cta_final', 3, 1,
+   '¿Listo para tu proximo viaje?',
+   NULL,
+   '{"boton_texto":"Cotiza con nosotros","boton_link":"/cotizador"}',
+   NULL),
+  ('contacto', 'intro', 1, 1,
+   'Hablemos de tu proximo viaje',
+   'Escribenos por el canal que prefieras, nuestro equipo te respondera a la brevedad.',
+   NULL,
+   NULL),
+  ('destinos', 'intro', 1, 1,
+   'Nuestros destinos',
+   'Elige entre experiencias nacionales e internacionales disenadas por nuestro equipo.',
+   NULL,
+   NULL),
+  ('paquetes', 'intro', 1, 1,
+   'Paquetes y excursiones',
+   'Filtra por destino o por tipo de viaje para encontrar tu proxima excursion.',
+   NULL,
+   NULL);

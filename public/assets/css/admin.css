@@ -110,6 +110,11 @@
   color: var(--color-error);
 }
 
+.admin-flash--info {
+  background: var(--color-fondo-alterno);
+  color: var(--color-primario-oscuro);
+}
+
 .admin-panel {
   background: #fff;
   border-radius: var(--radio);

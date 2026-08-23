@@ -50,6 +50,9 @@ class Rol extends Model
                 }
             }
 
+            $marcarActualizado = $db->prepare('UPDATE roles SET permisos_actualizado_en = NOW() WHERE id = :rol_id');
+            $marcarActualizado->execute(['rol_id' => $rolId]);
+
             $db->commit();
         } catch (\Throwable $e) {
             $db->rollBack();
