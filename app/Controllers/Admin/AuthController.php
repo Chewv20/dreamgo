@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
+use App\Models\Usuario;
 use Core\Auth;
 use Core\Controller;
 
@@ -24,12 +25,19 @@ class AuthController extends Controller
 
         $email = (string) $this->request->input('email', '');
         $password = (string) $this->request->input('password', '');
+        $ip = $this->request->ip();
 
-        if (Auth::attempt($email, $password)) {
+        $bloqueadoAntes = Auth::bloqueado($email, $ip);
+
+        if (Auth::attempt($email, $password, $ip)) {
             $this->redirect('/admin');
         }
 
-        Flash::set('error', 'Correo o contrasena incorrectos.');
+        $mensaje = $bloqueadoAntes
+            ? 'Demasiados intentos fallidos. Espera unos minutos antes de volver a intentar.'
+            : 'Correo o contrasena incorrectos.';
+
+        Flash::set('error', $mensaje);
         $this->view('admin/auth/login', ['email' => $email], ['title' => 'Iniciar sesion | Dream Go'], 'blank');
     }
 
@@ -37,6 +45,53 @@ class AuthController extends Controller
     {
         $this->verifyCsrf();
         Auth::logout();
+        $this->redirect('/admin/login');
+    }
+
+    public function cambiarPasswordForm(): void
+    {
+        $this->view('admin/auth/cambiar_password', [], ['title' => 'Cambiar contrasena | Dream Go'], 'blank');
+    }
+
+    public function cambiarPassword(): void
+    {
+        $this->verifyCsrf();
+
+        $actual = (string) $this->request->input('password_actual', '');
+        $nueva = (string) $this->request->input('password_nueva', '');
+        $confirmacion = (string) $this->request->input('password_confirmacion', '');
+
+        $usuario = Usuario::find((int) Auth::id());
+
+        if ($usuario === false || !password_verify($actual, $usuario['password_hash'])) {
+            Flash::set('error', 'La contrasena actual no es correcta.');
+            $this->redirect('/admin/cambiar-password');
+        }
+
+        if (strlen($nueva) < 8) {
+            Flash::set('error', 'La nueva contrasena debe tener al menos 8 caracteres.');
+            $this->redirect('/admin/cambiar-password');
+        }
+
+        if ($nueva !== $confirmacion) {
+            Flash::set('error', 'La confirmacion no coincide con la nueva contrasena.');
+            $this->redirect('/admin/cambiar-password');
+        }
+
+        if (password_verify($nueva, $usuario['password_hash'])) {
+            Flash::set('error', 'La nueva contrasena debe ser distinta a la actual.');
+            $this->redirect('/admin/cambiar-password');
+        }
+
+        Usuario::update((int) $usuario['id'], [
+            'password_hash' => password_hash($nueva, PASSWORD_DEFAULT),
+            'debe_cambiar_password' => 0,
+        ]);
+
+        // forzarCierre() invalida la sesion admin sin destruir la sesion HTTP,
+        // para que el mensaje de exito siga visible en la pagina de login.
+        Auth::forzarCierre();
+        Flash::set('exito', 'Contrasena actualizada. Inicia sesion con tu nueva contrasena.');
         $this->redirect('/admin/login');
     }
 }

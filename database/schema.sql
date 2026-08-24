@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS usuarios_admin (
   nombre VARCHAR(100) NOT NULL,
   email VARCHAR(150) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
+  debe_cambiar_password TINYINT(1) NOT NULL DEFAULT 0,
   rol_id INT UNSIGNED NOT NULL,
   activo TINYINT(1) NOT NULL DEFAULT 1,
   ultimo_login DATETIME NULL,
@@ -47,6 +48,19 @@ CREATE TABLE IF NOT EXISTS usuarios_admin (
   CONSTRAINT fk_usuario_rol FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE INDEX idx_usuarios_rol ON usuarios_admin(rol_id);
+
+-- ==========================================================
+-- INTENTOS DE LOGIN (rate limiting + auditoria del panel admin)
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS intentos_login (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(150) NOT NULL,
+  ip VARCHAR(45) NOT NULL,
+  exitoso TINYINT(1) NOT NULL DEFAULT 0,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE INDEX idx_intentos_login_email ON intentos_login(email, creado_en);
+CREATE INDEX idx_intentos_login_ip ON intentos_login(ip, creado_en);
 
 -- ==========================================================
 -- CATEGORIAS / DESTINOS
@@ -136,11 +150,10 @@ CREATE INDEX idx_salidas_estado ON salidas(estado);
 CREATE TABLE IF NOT EXISTS clientes (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(150) NOT NULL,
-  email VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
   telefono VARCHAR(30) NOT NULL,
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-CREATE INDEX idx_clientes_email ON clientes(email);
 
 -- ==========================================================
 -- CODIGOS DE DESCUENTO / OFERTAS

@@ -1,6 +1,6 @@
 # Tareas programadas (cron) — Dream Go
 
-Los 5 scripts de esta carpeta se ejecutan por PHP CLI y son independientes del servidor web.
+Los 6 scripts de esta carpeta se ejecutan por PHP CLI y son independientes del servidor web.
 Todos registran su actividad en `storage/logs/cron.log`.
 
 ## Prueba manual en local (XAMPP / Windows)
@@ -13,6 +13,7 @@ php cron/desactivar_ofertas_vencidas.php
 php cron/recordatorio_viaje.php
 php cron/reporte_periodico.php --periodo=diario
 php cron/backup_bd.php
+php cron/limpiar_intentos_login.php
 ```
 
 ## Configuracion en Hostinger (hPanel > Avanzado > Cron Jobs)
@@ -31,6 +32,8 @@ La ruta base normalmente es `/home/USUARIO/domains/dreamgooperadoraturistica.com
 0 7 * * 1 /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/reporte_periodico.php --periodo=semanal >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
 
 30 2 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/backup_bd.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+
+0 4 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/limpiar_intentos_login.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
 ```
 
 ## Que hace cada script
@@ -42,5 +45,6 @@ La ruta base normalmente es `/home/USUARIO/domains/dreamgooperadoraturistica.com
 | `recordatorio_viaje.php` | diario | Envia un correo recordatorio a clientes con reserva `confirmada` cuya salida es en N dias (configurable en `/admin/configuracion`). Evita duplicados revisando `log_correos_enviados`. |
 | `reporte_periodico.php` | diario y/o semanal | Envia un resumen de cotizaciones y reservas nuevas al correo del equipo. Usa `--periodo=diario` o `--periodo=semanal`. |
 | `backup_bd.php` | diario (madrugada) | Genera un dump comprimido (`.sql.gz`) de la base de datos en `storage/backups/`, con `mysqldump` si esta disponible o un respaldo 100% PHP como respaldo. Conserva los ultimos 14 dias. |
+| `limpiar_intentos_login.php` | diario | Purga de `intentos_login` (rate limiting del login admin, ver `core/Auth.php`) los registros con mas de 30 dias. |
 
 `storage/` nunca es accesible por URL (queda fuera de `public/`), asi que los backups y logs no estan expuestos publicamente.

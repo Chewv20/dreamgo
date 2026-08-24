@@ -1,5 +1,9 @@
 RewriteEngine On
 
+# El .htaccess de la raíz del proyecto deniega todo por defecto;
+# esta carpeta es la única que debe quedar accesible desde el navegador.
+Require all granted
+
 # Bloquea el acceso directo a archivos sensibles si llegaran a existir en public/
 <FilesMatch "\.(env|sql|log|md)$">
     Require all denied

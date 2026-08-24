@@ -2,6 +2,7 @@
 
 namespace Core;
 
+use App\Models\IntentoLogin;
 use PDO;
 
 final class Auth
@@ -12,25 +13,45 @@ final class Auth
     private const SESSION_NOMBRE = 'admin_nombre';
     private const SESSION_USUARIO_SELLO = 'admin_usuario_sello';
     private const SESSION_PERMISOS_SELLO = 'admin_permisos_sello';
+    private const SESSION_DEBE_CAMBIAR_PASSWORD = 'admin_debe_cambiar_password';
 
-    public static function attempt(string $email, string $password): bool
+    private const VENTANA_MINUTOS = 15;
+    private const MAX_INTENTOS_EMAIL = 5;
+    private const MAX_INTENTOS_IP = 15;
+
+    /**
+     * Ventana movil: cada intento (incluso mientras esta bloqueado) queda
+     * registrado, asi que insistir extiende el bloqueo en vez de acortarlo.
+     */
+    public static function bloqueado(string $email, string $ip): bool
     {
+        return IntentoLogin::fallidosPorEmail($email, self::VENTANA_MINUTOS) >= self::MAX_INTENTOS_EMAIL
+            || IntentoLogin::fallidosPorIp($ip, self::VENTANA_MINUTOS) >= self::MAX_INTENTOS_IP;
+    }
+
+    public static function attempt(string $email, string $password, string $ip): bool
+    {
+        if (self::bloqueado($email, $ip)) {
+            IntentoLogin::registrar($email, $ip, false);
+
+            return false;
+        }
+
         $db = Database::connection();
 
         $stmt = $db->prepare(
-            'SELECT id, nombre, password_hash, rol_id, activo, actualizado_en FROM usuarios_admin WHERE email = :email LIMIT 1'
+            'SELECT id, nombre, password_hash, rol_id, activo, actualizado_en, debe_cambiar_password FROM usuarios_admin WHERE email = :email LIMIT 1'
         );
         $stmt->execute(['email' => $email]);
         $usuario = $stmt->fetch();
 
-        if (!$usuario || (int) $usuario['activo'] !== 1) {
+        if (!$usuario || (int) $usuario['activo'] !== 1 || !password_verify($password, $usuario['password_hash'])) {
+            IntentoLogin::registrar($email, $ip, false);
+
             return false;
         }
 
-        if (!password_verify($password, $usuario['password_hash'])) {
-            return false;
-        }
-
+        IntentoLogin::registrar($email, $ip, true);
         self::login($usuario, $db);
 
         return true;
@@ -55,6 +76,7 @@ final class Auth
         $_SESSION[self::SESSION_PERMISOS] = self::cargarPermisos((int) $usuario['rol_id'], $db);
         $_SESSION[self::SESSION_USUARIO_SELLO] = $selloActual->fetchColumn();
         $_SESSION[self::SESSION_PERMISOS_SELLO] = self::permisosSello((int) $usuario['rol_id'], $db);
+        $_SESSION[self::SESSION_DEBE_CAMBIAR_PASSWORD] = (bool) $usuario['debe_cambiar_password'];
     }
 
     /**
@@ -71,7 +93,7 @@ final class Auth
 
         $db = Database::connection();
         $stmt = $db->prepare(
-            'SELECT rol_id, activo, actualizado_en FROM usuarios_admin WHERE id = :id LIMIT 1'
+            'SELECT rol_id, activo, actualizado_en, debe_cambiar_password FROM usuarios_admin WHERE id = :id LIMIT 1'
         );
         $stmt->execute(['id' => self::id()]);
         $usuario = $stmt->fetch();
@@ -91,6 +113,9 @@ final class Auth
         if (self::permisosSello((int) $usuario['rol_id'], $db) !== ($_SESSION[self::SESSION_PERMISOS_SELLO] ?? null)) {
             return false;
         }
+
+        // Se refresca en cada request para reflejar de inmediato un cambio de password.
+        $_SESSION[self::SESSION_DEBE_CAMBIAR_PASSWORD] = (bool) $usuario['debe_cambiar_password'];
 
         return true;
     }
@@ -164,5 +189,10 @@ final class Auth
         $permisos = $_SESSION[self::SESSION_PERMISOS] ?? [];
 
         return in_array($clave, $permisos, true);
+    }
+
+    public static function debeCambiarPassword(): bool
+    {
+        return (bool) ($_SESSION[self::SESSION_DEBE_CAMBIAR_PASSWORD] ?? false);
     }
 }

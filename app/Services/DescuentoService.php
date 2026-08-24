@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\CodigoDescuento;
 use PDO;
 use RuntimeException;
 
@@ -15,10 +14,19 @@ final class DescuentoService
     /**
      * Valida un codigo de descuento contra un paquete especifico. Lanza RuntimeException
      * con un mensaje entendible por el usuario si no es aplicable.
+     *
+     * Bloquea la fila con FOR UPDATE (igual que ReservaService con salidas) para que
+     * dos reservas concurrentes con el mismo codigo, cerca de uso_maximo, no puedan
+     * ambas pasar la validacion antes de que cualquiera incremente usos_actuales.
+     * Solo tiene efecto real cuando se llama dentro de una transaccion (asi lo hace
+     * el unico llamador, ReservaService::crear); fuera de una, MySQL la libera de
+     * inmediato al terminar el SELECT.
      */
     public function validar(string $codigo, int $paqueteId): array
     {
-        $descuento = CodigoDescuento::porCodigo($codigo);
+        $stmt = $this->db->prepare('SELECT * FROM codigos_descuento WHERE codigo = :codigo FOR UPDATE');
+        $stmt->execute(['codigo' => strtoupper($codigo)]);
+        $descuento = $stmt->fetch();
 
         if (!$descuento) {
             throw new RuntimeException('El codigo de descuento no existe.');

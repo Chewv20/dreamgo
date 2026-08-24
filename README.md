@@ -25,8 +25,7 @@ lugar se corre con el servidor embebido de PHP, apuntando directo a `public/`:
    ```
 4. **Servidor**: desde la raiz del proyecto, `php -S localhost:8090 -t public`
 5. Abre `http://localhost:8090/` — deberias ver el sitio con el contenido de ejemplo.
-6. Panel admin: `http://localhost:8090/admin/login` — `admin@dreamgooperadoraturistica.com` / `DreamGo2026!`
-   (cambiala en tu primer login desde `/admin/usuarios`).
+6. Panel admin: `http://localhost:8090/admin/login` — usuario `admin@dreamgooperadoraturistica.com`, contrasena temporal en el comentario de `database/seeds/seed_demo.sql` (el panel te pedira cambiarla apenas inicies sesion).
 
 ## Estructura del proyecto
 

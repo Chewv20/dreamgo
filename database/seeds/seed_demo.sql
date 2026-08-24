@@ -40,10 +40,12 @@ SELECT 2, id FROM permisos WHERE clave IN ('paquetes.ver','paquetes.crear','paqu
 -- ==========================================================
 -- USUARIO ADMIN INICIAL
 -- Email: admin@dreamgooperadoraturistica.com
--- Password temporal: DreamGo2026!  (cambiar en el primer login)
+-- Password temporal: 13449fae57f7ecbba0
+-- El panel obliga a cambiarla en el primer login (debe_cambiar_password = 1);
+-- no queda utilizable como password real hasta que se reemplace.
 -- ==========================================================
-INSERT INTO usuarios_admin (nombre, email, password_hash, rol_id, activo) VALUES
-  ('Administrador Dream Go', 'admin@dreamgooperadoraturistica.com', '$2y$12$SgLweP4n7uz6.wT8VSEOrOsaOJ.Ufgmn99AThl83gqRp8aX7b5Iim', 1, 1);
+INSERT INTO usuarios_admin (nombre, email, password_hash, debe_cambiar_password, rol_id, activo) VALUES
+  ('Administrador Dream Go', 'admin@dreamgooperadoraturistica.com', '$2y$12$qzzgX4Ar1SjfbgC/EuxdLu3hSVDMWqYZQt71pyakB2S18pOF03h/y', 1, 1, 1);
 
 -- ==========================================================
 -- CATEGORIAS / DESTINOS

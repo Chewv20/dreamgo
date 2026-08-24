@@ -68,14 +68,14 @@ Activa el certificado SSL gratuito (Let's Encrypt) desde hPanel → **SSL**. Una
 
 ## 8. Cron Jobs
 
-Sigue `cron/README.md` para las 5 tareas programadas. Ajusta las rutas de ejemplo a la ruta real de tu
+Sigue `cron/README.md` para las 6 tareas programadas. Ajusta las rutas de ejemplo a la ruta real de tu
 cuenta de Hostinger (hPanel te la muestra al crear el primer cron job).
 
 ## 9. Primer acceso al panel
 
-Usuario admin inicial (creado por el seed): `admin@dreamgooperadoraturistica.com` / `DreamGo2026!`
+Usuario admin inicial (creado por el seed): `admin@dreamgooperadoraturistica.com`. La contrasena temporal esta en el comentario junto al `INSERT` de `usuarios_admin` en `database/seeds/seed_demo.sql` — no se documenta aqui para no duplicar el punto de exposicion.
 
-**Cambia esta contrasena inmediatamente** desde `/admin/usuarios` tras el primer login.
+El panel **obliga a cambiarla** en el primer login (`debe_cambiar_password = 1`): no es utilizable como contrasena real hasta reemplazarla desde el formulario que aparece automaticamente.
 
 ## 10. Checklist final antes de anunciar el sitio
 
@@ -84,6 +84,6 @@ Usuario admin inicial (creado por el seed): `admin@dreamgooperadoraturistica.com
 - [ ] Numero de WhatsApp real configurado en `/admin/configuracion`.
 - [ ] Correo del equipo (`email_equipo_reportes`) configurado en `/admin/configuracion`.
 - [ ] Contenido placeholder (paquetes/categorias de ejemplo) reemplazado o eliminado por contenido real.
-- [ ] Los 5 cron jobs configurados en hPanel.
+- [ ] Los 6 cron jobs configurados en hPanel.
 - [ ] SSL activo y `APP_URL` con `https://`.
 - [ ] Enviar una cotizacion de prueba real y confirmar que llega el correo (valida SMTP en produccion).

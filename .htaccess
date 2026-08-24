@@ -1,0 +1,4 @@
+# Bloquea el acceso web directo a todo el proyecto.
+# Solo la carpeta public/ debe ser accesible (ver public/.htaccess,
+# que revierte este bloqueo explícitamente para su propio contenido).
+Require all denied

@@ -46,6 +46,9 @@ $router->get('/admin/login', [AuthController::class, 'mostrarLogin']);
 $router->post('/admin/login', [AuthController::class, 'login']);
 $router->post('/admin/logout', [AuthController::class, 'logout'], ['auth' => true]);
 
+$router->get('/admin/cambiar-password', [AuthController::class, 'cambiarPasswordForm'], ['auth' => true]);
+$router->post('/admin/cambiar-password', [AuthController::class, 'cambiarPassword'], ['auth' => true]);
+
 $router->get('/admin', [DashboardController::class, 'index'], ['auth' => true]);
 
 $router->get('/admin/paquetes', [PaqueteAdminController::class, 'index'], ['auth' => true, 'permiso' => 'paquetes.ver']);
