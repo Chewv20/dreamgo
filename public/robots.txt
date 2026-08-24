@@ -1,6 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: /admin/
 Disallow: /uploads/
 
-Sitemap: http://dreamgo.local/sitemap.xml
+Sitemap: https://dreamgooperadoraturistica.com/sitemap.xml

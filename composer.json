@@ -14,6 +14,9 @@
             "Core\\": "core/"
         }
     },
+    "scripts": {
+        "migrate": "php database/migrate.php"
+    },
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true

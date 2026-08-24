@@ -22,7 +22,7 @@
       </form>
     <?php endif; ?>
     <?php if (in_array($reserva['estado'], ['pendiente', 'confirmada'], true) && \Core\Auth::hasPermission('reservas.cancelar')): ?>
-      <form method="post" action="/admin/reservas/<?= (int) $reserva['id'] ?>/cancelar" onsubmit="return confirm('¿Cancelar esta reserva y liberar el cupo?');">
+      <form method="post" action="/admin/reservas/<?= (int) $reserva['id'] ?>/cancelar" data-confirm="¿Cancelar esta reserva y liberar el cupo?">
         <?= \App\Helpers\Csrf::field() ?>
         <button type="submit" class="btn btn-secundario">Cancelar reserva</button>
       </form>

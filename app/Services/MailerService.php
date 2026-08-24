@@ -30,7 +30,7 @@ final class MailerService
         $asunto = 'Tu reserva ' . $reserva['codigo_reserva'] . ' esta en revision';
         $html = $this->renderPlantilla('reserva_pendiente', ['reserva' => $reserva]);
 
-        return $this->enviar($reserva['cliente_email'], $asunto, $html, 'confirmacion_reserva', 'reserva', (int) $reserva['id']);
+        return $this->enviar($reserva['cliente_email'], $asunto, $html, 'reserva_pendiente', 'reserva', (int) $reserva['id']);
     }
 
     public function enviarConfirmacionReserva(array $reserva): bool

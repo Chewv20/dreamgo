@@ -104,7 +104,8 @@ CREATE TABLE IF NOT EXISTS paquetes (
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_paquete_categoria FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE RESTRICT,
-  CONSTRAINT fk_paquete_usuario FOREIGN KEY (creado_por) REFERENCES usuarios_admin(id) ON DELETE SET NULL
+  CONSTRAINT fk_paquete_usuario FOREIGN KEY (creado_por) REFERENCES usuarios_admin(id) ON DELETE SET NULL,
+  CONSTRAINT chk_paquete_precio CHECK (precio_desde >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE INDEX idx_paquetes_estado ON paquetes(estado);
 CREATE INDEX idx_paquetes_categoria ON paquetes(categoria_id);
@@ -139,7 +140,9 @@ CREATE TABLE IF NOT EXISTS salidas (
   estado ENUM('abierta','cerrada','cancelada') NOT NULL DEFAULT 'abierta',
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_salida_paquete FOREIGN KEY (paquete_id) REFERENCES paquetes(id) ON DELETE CASCADE,
-  CONSTRAINT chk_cupo CHECK (cupo_disponible <= cupo_maximo)
+  CONSTRAINT chk_cupo CHECK (cupo_disponible <= cupo_maximo),
+  CONSTRAINT chk_salida_precio CHECK (precio_override IS NULL OR precio_override >= 0),
+  CONSTRAINT chk_salida_fechas CHECK (fecha_regreso IS NULL OR fecha_regreso >= fecha_salida)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE INDEX idx_salidas_paquete_fecha ON salidas(paquete_id, fecha_salida);
 CREATE INDEX idx_salidas_estado ON salidas(estado);
@@ -172,7 +175,9 @@ CREATE TABLE IF NOT EXISTS codigos_descuento (
   usos_actuales INT UNSIGNED NOT NULL DEFAULT 0,
   activo TINYINT(1) NOT NULL DEFAULT 1,
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_descuento_paquete FOREIGN KEY (paquete_id) REFERENCES paquetes(id) ON DELETE CASCADE
+  CONSTRAINT fk_descuento_paquete FOREIGN KEY (paquete_id) REFERENCES paquetes(id) ON DELETE CASCADE,
+  CONSTRAINT chk_descuento_valor CHECK (valor > 0 AND (tipo <> 'porcentaje' OR valor <= 100)),
+  CONSTRAINT chk_descuento_fechas CHECK (fecha_fin >= fecha_inicio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE INDEX idx_descuento_activo_fechas ON codigos_descuento(activo, fecha_inicio, fecha_fin);
 
@@ -199,7 +204,9 @@ CREATE TABLE IF NOT EXISTS reservas (
   actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_reserva_salida FOREIGN KEY (salida_id) REFERENCES salidas(id) ON DELETE RESTRICT,
   CONSTRAINT fk_reserva_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE RESTRICT,
-  CONSTRAINT fk_reserva_descuento FOREIGN KEY (codigo_descuento_id) REFERENCES codigos_descuento(id) ON DELETE SET NULL
+  CONSTRAINT fk_reserva_descuento FOREIGN KEY (codigo_descuento_id) REFERENCES codigos_descuento(id) ON DELETE SET NULL,
+  CONSTRAINT chk_reserva_precio CHECK (precio_total >= 0),
+  CONSTRAINT chk_reserva_monto_pagado CHECK (monto_pagado >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE INDEX idx_reservas_estado ON reservas(estado);
 CREATE INDEX idx_reservas_expira ON reservas(estado, expira_en);
@@ -257,7 +264,7 @@ CREATE TABLE IF NOT EXISTS bloques_pagina (
 -- ==========================================================
 CREATE TABLE IF NOT EXISTS log_correos_enviados (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  tipo ENUM('cotizacion_equipo','confirmacion_reserva','recordatorio_viaje','reporte_periodico','otro') NOT NULL,
+  tipo ENUM('cotizacion_equipo','confirmacion_reserva','reserva_pendiente','recordatorio_viaje','reporte_periodico','otro') NOT NULL,
   destinatario VARCHAR(150) NOT NULL,
   asunto VARCHAR(200) NOT NULL,
   referencia_tipo VARCHAR(30) NULL,

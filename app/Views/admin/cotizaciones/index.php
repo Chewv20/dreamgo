@@ -17,7 +17,7 @@
             <td>
               <form method="post" action="/admin/cotizaciones/<?= (int) $c['id'] ?>/estado" style="display:flex;gap:0.4rem;">
                 <?= \App\Helpers\Csrf::field() ?>
-                <select name="estado" onchange="this.form.submit()">
+                <select name="estado" data-autosubmit>
                   <?php foreach (['nueva', 'contactada', 'convertida', 'descartada'] as $estado): ?>
                     <option value="<?= $estado ?>" <?= $c['estado'] === $estado ? 'selected' : '' ?>><?= ucfirst($estado) ?></option>
                   <?php endforeach; ?>

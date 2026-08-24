@@ -4,15 +4,12 @@ namespace App\Controllers\Admin;
 
 use App\Helpers\Flash;
 use App\Models\Cotizacion;
-use Core\Paginator;
 
 class CotizacionAdminController extends AdminController
 {
-    private const POR_PAGINA = 20;
-
     public function index(): void
     {
-        $paginador = new Paginator(Paginator::paginaDesde($this->request), self::POR_PAGINA, Cotizacion::contarTotal());
+        $paginador = $this->paginar(Cotizacion::contarTotal());
 
         $this->view('admin/cotizaciones/index', [
             'cotizaciones' => Cotizacion::adminListado($paginador->porPagina, $paginador->offset()),

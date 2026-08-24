@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Core\Model;
+use PDO;
 
 class Rol extends Model
 {
@@ -21,14 +22,28 @@ class Rol extends Model
         return $stmt->fetchAll();
     }
 
-    public static function permisosDelRol(int $rolId): array
+    /**
+     * @param int[] $rolIds
+     * @return array<int, int[]> permiso_id[] indexado por rol_id
+     */
+    public static function permisosPorRoles(array $rolIds): array
     {
-        $stmt = self::db()->prepare(
-            'SELECT permiso_id FROM rol_permiso WHERE rol_id = :rol_id'
-        );
-        $stmt->execute(['rol_id' => $rolId]);
+        if ($rolIds === []) {
+            return [];
+        }
 
-        return array_map('intval', array_column($stmt->fetchAll(), 'permiso_id'));
+        $placeholders = implode(',', array_fill(0, count($rolIds), '?'));
+        $stmt = self::db()->prepare(
+            "SELECT rol_id, permiso_id FROM rol_permiso WHERE rol_id IN ({$placeholders})"
+        );
+        $stmt->execute(array_values($rolIds));
+
+        $porRol = [];
+        foreach ($stmt->fetchAll() as $fila) {
+            $porRol[(int) $fila['rol_id']][] = (int) $fila['permiso_id'];
+        }
+
+        return $porRol;
     }
 
     /**
@@ -36,10 +51,7 @@ class Rol extends Model
      */
     public static function sincronizarPermisos(int $rolId, array $permisoIds): void
     {
-        $db = self::db();
-        $db->beginTransaction();
-
-        try {
+        self::transaction(function (PDO $db) use ($rolId, $permisoIds): void {
             $delete = $db->prepare('DELETE FROM rol_permiso WHERE rol_id = :rol_id');
             $delete->execute(['rol_id' => $rolId]);
 
@@ -52,11 +64,6 @@ class Rol extends Model
 
             $marcarActualizado = $db->prepare('UPDATE roles SET permisos_actualizado_en = NOW() WHERE id = :rol_id');
             $marcarActualizado->execute(['rol_id' => $rolId]);
-
-            $db->commit();
-        } catch (\Throwable $e) {
-            $db->rollBack();
-            throw $e;
-        }
+        });
     }
 }

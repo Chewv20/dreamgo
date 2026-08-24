@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
+use App\Helpers\PasswordPolicy;
 use App\Models\Usuario;
 use Core\Auth;
 use Core\Controller;
@@ -68,8 +69,8 @@ class AuthController extends Controller
             $this->redirect('/admin/cambiar-password');
         }
 
-        if (strlen($nueva) < 8) {
-            Flash::set('error', 'La nueva contrasena debe tener al menos 8 caracteres.');
+        if (!PasswordPolicy::esValida($nueva)) {
+            Flash::set('error', PasswordPolicy::mensaje());
             $this->redirect('/admin/cambiar-password');
         }
 

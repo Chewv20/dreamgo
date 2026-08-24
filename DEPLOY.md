@@ -24,6 +24,9 @@ Esto asegura que ninguna URL exponga `/public/` y que `app/`, `core/`, `config/`
 3. Importa el esquema y los datos iniciales via **phpMyAdmin**:
    - `database/schema.sql` primero.
    - `database/seeds/seed_demo.sql` despues (o solo la parte de `roles`/`permisos` si no quieres el contenido de ejemplo en produccion).
+   - En despliegues futuros (la BD de produccion ya existe y no vas a reimportar
+     `schema.sql`), corre `php database/migrate.php` desde la raiz del proyecto para aplicar
+     los cambios de esquema pendientes. Ver `database/migrations/README.md`.
 
 ## 4. Variables de entorno (`.env`)
 
@@ -32,7 +35,6 @@ Copia `.env.example` a `.env` en la raiz del proyecto (junto a `composer.json`, 
 ```
 APP_ENV=production
 APP_URL=https://dreamgooperadoraturistica.com
-APP_KEY=<genera uno nuevo, distinto al de desarrollo>
 
 DB_HOST=<host de Hostinger, normalmente localhost>
 DB_NAME=<nombre de la BD>
@@ -47,8 +49,6 @@ SMTP_FROM_EMAIL=no-reply@dreamgooperadoraturistica.com
 SMTP_FROM_NAME="Dream Go Operadora Turistica"
 SMTP_SECURE=tls
 ```
-
-Genera un `APP_KEY` nuevo con: `php -r "echo bin2hex(random_bytes(32));"`
 
 ## 5. Dependencias de Composer
 

@@ -8,16 +8,13 @@ use App\Models\Reserva;
 use App\Models\Salida;
 use App\Services\MailerService;
 use App\Services\ReservaService;
-use Core\Paginator;
 use RuntimeException;
 
 class ReservaAdminController extends AdminController
 {
-    private const POR_PAGINA = 20;
-
     public function index(): void
     {
-        $paginador = new Paginator(Paginator::paginaDesde($this->request), self::POR_PAGINA, Reserva::contarTotal());
+        $paginador = $this->paginar(Reserva::contarTotal());
 
         $this->view('admin/reservas/index', [
             'reservas' => Reserva::adminListado($paginador->porPagina, $paginador->offset()),

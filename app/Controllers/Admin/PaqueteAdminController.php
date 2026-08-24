@@ -11,15 +11,12 @@ use App\Models\Paquete;
 use App\Services\ImageUploadService;
 use App\Services\SitemapService;
 use Core\Auth;
-use Core\Paginator;
 
 class PaqueteAdminController extends AdminController
 {
-    private const POR_PAGINA = 20;
-
     public function index(): void
     {
-        $paginador = new Paginator(Paginator::paginaDesde($this->request), self::POR_PAGINA, Paquete::contarTotal());
+        $paginador = $this->paginar(Paquete::contarTotal());
 
         $this->view('admin/paquetes/index', [
             'paquetes' => Paquete::adminListado($paginador->porPagina, $paginador->offset()),

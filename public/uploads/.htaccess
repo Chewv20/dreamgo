@@ -1,0 +1,14 @@
+# Defensa en profundidad: esta carpeta solo debe contener imagenes ya procesadas por
+# ImageUploadService (que revalida el MIME, reencodea con GD y siempre guarda como .jpg -
+# ver app/Services/ImageUploadService.php). Si por un bug futuro o un cambio en esa
+# validacion llegara a guardarse aqui un archivo ejecutable, esto evita que Apache lo corra.
+
+<FilesMatch "\.(php|phtml|php\d|pht|phar|cgi|pl|py|sh|asp|aspx|jsp|exe)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+Options -ExecCGI -Indexes

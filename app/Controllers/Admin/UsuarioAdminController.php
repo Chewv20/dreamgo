@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Helpers\Flash;
+use App\Helpers\PasswordPolicy;
 use App\Helpers\Validator;
 use App\Models\Rol;
 use App\Models\Usuario;
@@ -38,8 +39,8 @@ class UsuarioAdminController extends AdminController
 
         $this->redirigirSiInvalido($validator, '/admin/usuarios/crear');
 
-        if (strlen((string) $datos['password']) < 8) {
-            Flash::set('error', 'La contrasena debe tener al menos 8 caracteres.');
+        if (!PasswordPolicy::esValida((string) $datos['password'])) {
+            Flash::set('error', PasswordPolicy::mensaje());
             $this->redirect('/admin/usuarios/crear');
         }
 
@@ -89,8 +90,8 @@ class UsuarioAdminController extends AdminController
 
         $password = (string) $this->request->input('password', '');
         if ($password !== '') {
-            if (strlen($password) < 8) {
-                Flash::set('error', 'La nueva contrasena debe tener al menos 8 caracteres.');
+            if (!PasswordPolicy::esValida($password)) {
+                Flash::set('error', PasswordPolicy::mensaje());
                 $this->redirect("/admin/usuarios/{$id}/editar");
             }
             $datos['password_hash'] = password_hash($password, PASSWORD_DEFAULT);

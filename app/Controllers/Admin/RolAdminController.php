@@ -12,11 +12,7 @@ class RolAdminController extends AdminController
     {
         $roles = Rol::conConteoUsuarios();
         $permisosPorModulo = Permiso::agrupadosPorModulo();
-
-        $permisosPorRol = [];
-        foreach ($roles as $rol) {
-            $permisosPorRol[$rol['id']] = Rol::permisosDelRol((int) $rol['id']);
-        }
+        $permisosPorRol = Rol::permisosPorRoles(array_map('intval', array_column($roles, 'id')));
 
         $this->view('admin/roles/index', [
             'roles' => $roles,

@@ -39,4 +39,25 @@ final class Database
 
         return self::$instance;
     }
+
+    /**
+     * Ejecuta $callback dentro de una transaccion: hace commit si termina bien, rollback y
+     * relanza la excepcion si $callback lanza cualquier Throwable. Centraliza el patron
+     * beginTransaction/try/commit/catch-rollBack que antes estaba repetido en varios
+     * modelos y servicios.
+     */
+    public static function transaction(PDO $db, callable $callback): mixed
+    {
+        $db->beginTransaction();
+
+        try {
+            $resultado = $callback($db);
+            $db->commit();
+
+            return $resultado;
+        } catch (\Throwable $e) {
+            $db->rollBack();
+            throw $e;
+        }
+    }
 }

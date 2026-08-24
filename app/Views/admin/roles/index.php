@@ -34,7 +34,7 @@
             <td><?= (int) $rol['total_usuarios'] ?></td>
             <td>
               <?php if ((int) $rol['es_sistema'] !== 1): ?>
-                <form method="post" action="/admin/roles/<?= (int) $rol['id'] ?>/eliminar" onsubmit="return confirm('¿Eliminar este rol?');">
+                <form method="post" action="/admin/roles/<?= (int) $rol['id'] ?>/eliminar" data-confirm="¿Eliminar este rol?">
                   <?= \App\Helpers\Csrf::field() ?>
                   <button type="submit" class="btn btn-secundario" style="padding:0.4rem 0.8rem;font-size:0.85rem;">Eliminar</button>
                 </form>

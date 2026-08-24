@@ -44,7 +44,7 @@ $oferta ??= [];
 <div class="admin-form-grid admin-form-grid--2">
   <div class="campo">
     <label for="alcance">Alcance</label>
-    <select id="alcance" name="alcance" onchange="document.getElementById('campo-paquete').style.display = this.value === 'paquete' ? 'block' : 'none';">
+    <select id="alcance" name="alcance" data-toggle-target="campo-paquete" data-toggle-value="paquete">
       <option value="global" <?= ($oferta['alcance'] ?? 'global') === 'global' ? 'selected' : '' ?>>Global (todos los paquetes)</option>
       <option value="paquete" <?= ($oferta['alcance'] ?? '') === 'paquete' ? 'selected' : '' ?>>Un paquete especifico</option>
     </select>

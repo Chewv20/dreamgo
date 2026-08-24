@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Cliente;
 use App\Models\ConfiguracionSitio;
+use Core\Database;
 use PDO;
 use RuntimeException;
 
@@ -25,9 +26,7 @@ final class ReservaService
      */
     public function crear(array $datos): int
     {
-        $this->db->beginTransaction();
-
-        try {
+        return Database::transaction($this->db, function () use ($datos): int {
             $stmtSalida = $this->db->prepare('SELECT * FROM salidas WHERE id = :id FOR UPDATE');
             $stmtSalida->execute(['id' => $datos['salida_id']]);
             $salida = $stmtSalida->fetch();
@@ -87,13 +86,8 @@ final class ReservaService
             $stmtCodigo = $this->db->prepare('UPDATE reservas SET codigo_reserva = :codigo WHERE id = :id');
             $stmtCodigo->execute(['codigo' => $codigo, 'id' => $reservaId]);
 
-            $this->db->commit();
-
             return $reservaId;
-        } catch (\Throwable $e) {
-            $this->db->rollBack();
-            throw $e;
-        }
+        });
     }
 
     public function confirmar(int $reservaId): bool
@@ -108,16 +102,12 @@ final class ReservaService
 
     public function cancelar(int $reservaId): bool
     {
-        $this->db->beginTransaction();
-
-        try {
+        return Database::transaction($this->db, function () use ($reservaId): bool {
             $stmt = $this->db->prepare('SELECT * FROM reservas WHERE id = :id FOR UPDATE');
             $stmt->execute(['id' => $reservaId]);
             $reserva = $stmt->fetch();
 
             if (!$reserva || !in_array($reserva['estado'], ['pendiente', 'confirmada'], true)) {
-                $this->db->rollBack();
-
                 return false;
             }
 
@@ -128,13 +118,8 @@ final class ReservaService
             );
             $update->execute(['id' => $reservaId]);
 
-            $this->db->commit();
-
             return true;
-        } catch (\Throwable $e) {
-            $this->db->rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**
@@ -149,16 +134,15 @@ final class ReservaService
         $vencidas = $stmt->fetchAll();
 
         foreach ($vencidas as $reserva) {
-            $this->db->beginTransaction();
             try {
-                $this->reponerCupo((int) $reserva['salida_id'], (int) $reserva['num_personas']);
+                Database::transaction($this->db, function () use ($reserva): void {
+                    $this->reponerCupo((int) $reserva['salida_id'], (int) $reserva['num_personas']);
 
-                $update = $this->db->prepare('UPDATE reservas SET estado = "expirada" WHERE id = :id AND estado = "pendiente"');
-                $update->execute(['id' => $reserva['id']]);
-
-                $this->db->commit();
+                    $update = $this->db->prepare('UPDATE reservas SET estado = "expirada" WHERE id = :id AND estado = "pendiente"');
+                    $update->execute(['id' => $reserva['id']]);
+                });
             } catch (\Throwable $e) {
-                $this->db->rollBack();
+                // Una reserva con problemas no debe abortar el resto del lote del cron.
                 error_log('[ReservaService] Error expirando reserva ' . $reserva['id'] . ': ' . $e->getMessage());
             }
         }

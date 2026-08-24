@@ -14,6 +14,14 @@ abstract class Model
         return Database::connection();
     }
 
+    /**
+     * @param callable(PDO): mixed $callback
+     */
+    protected static function transaction(callable $callback): mixed
+    {
+        return Database::transaction(static::db(), $callback);
+    }
+
     public static function find(int|string $id): array|false
     {
         $stmt = static::db()->prepare(

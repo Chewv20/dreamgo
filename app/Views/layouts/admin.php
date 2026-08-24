@@ -9,6 +9,7 @@
 <link rel="icon" href="/assets/icons/icon-96.png" type="image/png">
 <link rel="stylesheet" href="/assets/css/site.css">
 <link rel="stylesheet" href="/assets/css/admin.css">
+<script src="/assets/js/admin.js" defer></script>
 </head>
 <body class="admin-body">
 <div class="admin-layout">
@@ -53,16 +54,5 @@
   </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  var toggle = document.querySelector('[data-admin-sidebar-toggle]');
-  var sidebar = document.querySelector('[data-admin-sidebar]');
-  if (!toggle || !sidebar) return;
-  toggle.addEventListener('click', function () {
-    var isOpen = sidebar.classList.toggle('is-open');
-    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  });
-});
-</script>
 </body>
 </html>

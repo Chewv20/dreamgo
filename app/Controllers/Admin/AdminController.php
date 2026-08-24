@@ -6,6 +6,7 @@ use App\Helpers\Flash;
 use App\Helpers\Validator;
 use Core\Auth;
 use Core\Controller;
+use Core\Paginator;
 
 abstract class AdminController extends Controller
 {
@@ -13,6 +14,16 @@ abstract class AdminController extends Controller
     {
         $data['adminNombre'] = Auth::nombre();
         parent::view($view, $data, $meta, $layout);
+    }
+
+    /**
+     * Arma el Paginator a partir del query string (?pagina=) y el total de registros.
+     * Evita repetir `new Paginator(Paginator::paginaDesde($this->request), $porPagina,
+     * $total)` en cada controller con listado paginado.
+     */
+    protected function paginar(int $total, int $porPagina = 20): Paginator
+    {
+        return new Paginator(Paginator::paginaDesde($this->request), $porPagina, $total);
     }
 
     /**
