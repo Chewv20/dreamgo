@@ -50,6 +50,28 @@ class Reserva extends Model
     }
 
     /**
+     * Consulta publica: un cliente ve su reserva con su codigo + el email con el que la hizo.
+     * El filtro por email (ademas del codigo unico) evita que alguien adivine codigos ajenos
+     * por fuerza bruta secuencial (los codigos son correlativos: DG-2026-000001, 000002...).
+     */
+    public static function porCodigoYEmail(string $codigo, string $email): array|false
+    {
+        $stmt = self::db()->prepare(
+            'SELECT r.*, c.nombre AS cliente_nombre, c.email AS cliente_email,
+                    s.fecha_salida, s.fecha_regreso, p.titulo AS paquete_titulo, p.slug AS paquete_slug
+             FROM reservas r
+             INNER JOIN clientes c ON c.id = r.cliente_id
+             INNER JOIN salidas s ON s.id = r.salida_id
+             INNER JOIN paquetes p ON p.id = s.paquete_id
+             WHERE r.codigo_reserva = :codigo AND c.email = :email
+             LIMIT 1'
+        );
+        $stmt->execute(['codigo' => $codigo, 'email' => $email]);
+
+        return $stmt->fetch();
+    }
+
+    /**
      * Datos para el calendario admin: salidas de un mes con conteo de reservas por estado.
      */
     public static function calendarioMes(int $anio, int $mes): array

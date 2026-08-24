@@ -16,11 +16,19 @@ class PaqueteController extends Controller
     {
         $categoriaSlug = (string) $this->request->query('categoria', '');
         $tipo = (string) $this->request->query('tipo', '');
+        $q = trim((string) $this->request->query('q', ''));
+        $precioMin = (string) $this->request->query('precio_min', '');
+        $precioMax = (string) $this->request->query('precio_max', '');
+        $duracion = (string) $this->request->query('duracion', '');
 
         $filtros = array_filter([
             'categoria' => $categoriaSlug,
             'tipo' => in_array($tipo, ['nacional', 'internacional'], true) ? $tipo : '',
-        ]);
+            'q' => mb_substr($q, 0, 120),
+            'precio_min' => ctype_digit($precioMin) ? (int) $precioMin : '',
+            'precio_max' => ctype_digit($precioMax) ? (int) $precioMax : '',
+            'duracion' => in_array($duracion, ['1-3', '4-7', '8-14', '15+'], true) ? $duracion : '',
+        ], static fn ($valor) => $valor !== '' && $valor !== null);
 
         $bloques = BloquePagina::porPagina('paquetes');
 
@@ -35,6 +43,10 @@ class PaqueteController extends Controller
             'categorias' => Categoria::activas(),
             'categoriaActiva' => $categoriaSlug,
             'tipoActivo' => $tipo,
+            'qActivo' => $filtros['q'] ?? '',
+            'precioMinActivo' => $filtros['precio_min'] ?? '',
+            'precioMaxActivo' => $filtros['precio_max'] ?? '',
+            'duracionActiva' => $filtros['duracion'] ?? '',
             'intro' => $bloques[0] ?? null,
             'paginador' => $paginador,
         ], [

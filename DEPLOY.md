@@ -48,7 +48,25 @@ SMTP_PASS=<contrasena del correo>
 SMTP_FROM_EMAIL=no-reply@dreamgooperadoraturistica.com
 SMTP_FROM_NAME="Dream Go Operadora Turistica"
 SMTP_SECURE=tls
+
+MP_ACCESS_TOKEN=<access token de produccion de tu cuenta de Mercado Pago>
+MP_WEBHOOK_SECRET=<clave secreta de la notificacion webhook, ver paso 4.1>
 ```
+
+### 4.1. Configurar Mercado Pago (reserva y pago en linea)
+
+1. En [Mercado Pago Developers](https://www.mercadopago.com.mx/developers) → **Tus integraciones**,
+   crea o abre tu aplicacion y copia el **Access Token de produccion** a `MP_ACCESS_TOKEN`.
+2. En la seccion **Webhooks** de esa misma aplicacion, agrega una notificacion para el evento
+   **Pagos** apuntando a `https://tudominio.com/webhooks/mercadopago`. Mercado Pago te da ahi
+   una **clave secreta** — copiala a `MP_WEBHOOK_SECRET` (se usa para verificar la firma
+   `x-signature` de cada notificacion; sin ella el webhook sigue funcionando pero sin poder
+   confirmar que la notificacion viene realmente de Mercado Pago).
+3. El porcentaje de anticipo que se cobra al reservar en linea se ajusta desde
+   `/admin/configuracion` (campo "Porcentaje de anticipo al reservar en linea"), no en `.env`.
+4. Sin `MP_ACCESS_TOKEN` configurado, el formulario publico de reserva sigue funcionando (crea
+   la reserva y aparta el cupo igual), solo que sin pago en linea — el cliente queda con la
+   reserva `pendiente` para coordinar el pago por otro medio.
 
 ## 5. Dependencias de Composer
 
@@ -87,3 +105,5 @@ El panel **obliga a cambiarla** en el primer login (`debe_cambiar_password = 1`)
 - [ ] Los 6 cron jobs configurados en hPanel.
 - [ ] SSL activo y `APP_URL` con `https://`.
 - [ ] Enviar una cotizacion de prueba real y confirmar que llega el correo (valida SMTP en produccion).
+- [ ] `MP_ACCESS_TOKEN`/`MP_WEBHOOK_SECRET` configurados y una reserva de prueba pagada de
+      principio a fin (checkout de Mercado Pago + webhook confirma la reserva) — ver punto 4.1.

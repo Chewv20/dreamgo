@@ -25,7 +25,7 @@ class Paquete extends Model
     }
 
     /**
-     * @param array{categoria?: string, tipo?: string} $filtros
+     * @param array{categoria?: string, tipo?: string, q?: string, precio_min?: int, precio_max?: int, duracion?: string} $filtros
      */
     public static function publicadosConFiltros(array $filtros = [], int $limite = 12, int $offset = 0): array
     {
@@ -50,7 +50,7 @@ class Paquete extends Model
     }
 
     /**
-     * @param array{categoria?: string, tipo?: string} $filtros
+     * @param array{categoria?: string, tipo?: string, q?: string, precio_min?: int, precio_max?: int, duracion?: string} $filtros
      */
     public static function contarPublicados(array $filtros = []): int
     {
@@ -67,9 +67,16 @@ class Paquete extends Model
         return (int) $stmt->fetchColumn();
     }
 
+    private const RANGOS_DURACION = [
+        '1-3' => [1, 3],
+        '4-7' => [4, 7],
+        '8-14' => [8, 14],
+        '15+' => [15, null],
+    ];
+
     /**
-     * @param array{categoria?: string, tipo?: string} $filtros
-     * @return array{0: string, 1: array<string, string>}
+     * @param array{categoria?: string, tipo?: string, q?: string, precio_min?: int, precio_max?: int, duracion?: string} $filtros
+     * @return array{0: string, 1: array<string, string|int>}
      */
     private static function clausulaFiltrosPublicados(array $filtros): array
     {
@@ -84,6 +91,33 @@ class Paquete extends Model
         if (!empty($filtros['tipo'])) {
             $clausula .= ' AND c.tipo = :tipo';
             $params['tipo'] = $filtros['tipo'];
+        }
+
+        if (!empty($filtros['q'])) {
+            $clausula .= ' AND (p.titulo LIKE :q_titulo OR p.resumen LIKE :q_resumen)';
+            $params['q_titulo'] = '%' . $filtros['q'] . '%';
+            $params['q_resumen'] = '%' . $filtros['q'] . '%';
+        }
+
+        if (isset($filtros['precio_min']) && $filtros['precio_min'] !== '' && $filtros['precio_min'] !== null) {
+            $clausula .= ' AND p.precio_desde >= :precio_min';
+            $params['precio_min'] = (int) $filtros['precio_min'];
+        }
+
+        if (isset($filtros['precio_max']) && $filtros['precio_max'] !== '' && $filtros['precio_max'] !== null) {
+            $clausula .= ' AND p.precio_desde <= :precio_max';
+            $params['precio_max'] = (int) $filtros['precio_max'];
+        }
+
+        if (!empty($filtros['duracion']) && isset(self::RANGOS_DURACION[$filtros['duracion']])) {
+            [$min, $max] = self::RANGOS_DURACION[$filtros['duracion']];
+            $clausula .= ' AND p.duracion_dias >= :duracion_min';
+            $params['duracion_min'] = $min;
+
+            if ($max !== null) {
+                $clausula .= ' AND p.duracion_dias <= :duracion_max';
+                $params['duracion_max'] = $max;
+            }
         }
 
         return [$clausula, $params];

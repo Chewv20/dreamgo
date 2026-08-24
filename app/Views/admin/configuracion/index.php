@@ -64,6 +64,10 @@
         <label for="dias_recordatorio_viaje">Dias de anticipacion para el recordatorio de viaje</label>
         <input type="number" min="1" id="dias_recordatorio_viaje" name="dias_recordatorio_viaje" value="<?= htmlspecialchars($valores['dias_recordatorio_viaje'], ENT_QUOTES, 'UTF-8') ?>">
       </div>
+      <div class="campo">
+        <label for="porcentaje_anticipo_reserva">Porcentaje de anticipo al reservar en linea (1-100)</label>
+        <input type="number" min="1" max="100" id="porcentaje_anticipo_reserva" name="porcentaje_anticipo_reserva" value="<?= htmlspecialchars($valores['porcentaje_anticipo_reserva'], ENT_QUOTES, 'UTF-8') ?>">
+      </div>
     </div>
 
     <div class="campo">

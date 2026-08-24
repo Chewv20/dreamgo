@@ -57,9 +57,12 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     <?php else: ?>
       <ul style="list-style:none;padding:0;margin:0 0 1.5rem;">
         <?php foreach ($salidas as $salida): ?>
-          <li style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--color-borde);">
+          <li style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid var(--color-borde);">
             <span><?= date('d M Y', strtotime($salida['fecha_salida'])) ?></span>
             <span style="font-size:0.85rem;opacity:0.75;"><?= (int) $salida['cupo_disponible'] ?> cupos</span>
+            <?php if ($salida['estado'] === 'abierta' && (int) $salida['cupo_disponible'] > 0): ?>
+              <a href="/paquetes/<?= urlencode($paquete['slug']) ?>/reservar/<?= (int) $salida['id'] ?>" class="btn btn-primario" style="padding:0.35rem 0.85rem;font-size:0.85rem;">Reservar</a>
+            <?php endif; ?>
           </li>
         <?php endforeach; ?>
       </ul>

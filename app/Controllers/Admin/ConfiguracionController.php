@@ -17,6 +17,7 @@ class ConfiguracionController extends AdminController
         'tiktok_url',
         'youtube_url',
         'horas_expiracion_reserva',
+        'porcentaje_anticipo_reserva',
         'dias_recordatorio_viaje',
         'email_equipo_reportes',
         'meta_title_default',

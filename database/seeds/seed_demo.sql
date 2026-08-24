@@ -163,6 +163,7 @@ INSERT INTO configuracion_sitio (clave, valor, descripcion) VALUES
   ('tiktok_url', '', 'URL del perfil de TikTok (vacio = icono oculto)'),
   ('youtube_url', '', 'URL del canal de YouTube (vacio = icono oculto)'),
   ('horas_expiracion_reserva', '48', 'Horas antes de liberar automaticamente una reserva pendiente'),
+  ('porcentaje_anticipo_reserva', '30', 'Porcentaje del precio total que se cobra como anticipo en linea al reservar (1-100)'),
   ('dias_recordatorio_viaje', '3', 'Dias de anticipacion para enviar el recordatorio de viaje'),
   ('email_equipo_reportes', 'admin@dreamgooperadoraturistica.com', 'Correo que recibe el reporte periodico y notificaciones de cotizacion'),
   ('meta_title_default', 'Dream Go Operadora Turistica | Excursiones y paquetes de viaje', 'Titulo SEO por defecto'),

@@ -123,6 +123,39 @@ final class ReservaService
     }
 
     /**
+     * Registra un pago aprobado (Mercado Pago u otro medio futuro) y confirma la reserva si
+     * seguia pendiente. Devuelve true solo cuando ESTA llamada fue la que confirmo, para que
+     * el webhook que la invoca sepa si debe mandar el correo de confirmacion (evita mandarlo
+     * dos veces si Mercado Pago reintenta la notificacion del mismo pago).
+     */
+    public function registrarPagoAprobado(int $reservaId, string $referenciaPago, float $montoPagado): bool
+    {
+        return Database::transaction($this->db, function () use ($reservaId, $referenciaPago, $montoPagado): bool {
+            $stmt = $this->db->prepare('SELECT estado FROM reservas WHERE id = :id FOR UPDATE');
+            $stmt->execute(['id' => $reservaId]);
+            $reserva = $stmt->fetch();
+
+            if (!$reserva) {
+                return false;
+            }
+
+            $fueConfirmadaAhora = false;
+            if ($reserva['estado'] === 'pendiente') {
+                $this->db->prepare(
+                    'UPDATE reservas SET estado = "confirmada", confirmada_en = NOW() WHERE id = :id'
+                )->execute(['id' => $reservaId]);
+                $fueConfirmadaAhora = true;
+            }
+
+            $this->db->prepare(
+                'UPDATE reservas SET metodo_pago = "mercadopago", referencia_pago = :ref, monto_pagado = :monto WHERE id = :id'
+            )->execute(['ref' => $referenciaPago, 'monto' => $montoPagado, 'id' => $reservaId]);
+
+            return $fueConfirmadaAhora;
+        });
+    }
+
+    /**
      * Usado por el cron: libera el cupo de todas las reservas pendientes vencidas.
      * Devuelve el listado de reservas expiradas (para notificar/loggear si se desea).
      */

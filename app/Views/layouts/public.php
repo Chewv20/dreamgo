@@ -135,6 +135,7 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
         <li><a href="/destinos">Destinos</a></li>
         <li><a href="/cotizador">Cotizar</a></li>
         <li><a href="/nosotros">Nosotros</a></li>
+        <li><a href="/mi-reserva">Mi reserva</a></li>
       </ul>
 
       <?php if ($footerTieneRedes): ?>

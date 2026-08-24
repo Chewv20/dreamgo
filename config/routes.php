@@ -19,8 +19,11 @@ use App\Controllers\Public\ContactoController;
 use App\Controllers\Public\CotizadorController;
 use App\Controllers\Public\DestinoController;
 use App\Controllers\Public\HomeController;
+use App\Controllers\Public\MercadoPagoWebhookController;
 use App\Controllers\Public\NosotrosController;
 use App\Controllers\Public\PaqueteController;
+use App\Controllers\Public\ReservaConsultaController;
+use App\Controllers\Public\ReservaPublicaController;
 
 // =========================================================
 // SITIO PUBLICO
@@ -38,6 +41,15 @@ $router->post('/cotizador', [CotizadorController::class, 'enviar']);
 
 $router->get('/nosotros', [NosotrosController::class, 'index']);
 $router->get('/contacto', [ContactoController::class, 'index']);
+
+$router->get('/mi-reserva', [ReservaConsultaController::class, 'mostrar']);
+$router->post('/mi-reserva', [ReservaConsultaController::class, 'buscar']);
+
+$router->get('/paquetes/{slug}/reservar/{salidaId}', [ReservaPublicaController::class, 'formulario']);
+$router->post('/reservar', [ReservaPublicaController::class, 'crear']);
+$router->get('/reservar/{codigo}/gracias', [ReservaPublicaController::class, 'gracias']);
+
+$router->post('/webhooks/mercadopago', [MercadoPagoWebhookController::class, 'notificar']);
 
 // =========================================================
 // PANEL ADMINISTRATIVO

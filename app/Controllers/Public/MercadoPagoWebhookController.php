@@ -1,0 +1,87 @@
+<?php
+
+namespace App\Controllers\Public;
+
+use App\Models\Reserva;
+use App\Services\MailerService;
+use App\Services\MercadoPagoService;
+use App\Services\ReservaService;
+use Core\Controller;
+use RuntimeException;
+
+/**
+ * Recibe las notificaciones de Mercado Pago (Checkout Pro). Nunca confia en el cuerpo/query
+ * de la notificacion para el estado o el monto del pago -- siempre vuelve a pedir el pago a
+ * la API de Mercado Pago con nuestro propio access token antes de confirmar nada.
+ */
+class MercadoPagoWebhookController extends Controller
+{
+    public function notificar(): void
+    {
+        // PHP convierte automaticamente los puntos de los nombres de parametros de query
+        // string en guiones bajos, asi que "data.id" (formato actual de Mercado Pago) llega
+        // a $_GET como "data_id", no como "data.id". El formato viejo (?topic=payment&id=X)
+        // no tiene puntos y no se ve afectado.
+        $tipo = (string) $this->request->query('type', $this->request->query('topic', ''));
+        $paymentId = (string) $this->request->query('data_id', $this->request->query('id', ''));
+
+        if ($tipo !== 'payment' || $paymentId === '') {
+            $this->json(['ok' => true, 'ignorado' => true]);
+        }
+
+        $secret = $_ENV['MP_WEBHOOK_SECRET'] ?? '';
+        $accessToken = $_ENV['MP_ACCESS_TOKEN'] ?? '';
+
+        if ($accessToken === '') {
+            error_log('[MercadoPagoWebhook] Notificacion recibida pero MP_ACCESS_TOKEN no esta configurado.');
+            $this->json(['ok' => false], 200);
+        }
+
+        $servicio = new MercadoPagoService($accessToken);
+
+        if ($secret !== '') {
+            $xSignature = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
+            $xRequestId = $_SERVER['HTTP_X_REQUEST_ID'] ?? '';
+
+            if (!$servicio->verificarFirmaWebhook($xSignature, $xRequestId, $paymentId, $secret)) {
+                error_log('[MercadoPagoWebhook] Firma invalida para el pago ' . $paymentId);
+                $this->json(['error' => 'Firma invalida'], 401);
+            }
+        } else {
+            error_log('[MercadoPagoWebhook] MP_WEBHOOK_SECRET no configurado: la notificacion no se esta verificando.');
+        }
+
+        try {
+            $pago = $servicio->obtenerPago($paymentId);
+        } catch (RuntimeException $e) {
+            error_log('[MercadoPagoWebhook] No se pudo obtener el pago ' . $paymentId . ': ' . $e->getMessage());
+            $this->json(['ok' => false], 200);
+        }
+
+        if (($pago['status'] ?? '') !== 'approved') {
+            $this->json(['ok' => true, 'estado_pago' => $pago['status'] ?? null]);
+        }
+
+        $reservaId = (int) ($pago['external_reference'] ?? 0);
+        $reserva = $reservaId > 0 ? Reserva::find($reservaId) : false;
+
+        if (!$reserva) {
+            error_log('[MercadoPagoWebhook] Pago ' . $paymentId . ' aprobado pero external_reference no corresponde a ninguna reserva.');
+            $this->json(['ok' => true]);
+        }
+
+        $service = new ReservaService($this->db);
+        $fueConfirmadaAhora = $service->registrarPagoAprobado(
+            $reservaId,
+            (string) $paymentId,
+            (float) ($pago['transaction_amount'] ?? 0)
+        );
+
+        if ($fueConfirmadaAhora) {
+            $reservaDetalle = Reserva::conDetalle($reservaId);
+            (new MailerService($this->db))->enviarConfirmacionReserva($reservaDetalle);
+        }
+
+        $this->json(['ok' => true]);
+    }
+}
