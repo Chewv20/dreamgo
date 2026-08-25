@@ -33,7 +33,7 @@ lugar se corre con el servidor embebido de PHP, apuntando directo a `public/`:
 app/            Controladores, Modelos, Vistas, Services y Helpers (logica de negocio)
 core/           "Framework" propio: Router, Database, Auth, Controller/Model base
 config/         Bootstrap, rutas, credenciales de BD
-cron/           5 tareas programadas (ver cron/README.md)
+cron/           7 tareas programadas (ver cron/README.md)
 database/       Esquema SQL y datos iniciales
 storage/        Logs y backups (nunca accesible por URL)
 public/         Document root real (front controller, assets, uploads)
