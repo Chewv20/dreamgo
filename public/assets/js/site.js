@@ -36,6 +36,7 @@
   function initComparador() {
     var KEY = 'dreamgo_comparar';
     var MAX = 3;
+    var basePath = null;
 
     function leer() {
       try {
@@ -100,7 +101,7 @@
       var link = barra.querySelector('[data-comparador-link]');
       if (lista.length >= 2) {
         var slugs = lista.map(function (p) { return p.slug; }).join(',');
-        link.href = '/comparar?paquetes=' + encodeURIComponent(slugs);
+        link.href = basePath + '?paquetes=' + encodeURIComponent(slugs);
         link.removeAttribute('aria-disabled');
         link.textContent = 'Comparar (' + lista.length + ')';
       } else {
@@ -133,6 +134,7 @@
     if (!barra) return;
 
     var link = barra.querySelector('[data-comparador-link]');
+    basePath = link.getAttribute('href').split('?')[0];
     link.addEventListener('click', function (e) {
       if (link.getAttribute('aria-disabled') === 'true') {
         e.preventDefault();
