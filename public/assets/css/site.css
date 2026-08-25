@@ -453,6 +453,86 @@ input[type="radio"]:focus-visible,
   grid-template-columns: 1fr;
 }
 
+/* --- Comparador de paquetes --- */
+.tarjeta__comparar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 1.25rem 1.25rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.tabla-comparativa-wrap {
+  overflow-x: auto;
+}
+
+.tabla-comparativa {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 480px;
+}
+
+.tabla-comparativa th,
+.tabla-comparativa td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-borde);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabla-comparativa th:first-child,
+.tabla-comparativa td:first-child {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.barra-comparador {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-blanco);
+  box-shadow: var(--sombra);
+  border-top: 1px solid var(--color-borde);
+  z-index: 40;
+}
+
+.barra-comparador__contenido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  flex-wrap: wrap;
+}
+
+.barra-comparador__chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chip-comparador {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--color-fondo-alterno);
+  border-radius: 999px;
+  padding: 0.3rem 0.4rem 0.3rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.chip-comparador__quitar {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0.15rem 0.4rem;
+  color: var(--color-texto-oscuro);
+}
+
 /* --- Footer --- */
 .footer {
   background: var(--color-texto-oscuro);

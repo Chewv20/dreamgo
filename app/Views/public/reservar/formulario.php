@@ -22,7 +22,7 @@ $anticipoEstimado = round($totalEstimado * $porcentajeAnticipo / 100, 2);
   </p>
 
   <p>Se cobra un anticipo del <strong><?= $porcentajeAnticipo ?>%</strong> del total para confirmar tu lugar (estimado con
-    <?= $numPersonasVista ?> persona(s): $<?= number_format($anticipoEstimado, 2, '.', ',') ?>). El resto se liquida
+    <?= $numPersonasVista ?> persona(s): $<?= number_format($anticipoEstimado, 2, '.', ',') ?> <?= htmlspecialchars($paquete['moneda'], ENT_QUOTES, 'UTF-8') ?>). El resto se liquida
     directamente con nuestro equipo antes del viaje.</p>
 
   <?php if (!empty($errores['general'])): ?>

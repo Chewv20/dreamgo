@@ -8,7 +8,7 @@
     <tr><td style="font-weight:bold;">Correo</td><td><?= htmlspecialchars($reserva['cliente_email'], ENT_QUOTES, 'UTF-8') ?></td></tr>
     <tr><td style="font-weight:bold;">Telefono</td><td><?= htmlspecialchars($reserva['cliente_telefono'], ENT_QUOTES, 'UTF-8') ?></td></tr>
     <tr><td style="font-weight:bold;">Personas</td><td><?= (int) $reserva['num_personas'] ?></td></tr>
-    <tr><td style="font-weight:bold;">Total</td><td>$<?= number_format((float) $reserva['precio_total'], 2) ?></td></tr>
+    <tr><td style="font-weight:bold;">Total</td><td>$<?= number_format((float) $reserva['precio_total'], 2) ?> <?= htmlspecialchars($reserva['paquete_moneda'], ENT_QUOTES, 'UTF-8') ?></td></tr>
     <?php if ($reserva['expira_en'] && $reserva['estado'] === 'pendiente'): ?>
       <tr><td style="font-weight:bold;">Expira</td><td><?= date('d M Y H:i', strtotime($reserva['expira_en'])) ?></td></tr>
     <?php endif; ?>

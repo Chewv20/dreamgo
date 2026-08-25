@@ -12,7 +12,7 @@
           <tr>
             <td><?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?></td>
             <td><?= htmlspecialchars($paquete['categoria_nombre'], ENT_QUOTES, 'UTF-8') ?></td>
-            <td>$<?= number_format((float) $paquete['precio_desde'], 0, '.', ',') ?></td>
+            <td>$<?= number_format((float) $paquete['precio_desde'], 0, '.', ',') ?> <?= htmlspecialchars($paquete['moneda'], ENT_QUOTES, 'UTF-8') ?></td>
             <td>
               <?php $badge = ['publicado' => 'verde', 'borrador' => 'ambar', 'archivado' => 'gris'][$paquete['estado']]; ?>
               <span class="admin-badge admin-badge--<?= $badge ?>"><?= ucfirst($paquete['estado']) ?></span>

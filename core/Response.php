@@ -26,4 +26,27 @@ final class Response
     {
         http_response_code($status);
     }
+
+    /**
+     * @param list<string> $encabezados
+     * @param list<list<scalar|null>> $filas
+     */
+    public static function csv(string $nombreArchivo, array $encabezados, array $filas): never
+    {
+        http_response_code(200);
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
+
+        // BOM UTF-8: sin esto Excel interpreta el archivo como ANSI y rompe los acentos.
+        echo "\xEF\xBB\xBF";
+
+        $out = fopen('php://output', 'w');
+        // Escape explicito: PHP 8.4+ marca como deprecated el default implicito de $escape.
+        fputcsv($out, $encabezados, ',', '"', '\\');
+        foreach ($filas as $fila) {
+            fputcsv($out, $fila, ',', '"', '\\');
+        }
+        fclose($out);
+        exit;
+    }
 }

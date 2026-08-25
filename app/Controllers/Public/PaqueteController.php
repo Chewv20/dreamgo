@@ -5,6 +5,7 @@ namespace App\Controllers\Public;
 use App\Models\BloquePagina;
 use App\Models\Categoria;
 use App\Models\Paquete;
+use App\Models\Resena;
 use Core\Controller;
 use Core\Paginator;
 
@@ -83,11 +84,36 @@ class PaqueteController extends Controller
             'paquete' => $paquete,
             'imagenes' => $imagenes,
             'salidas' => $salidas,
+            'resenas' => Resena::aprobadasDelPaquete($paquete['id']),
         ], [
             'title' => $paquete['meta_title'] ?: ($paquete['titulo'] . ' | Dream Go Operadora Turistica'),
             'description' => $paquete['meta_description'] ?: $paquete['resumen'],
             'ogImage' => $paquete['imagen_portada'] ?? '/assets/img/logo.avif',
             'jsonLd' => $jsonLd,
+        ]);
+    }
+
+    public function comparar(): void
+    {
+        $slugsPedidos = array_values(array_unique(array_filter(array_map(
+            'trim',
+            explode(',', (string) $this->request->query('paquetes', ''))
+        ))));
+        $slugsPedidos = array_slice($slugsPedidos, 0, 3);
+
+        $encontrados = $slugsPedidos !== [] ? Paquete::porSlugsPublicados($slugsPedidos) : [];
+        $porSlug = array_column($encontrados, null, 'slug');
+
+        $paquetes = array_values(array_filter(array_map(
+            static fn (string $slug) => $porSlug[$slug] ?? null,
+            $slugsPedidos
+        )));
+
+        $this->view('public/paquetes/comparar', [
+            'paquetes' => $paquetes,
+        ], [
+            'title' => 'Comparar paquetes | Dream Go Operadora Turistica',
+            'description' => 'Compara precio, duracion y detalles de nuestros paquetes de viaje.',
         ]);
     }
 }

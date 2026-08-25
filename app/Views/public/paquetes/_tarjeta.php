@@ -24,5 +24,9 @@
         <?= (int) $paquete['duracion_dias'] ?>d / <?= (int) $paquete['duracion_noches'] ?>n
       </span>
     </div>
+    <label class="tarjeta__comparar">
+      <input type="checkbox" data-comparar-slug="<?= htmlspecialchars($paquete['slug'], ENT_QUOTES, 'UTF-8') ?>" data-comparar-titulo="<?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?>">
+      Comparar
+    </label>
   </div>
 </article>

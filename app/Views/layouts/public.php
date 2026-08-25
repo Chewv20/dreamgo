@@ -158,6 +158,13 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
   </div>
 </footer>
 
+<div class="barra-comparador" data-comparador-barra hidden>
+  <div class="contenedor barra-comparador__contenido">
+    <div data-comparador-chips class="barra-comparador__chips"></div>
+    <a href="/comparar" data-comparador-link class="btn btn-primario">Comparar</a>
+  </div>
+</div>
+
 <script src="/assets/js/site.js" defer></script>
 </body>
 </html>

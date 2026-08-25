@@ -1,4 +1,8 @@
 <?php /** @var array $cotizaciones */ ?>
+<div class="admin-acciones" style="margin-bottom:1.25rem;">
+  <a href="/admin/cotizaciones/exportar" class="btn btn-secundario">Exportar CSV</a>
+</div>
+
 <div class="admin-panel">
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">

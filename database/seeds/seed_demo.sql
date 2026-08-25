@@ -27,7 +27,10 @@ INSERT INTO permisos (clave, modulo, descripcion) VALUES
   ('roles.gestionar', 'roles', 'Crear roles y asignar permisos'),
   ('configuracion.gestionar', 'configuracion', 'Editar la configuracion global del sitio'),
   ('reportes.ver', 'reportes', 'Ver reportes y metricas del negocio'),
-  ('contenido.gestionar', 'contenido', 'Editar textos, orden y colores de las paginas publicas');
+  ('contenido.gestionar', 'contenido', 'Editar textos, orden y colores de las paginas publicas'),
+  ('resenas.ver', 'resenas', 'Ver el listado de resenas de clientes'),
+  ('resenas.gestionar', 'resenas', 'Aprobar o rechazar resenas de clientes'),
+  ('suscriptores.ver', 'suscriptores', 'Ver el listado de suscriptores al newsletter');
 
 -- Administrador: todos los permisos
 INSERT INTO rol_permiso (rol_id, permiso_id)
@@ -165,6 +168,7 @@ INSERT INTO configuracion_sitio (clave, valor, descripcion) VALUES
   ('horas_expiracion_reserva', '48', 'Horas antes de liberar automaticamente una reserva pendiente'),
   ('porcentaje_anticipo_reserva', '30', 'Porcentaje del precio total que se cobra como anticipo en linea al reservar (1-100)'),
   ('dias_recordatorio_viaje', '3', 'Dias de anticipacion para enviar el recordatorio de viaje'),
+  ('dias_solicitud_resena', '3', 'Dias despues de terminado el viaje (fecha_regreso o fecha_salida) para pedir una resena al cliente'),
   ('email_equipo_reportes', 'admin@dreamgooperadoraturistica.com', 'Correo que recibe el reporte periodico y notificaciones de cotizacion'),
   ('meta_title_default', 'Dream Go Operadora Turistica | Excursiones y paquetes de viaje', 'Titulo SEO por defecto'),
   ('meta_description_default', 'Excursiones y paquetes a los mejores destinos de Mexico y el mundo, con la confianza de un equipo experto.', 'Descripcion SEO por defecto'),

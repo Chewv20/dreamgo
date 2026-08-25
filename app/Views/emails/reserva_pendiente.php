@@ -5,6 +5,6 @@
   <tr><td style="font-weight:bold;width:160px;">Codigo de reserva</td><td><?= htmlspecialchars($reserva['codigo_reserva'], ENT_QUOTES, 'UTF-8') ?></td></tr>
   <tr><td style="font-weight:bold;">Fecha de salida</td><td><?= date('d/m/Y', strtotime($reserva['fecha_salida'])) ?></td></tr>
   <tr><td style="font-weight:bold;">Personas</td><td><?= (int) $reserva['num_personas'] ?></td></tr>
-  <tr><td style="font-weight:bold;">Total</td><td>$<?= number_format((float) $reserva['precio_total'], 2) ?></td></tr>
+  <tr><td style="font-weight:bold;">Total</td><td>$<?= number_format((float) $reserva['precio_total'], 2) ?> <?= htmlspecialchars($reserva['paquete_moneda'], ENT_QUOTES, 'UTF-8') ?></td></tr>
 </table>
 <p>Tu lugar quedo apartado temporalmente. Nuestro equipo se pondra en contacto contigo para confirmar el pago y finalizar tu reserva.</p>

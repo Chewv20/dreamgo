@@ -14,6 +14,14 @@ use Core\Auth;
 
 class PaqueteAdminController extends AdminController
 {
+    private const MONEDAS = [
+        'MXN' => 'Peso mexicano (MXN)',
+        'USD' => 'Dolar estadounidense (USD)',
+        'EUR' => 'Euro (EUR)',
+        'CAD' => 'Dolar canadiense (CAD)',
+        'GBP' => 'Libra esterlina (GBP)',
+    ];
+
     public function index(): void
     {
         $paginador = $this->paginar(Paquete::contarTotal());
@@ -28,6 +36,8 @@ class PaqueteAdminController extends AdminController
     {
         $this->view('admin/paquetes/create', [
             'categorias' => Categoria::all('nombre ASC'),
+            'monedas' => self::MONEDAS,
+            'monedaBloqueada' => false,
         ], ['title' => 'Nuevo paquete | Dream Go', 'heading' => 'Nuevo paquete']);
     }
 
@@ -53,6 +63,7 @@ class PaqueteAdminController extends AdminController
             'incluye' => HtmlSanitizer::limpiar($datos['incluye']),
             'no_incluye' => HtmlSanitizer::limpiar($datos['no_incluye']),
             'precio_desde' => $datos['precio_desde'],
+            'moneda' => $datos['moneda'],
             'duracion_dias' => $datos['duracion_dias'] ?: null,
             'duracion_noches' => $datos['duracion_noches'] ?: null,
             'destacado' => $datos['destacado'],
@@ -77,6 +88,8 @@ class PaqueteAdminController extends AdminController
             'paquete' => $paquete,
             'categorias' => Categoria::all('nombre ASC'),
             'imagenes' => Paquete::imagenes($id),
+            'monedas' => self::MONEDAS,
+            'monedaBloqueada' => Paquete::tieneReservas($id),
         ], ['title' => 'Editar paquete | Dream Go', 'heading' => 'Editar paquete']);
     }
 
@@ -87,6 +100,13 @@ class PaqueteAdminController extends AdminController
         $paquete = $this->encontrarO404(Paquete::class, $id);
 
         $datos = $this->datosFormulario();
+
+        // Un paquete con reservas no puede cambiar de moneda (ver Paquete::tieneReservas):
+        // se ignora cualquier valor recibido y se conserva el actual, aunque el campo del
+        // formulario venga manipulado.
+        if (Paquete::tieneReservas($id)) {
+            $datos['moneda'] = $paquete['moneda'];
+        }
 
         if (!$this->validar($datos)) {
             $this->redirect("/admin/paquetes/{$id}/editar");
@@ -104,6 +124,7 @@ class PaqueteAdminController extends AdminController
             'incluye' => HtmlSanitizer::limpiar($datos['incluye']),
             'no_incluye' => HtmlSanitizer::limpiar($datos['no_incluye']),
             'precio_desde' => $datos['precio_desde'],
+            'moneda' => $datos['moneda'],
             'duracion_dias' => $datos['duracion_dias'] ?: null,
             'duracion_noches' => $datos['duracion_noches'] ?: null,
             'destacado' => $datos['destacado'],
@@ -137,7 +158,7 @@ class PaqueteAdminController extends AdminController
     {
         $datos = $this->request->only([
             'categoria_id', 'titulo', 'resumen', 'descripcion_larga', 'itinerario',
-            'incluye', 'no_incluye', 'precio_desde', 'duracion_dias', 'duracion_noches',
+            'incluye', 'no_incluye', 'precio_desde', 'moneda', 'duracion_dias', 'duracion_noches',
             'estado', 'meta_title', 'meta_description',
         ]);
         $datos['destacado'] = $this->request->input('destacado') ? 1 : 0;
@@ -155,6 +176,12 @@ class PaqueteAdminController extends AdminController
 
         if ($validator->pasa() && !is_numeric($datos['precio_desde'])) {
             Flash::set('error', 'El precio debe ser un numero valido.');
+
+            return false;
+        }
+
+        if (!array_key_exists($datos['moneda'] ?? '', self::MONEDAS)) {
+            Flash::set('error', 'Selecciona una moneda valida.');
 
             return false;
         }

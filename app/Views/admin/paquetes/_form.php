@@ -1,6 +1,8 @@
 <?php
 /** @var array $categorias */
 /** @var array|null $paquete */
+/** @var array $monedas */
+/** @var bool $monedaBloqueada */
 $paquete ??= [];
 ?>
 <?= \App\Helpers\Csrf::field() ?>
@@ -29,17 +31,32 @@ $paquete ??= [];
 
 <div class="admin-form-grid admin-form-grid--2">
   <div class="campo">
-    <label for="precio_desde">Precio desde (MXN)</label>
+    <label for="precio_desde">Precio desde</label>
     <input type="number" step="0.01" min="0" id="precio_desde" name="precio_desde" required value="<?= htmlspecialchars((string) ($paquete['precio_desde'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
   </div>
   <div class="campo">
-    <label for="estado">Estado</label>
-    <select id="estado" name="estado" required>
-      <?php foreach (['borrador' => 'Borrador', 'publicado' => 'Publicado', 'archivado' => 'Archivado'] as $valor => $etiqueta): ?>
-        <option value="<?= $valor ?>" <?= ($paquete['estado'] ?? 'borrador') === $valor ? 'selected' : '' ?>><?= $etiqueta ?></option>
-      <?php endforeach; ?>
-    </select>
+    <label for="moneda">Moneda</label>
+    <?php if (!empty($monedaBloqueada)): ?>
+      <input type="text" value="<?= htmlspecialchars($paquete['moneda'] ?? 'MXN', ENT_QUOTES, 'UTF-8') ?>" disabled>
+      <input type="hidden" name="moneda" value="<?= htmlspecialchars($paquete['moneda'] ?? 'MXN', ENT_QUOTES, 'UTF-8') ?>">
+      <small style="opacity:0.7;">No se puede cambiar: este paquete ya tiene reservas.</small>
+    <?php else: ?>
+      <select id="moneda" name="moneda" required>
+        <?php foreach ($monedas as $codigo => $etiqueta): ?>
+          <option value="<?= $codigo ?>" <?= ($paquete['moneda'] ?? 'MXN') === $codigo ? 'selected' : '' ?>><?= htmlspecialchars($etiqueta, ENT_QUOTES, 'UTF-8') ?></option>
+        <?php endforeach; ?>
+      </select>
+    <?php endif; ?>
   </div>
+</div>
+
+<div class="campo">
+  <label for="estado">Estado</label>
+  <select id="estado" name="estado" required>
+    <?php foreach (['borrador' => 'Borrador', 'publicado' => 'Publicado', 'archivado' => 'Archivado'] as $valor => $etiqueta): ?>
+      <option value="<?= $valor ?>" <?= ($paquete['estado'] ?? 'borrador') === $valor ? 'selected' : '' ?>><?= $etiqueta ?></option>
+    <?php endforeach; ?>
+  </select>
 </div>
 
 <div class="admin-form-grid admin-form-grid--2">

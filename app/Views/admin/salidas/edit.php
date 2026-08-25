@@ -18,6 +18,7 @@
     <div class="campo">
       <label for="precio_override">Precio especial para esta fecha (opcional)</label>
       <input type="number" step="0.01" min="0" id="precio_override" name="precio_override" value="<?= htmlspecialchars((string) ($salida['precio_override'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+      <small style="opacity:0.7;">En la moneda del paquete: <?= htmlspecialchars($paquete['moneda'], ENT_QUOTES, 'UTF-8') ?></small>
     </div>
     <div class="campo">
       <label for="estado">Estado</label>

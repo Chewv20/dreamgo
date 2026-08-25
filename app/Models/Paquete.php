@@ -137,6 +137,51 @@ class Paquete extends Model
         return $stmt->fetch();
     }
 
+    /**
+     * Trae varios paquetes publicados por slug de golpe, para el comparador. El orden del
+     * resultado no sigue necesariamente el de $slugs (limitacion de SQL IN); el controller
+     * reordena segun el orden pedido.
+     */
+    public static function porSlugsPublicados(array $slugs): array
+    {
+        if ($slugs === []) {
+            return [];
+        }
+
+        $placeholders = [];
+        $params = [];
+        foreach ($slugs as $i => $slug) {
+            $clave = "slug{$i}";
+            $placeholders[] = ":{$clave}";
+            $params[$clave] = $slug;
+        }
+
+        $stmt = self::db()->prepare(
+            'SELECT p.*, c.nombre AS categoria_nombre
+             FROM paquetes p
+             INNER JOIN categorias c ON c.id = p.categoria_id
+             WHERE p.slug IN (' . implode(', ', $placeholders) . ') AND p.estado = "publicado"'
+        );
+        $stmt->execute($params);
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Si el paquete ya tiene alguna reserva, no se debe permitir cambiar su moneda: las
+     * reservas no guardan su propia moneda, la heredan vía join a paquetes.moneda, y un
+     * cambio retroactivo haria que montos historicos se muestren con el codigo de moneda nuevo.
+     */
+    public static function tieneReservas(int $paqueteId): bool
+    {
+        $stmt = self::db()->prepare(
+            'SELECT COUNT(*) FROM reservas r INNER JOIN salidas s ON s.id = r.salida_id WHERE s.paquete_id = :id'
+        );
+        $stmt->execute(['id' => $paqueteId]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     public static function imagenes(int $paqueteId): array
     {
         $stmt = self::db()->prepare(

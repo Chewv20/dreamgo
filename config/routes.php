@@ -11,9 +11,11 @@ use App\Controllers\Admin\CotizacionAdminController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\OfertaAdminController;
 use App\Controllers\Admin\PaqueteAdminController;
+use App\Controllers\Admin\ResenaAdminController;
 use App\Controllers\Admin\ReservaAdminController;
 use App\Controllers\Admin\RolAdminController;
 use App\Controllers\Admin\SalidaAdminController;
+use App\Controllers\Admin\SuscriptorAdminController;
 use App\Controllers\Admin\UsuarioAdminController;
 use App\Controllers\Public\ContactoController;
 use App\Controllers\Public\CotizadorController;
@@ -22,8 +24,10 @@ use App\Controllers\Public\HomeController;
 use App\Controllers\Public\MercadoPagoWebhookController;
 use App\Controllers\Public\NosotrosController;
 use App\Controllers\Public\PaqueteController;
+use App\Controllers\Public\ResenaPublicaController;
 use App\Controllers\Public\ReservaConsultaController;
 use App\Controllers\Public\ReservaPublicaController;
+use App\Controllers\Public\SuscripcionController;
 
 // =========================================================
 // SITIO PUBLICO
@@ -35,6 +39,7 @@ $router->get('/destinos/{slug}', [DestinoController::class, 'mostrar']);
 
 $router->get('/paquetes', [PaqueteController::class, 'catalogo']);
 $router->get('/paquetes/{slug}', [PaqueteController::class, 'ficha']);
+$router->get('/comparar', [PaqueteController::class, 'comparar']);
 
 $router->get('/cotizador', [CotizadorController::class, 'mostrar']);
 $router->post('/cotizador', [CotizadorController::class, 'enviar']);
@@ -44,6 +49,13 @@ $router->get('/contacto', [ContactoController::class, 'index']);
 
 $router->get('/mi-reserva', [ReservaConsultaController::class, 'mostrar']);
 $router->post('/mi-reserva', [ReservaConsultaController::class, 'buscar']);
+
+$router->get('/resena/{codigo}', [ResenaPublicaController::class, 'formulario']);
+$router->post('/resena/{codigo}', [ResenaPublicaController::class, 'guardar']);
+
+$router->post('/suscribir', [SuscripcionController::class, 'suscribir']);
+$router->get('/suscribir/confirmar/{token}', [SuscripcionController::class, 'confirmar']);
+$router->get('/suscribir/baja/{token}', [SuscripcionController::class, 'baja']);
 
 $router->get('/paquetes/{slug}/reservar/{salidaId}', [ReservaPublicaController::class, 'formulario']);
 $router->post('/reservar', [ReservaPublicaController::class, 'crear']);
@@ -81,12 +93,17 @@ $router->get('/admin/reservas/calendario', [ReservaAdminController::class, 'cale
 $router->get('/admin/reservas/calendario/datos', [ReservaAdminController::class, 'calendarioDatos'], ['auth' => true, 'permiso' => 'reservas.ver']);
 $router->get('/admin/reservas/crear', [ReservaAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'reservas.ver']);
 $router->post('/admin/reservas', [ReservaAdminController::class, 'crear'], ['auth' => true, 'permiso' => 'reservas.ver']);
+$router->get('/admin/reservas/exportar', [ReservaAdminController::class, 'exportarCsv'], ['auth' => true, 'permiso' => 'reservas.ver']);
 $router->get('/admin/reservas/{id}', [ReservaAdminController::class, 'detalle'], ['auth' => true, 'permiso' => 'reservas.ver']);
 $router->post('/admin/reservas/{id}/confirmar', [ReservaAdminController::class, 'confirmar'], ['auth' => true, 'permiso' => 'reservas.confirmar']);
 $router->post('/admin/reservas/{id}/cancelar', [ReservaAdminController::class, 'cancelar'], ['auth' => true, 'permiso' => 'reservas.cancelar']);
 
 $router->get('/admin/cotizaciones', [CotizacionAdminController::class, 'index'], ['auth' => true, 'permiso' => 'cotizaciones.ver']);
+$router->get('/admin/cotizaciones/exportar', [CotizacionAdminController::class, 'exportarCsv'], ['auth' => true, 'permiso' => 'cotizaciones.ver']);
 $router->post('/admin/cotizaciones/{id}/estado', [CotizacionAdminController::class, 'cambiarEstado'], ['auth' => true, 'permiso' => 'cotizaciones.gestionar']);
+
+$router->get('/admin/resenas', [ResenaAdminController::class, 'index'], ['auth' => true, 'permiso' => 'resenas.ver']);
+$router->post('/admin/resenas/{id}/estado', [ResenaAdminController::class, 'cambiarEstado'], ['auth' => true, 'permiso' => 'resenas.gestionar']);
 
 $router->get('/admin/ofertas', [OfertaAdminController::class, 'index'], ['auth' => true, 'permiso' => 'ofertas.gestionar']);
 $router->get('/admin/ofertas/crear', [OfertaAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'ofertas.gestionar']);
@@ -94,6 +111,10 @@ $router->post('/admin/ofertas', [OfertaAdminController::class, 'crear'], ['auth'
 $router->get('/admin/ofertas/{id}/editar', [OfertaAdminController::class, 'editarForm'], ['auth' => true, 'permiso' => 'ofertas.gestionar']);
 $router->post('/admin/ofertas/{id}/editar', [OfertaAdminController::class, 'editar'], ['auth' => true, 'permiso' => 'ofertas.gestionar']);
 $router->post('/admin/ofertas/{id}/desactivar', [OfertaAdminController::class, 'desactivar'], ['auth' => true, 'permiso' => 'ofertas.gestionar']);
+$router->post('/admin/ofertas/{id}/enviar-suscriptores', [OfertaAdminController::class, 'enviarSuscriptores'], ['auth' => true, 'permiso' => 'ofertas.gestionar']);
+
+$router->get('/admin/suscriptores', [SuscriptorAdminController::class, 'index'], ['auth' => true, 'permiso' => 'suscriptores.ver']);
+$router->get('/admin/suscriptores/exportar', [SuscriptorAdminController::class, 'exportarCsv'], ['auth' => true, 'permiso' => 'suscriptores.ver']);
 
 $router->get('/admin/usuarios', [UsuarioAdminController::class, 'index'], ['auth' => true, 'permiso' => 'usuarios.gestionar']);
 $router->get('/admin/usuarios/crear', [UsuarioAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'usuarios.gestionar']);

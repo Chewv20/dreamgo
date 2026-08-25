@@ -24,6 +24,12 @@
             </td>
             <td class="admin-acciones">
               <a href="/admin/ofertas/<?= (int) $o['id'] ?>/editar" class="btn btn-secundario">Editar</a>
+              <?php if ((int) $o['activo'] === 1): ?>
+                <form method="post" action="/admin/ofertas/<?= (int) $o['id'] ?>/enviar-suscriptores" data-confirm="¿Enviar esta oferta a todos los suscriptores confirmados?">
+                  <?= \App\Helpers\Csrf::field() ?>
+                  <button type="submit" class="btn btn-secundario">Enviar a suscriptores</button>
+                </form>
+              <?php endif; ?>
             </td>
           </tr>
         <?php endforeach; ?>

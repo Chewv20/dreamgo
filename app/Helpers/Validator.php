@@ -59,6 +59,16 @@ final class Validator
         return $this;
     }
 
+    public function enRango(string $campo, int $min, int $max, string $etiqueta): self
+    {
+        $valor = $this->datos[$campo] ?? '';
+        if ($valor !== '' && $valor !== null && ((int) $valor < $min || (int) $valor > $max)) {
+            $this->errores[$campo] = "{$etiqueta} debe estar entre {$min} y {$max}.";
+        }
+
+        return $this;
+    }
+
     public function pasa(): bool
     {
         return $this->errores === [];

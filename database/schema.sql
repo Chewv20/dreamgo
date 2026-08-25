@@ -211,6 +211,7 @@ CREATE TABLE IF NOT EXISTS reservas (
 CREATE INDEX idx_reservas_estado ON reservas(estado);
 CREATE INDEX idx_reservas_expira ON reservas(estado, expira_en);
 CREATE INDEX idx_reservas_salida ON reservas(salida_id);
+CREATE INDEX idx_reservas_estado_confirmada ON reservas(estado, confirmada_en);
 
 -- ==========================================================
 -- COTIZACIONES (leads del formulario publico)
@@ -231,6 +232,42 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE INDEX idx_cotizaciones_estado ON cotizaciones(estado);
 CREATE INDEX idx_cotizaciones_creado ON cotizaciones(creado_en);
+
+-- ==========================================================
+-- RESENAS (moderadas, ligadas a una reserva confirmada)
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS resenas (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  reserva_id INT UNSIGNED NOT NULL,
+  cliente_id INT UNSIGNED NOT NULL,
+  paquete_id INT UNSIGNED NOT NULL,
+  calificacion TINYINT UNSIGNED NOT NULL,
+  comentario TEXT NOT NULL,
+  estado ENUM('pendiente','aprobada','rechazada') NOT NULL DEFAULT 'pendiente',
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  moderada_en DATETIME NULL,
+  CONSTRAINT fk_resena_reserva FOREIGN KEY (reserva_id) REFERENCES reservas(id) ON DELETE CASCADE,
+  CONSTRAINT fk_resena_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+  CONSTRAINT fk_resena_paquete FOREIGN KEY (paquete_id) REFERENCES paquetes(id) ON DELETE CASCADE,
+  CONSTRAINT uq_resena_reserva UNIQUE (reserva_id),
+  CONSTRAINT chk_resena_calificacion CHECK (calificacion BETWEEN 1 AND 5)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE INDEX idx_resenas_paquete_estado ON resenas(paquete_id, estado);
+
+-- ==========================================================
+-- SUSCRIPTORES (newsletter / alertas de ofertas, doble opt-in)
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS suscriptores (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  estado ENUM('pendiente','confirmado','baja') NOT NULL DEFAULT 'pendiente',
+  token VARCHAR(64) NOT NULL UNIQUE,
+  ip_origen VARCHAR(45) NULL,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  confirmado_en DATETIME NULL,
+  baja_en DATETIME NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE INDEX idx_suscriptores_estado ON suscriptores(estado);
 
 -- ==========================================================
 -- CONFIGURACION DEL SITIO (clave/valor)
@@ -264,7 +301,7 @@ CREATE TABLE IF NOT EXISTS bloques_pagina (
 -- ==========================================================
 CREATE TABLE IF NOT EXISTS log_correos_enviados (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  tipo ENUM('cotizacion_equipo','confirmacion_reserva','reserva_pendiente','recordatorio_viaje','reporte_periodico','otro') NOT NULL,
+  tipo ENUM('cotizacion_equipo','confirmacion_reserva','reserva_pendiente','recordatorio_viaje','reporte_periodico','solicitud_resena','confirmacion_suscripcion','aviso_oferta','otro') NOT NULL,
   destinatario VARCHAR(150) NOT NULL,
   asunto VARCHAR(200) NOT NULL,
   referencia_tipo VARCHAR(30) NULL,

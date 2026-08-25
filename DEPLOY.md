@@ -86,7 +86,7 @@ Activa el certificado SSL gratuito (Let's Encrypt) desde hPanel → **SSL**. Una
 
 ## 8. Cron Jobs
 
-Sigue `cron/README.md` para las 6 tareas programadas. Ajusta las rutas de ejemplo a la ruta real de tu
+Sigue `cron/README.md` para las 7 tareas programadas. Ajusta las rutas de ejemplo a la ruta real de tu
 cuenta de Hostinger (hPanel te la muestra al crear el primer cron job).
 
 ## 9. Primer acceso al panel
@@ -102,7 +102,7 @@ El panel **obliga a cambiarla** en el primer login (`debe_cambiar_password = 1`)
 - [ ] Numero de WhatsApp real configurado en `/admin/configuracion`.
 - [ ] Correo del equipo (`email_equipo_reportes`) configurado en `/admin/configuracion`.
 - [ ] Contenido placeholder (paquetes/categorias de ejemplo) reemplazado o eliminado por contenido real.
-- [ ] Los 6 cron jobs configurados en hPanel.
+- [ ] Los 7 cron jobs configurados en hPanel.
 - [ ] SSL activo y `APP_URL` con `https://`.
 - [ ] Enviar una cotizacion de prueba real y confirmar que llega el correo (valida SMTP en produccion).
 - [ ] `MP_ACCESS_TOKEN`/`MP_WEBHOOK_SECRET` configurados y una reserva de prueba pagada de

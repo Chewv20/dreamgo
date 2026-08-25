@@ -51,6 +51,11 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     </p>
     <p style="opacity:0.75;margin-bottom:1.5rem;"><?= (int) $paquete['duracion_dias'] ?> dias / <?= (int) $paquete['duracion_noches'] ?> noches</p>
 
+    <label class="tarjeta__comparar" style="display:block;margin-bottom:1rem;">
+      <input type="checkbox" data-comparar-slug="<?= htmlspecialchars($paquete['slug'], ENT_QUOTES, 'UTF-8') ?>" data-comparar-titulo="<?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?>">
+      Agregar a comparar
+    </label>
+
     <h3 style="font-size:1.1rem;">Proximas salidas</h3>
     <?php if (empty($salidas)): ?>
       <p>Consulta disponibilidad con nuestro equipo.</p>
@@ -72,3 +77,25 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     <a href="<?= htmlspecialchars($whatsapp, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-whatsapp" style="width:100%;" target="_blank" rel="noopener">Cotizar por WhatsApp</a>
   </aside>
 </section>
+
+<?php if (!empty($resenas)): ?>
+<section class="seccion contenedor">
+  <div class="seccion__encabezado">
+    <h2>Lo que dicen nuestros viajeros</h2>
+  </div>
+  <div class="grid-tarjetas grid-tarjetas--3">
+    <?php foreach ($resenas as $r): ?>
+      <?php
+        $partesNombre = explode(' ', trim($r['cliente_nombre']));
+        $nombrePublico = $partesNombre[0] . (isset($partesNombre[1]) ? ' ' . mb_strtoupper(mb_substr($partesNombre[1], 0, 1)) . '.' : '');
+      ?>
+      <figure class="tarjeta-testimonio animar-entrada">
+        <span class="tarjeta-testimonio__avatar" aria-hidden="true"><?= htmlspecialchars(mb_strtoupper(mb_substr($partesNombre[0], 0, 1)), ENT_QUOTES, 'UTF-8') ?></span>
+        <p style="color:#a85f4d;letter-spacing:0.1em;margin:0 0 0.5rem;"><?= str_repeat('★', (int) $r['calificacion']) . str_repeat('☆', 5 - (int) $r['calificacion']) ?></p>
+        <blockquote>&quot;<?= htmlspecialchars($r['comentario'], ENT_QUOTES, 'UTF-8') ?>&quot;</blockquote>
+        <figcaption><?= htmlspecialchars($nombrePublico, ENT_QUOTES, 'UTF-8') ?></figcaption>
+      </figure>
+    <?php endforeach; ?>
+  </div>
+</section>
+<?php endif; ?>

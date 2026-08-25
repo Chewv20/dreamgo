@@ -6,6 +6,8 @@ use App\Helpers\Flash;
 use App\Helpers\Validator;
 use App\Models\CodigoDescuento;
 use App\Models\Paquete;
+use App\Models\Suscriptor;
+use App\Services\MailerService;
 
 class OfertaAdminController extends AdminController
 {
@@ -86,6 +88,26 @@ class OfertaAdminController extends AdminController
 
         CodigoDescuento::update($id, ['activo' => 0]);
         Flash::set('exito', 'Codigo desactivado.');
+        $this->redirect('/admin/ofertas');
+    }
+
+    public function enviarSuscriptores(int $id): void
+    {
+        $this->verifyCsrf();
+
+        $oferta = $this->encontrarO404(CodigoDescuento::class, $id);
+
+        $suscriptores = Suscriptor::confirmados();
+        $mailer = new MailerService($this->db);
+        $enviados = 0;
+
+        foreach ($suscriptores as $suscriptor) {
+            if ($mailer->enviarAvisoOferta($suscriptor, $oferta)) {
+                $enviados++;
+            }
+        }
+
+        Flash::set('exito', "Aviso enviado a {$enviados} de " . count($suscriptores) . ' suscriptor(es).');
         $this->redirect('/admin/ofertas');
     }
 

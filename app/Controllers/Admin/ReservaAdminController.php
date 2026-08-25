@@ -8,6 +8,7 @@ use App\Models\Reserva;
 use App\Models\Salida;
 use App\Services\MailerService;
 use App\Services\ReservaService;
+use Core\Response;
 use RuntimeException;
 
 class ReservaAdminController extends AdminController
@@ -20,6 +21,29 @@ class ReservaAdminController extends AdminController
             'reservas' => Reserva::adminListado($paginador->porPagina, $paginador->offset()),
             'paginador' => $paginador,
         ], ['title' => 'Reservas | Dream Go', 'heading' => 'Reservas']);
+    }
+
+    public function exportarCsv(): void
+    {
+        $encabezados = ['Codigo', 'Cliente', 'Email', 'Telefono', 'Paquete', 'Fecha salida', 'Personas', 'Precio total', 'Moneda', 'Monto pagado', 'Estado', 'Creado en', 'Confirmada en'];
+
+        $filas = array_map(static fn (array $r): array => [
+            $r['codigo_reserva'],
+            $r['cliente_nombre'],
+            $r['cliente_email'],
+            $r['cliente_telefono'],
+            $r['paquete_titulo'],
+            $r['fecha_salida'],
+            $r['num_personas'],
+            $r['precio_total'],
+            $r['paquete_moneda'],
+            $r['monto_pagado'],
+            $r['estado'],
+            $r['creado_en'],
+            $r['confirmada_en'] ?? '',
+        ], Reserva::todasAdmin());
+
+        Response::csv('reservas_' . date('Y-m-d') . '.csv', $encabezados, $filas);
     }
 
     public function calendario(): void

@@ -32,11 +32,27 @@ class Reserva extends Model
         return (int) self::db()->query('SELECT COUNT(*) FROM reservas')->fetchColumn();
     }
 
+    /**
+     * Igual que adminListado() pero sin paginar, para exportar el listado completo a CSV.
+     */
+    public static function todasAdmin(): array
+    {
+        return self::db()->query(
+            'SELECT r.*, c.nombre AS cliente_nombre, c.email AS cliente_email, c.telefono AS cliente_telefono,
+                    s.fecha_salida, p.titulo AS paquete_titulo, p.moneda AS paquete_moneda
+             FROM reservas r
+             INNER JOIN clientes c ON c.id = r.cliente_id
+             INNER JOIN salidas s ON s.id = r.salida_id
+             INNER JOIN paquetes p ON p.id = s.paquete_id
+             ORDER BY r.creado_en DESC'
+        )->fetchAll();
+    }
+
     public static function conDetalle(int $id): array|false
     {
         $stmt = self::db()->prepare(
             'SELECT r.*, c.nombre AS cliente_nombre, c.email AS cliente_email, c.telefono AS cliente_telefono,
-                    s.fecha_salida, s.fecha_regreso, p.titulo AS paquete_titulo
+                    s.fecha_salida, s.fecha_regreso, p.titulo AS paquete_titulo, p.moneda AS paquete_moneda
              FROM reservas r
              INNER JOIN clientes c ON c.id = r.cliente_id
              INNER JOIN salidas s ON s.id = r.salida_id
@@ -58,7 +74,7 @@ class Reserva extends Model
     {
         $stmt = self::db()->prepare(
             'SELECT r.*, c.nombre AS cliente_nombre, c.email AS cliente_email,
-                    s.fecha_salida, s.fecha_regreso, p.titulo AS paquete_titulo, p.slug AS paquete_slug
+                    s.fecha_salida, s.fecha_regreso, p.id AS paquete_id, p.titulo AS paquete_titulo, p.slug AS paquete_slug, p.moneda AS paquete_moneda
              FROM reservas r
              INNER JOIN clientes c ON c.id = r.cliente_id
              INNER JOIN salidas s ON s.id = r.salida_id
@@ -91,5 +107,28 @@ class Reserva extends Model
         $stmt->execute(['anio' => $anio, 'mes' => $mes]);
 
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Ingresos totales (reservas confirmadas) en un rango de fechas inclusivo, filtrando por
+     * confirmada_en: el ingreso se realiza cuando la reserva se confirma, no cuando se crea.
+     * $desde/$hasta en formato 'Y-m-d'; $hasta se extiende hasta el fin del dia para incluir
+     * confirmaciones registradas con hora dentro de esa fecha.
+     */
+    public static function ingresosPeriodo(string $desde, string $hasta): float
+    {
+        $stmt = self::db()->prepare(
+            "SELECT COALESCE(SUM(precio_total), 0)
+             FROM reservas
+             WHERE estado = 'confirmada'
+               AND confirmada_en >= :desde
+               AND confirmada_en < :hasta"
+        );
+        $stmt->execute([
+            'desde' => $desde . ' 00:00:00',
+            'hasta' => date('Y-m-d', strtotime($hasta . ' +1 day')) . ' 00:00:00',
+        ]);
+
+        return (float) $stmt->fetchColumn();
     }
 }

@@ -43,8 +43,8 @@ $etiquetasEstado = [
         <p><strong>Estado:</strong> <?= htmlspecialchars($etiquetasEstado[$reserva['estado']] ?? ucfirst($reserva['estado']), ENT_QUOTES, 'UTF-8') ?></p>
         <p><strong>Fecha de salida:</strong> <?= htmlspecialchars(date('d/m/Y', strtotime($reserva['fecha_salida'])), ENT_QUOTES, 'UTF-8') ?></p>
         <p><strong>Personas:</strong> <?= (int) $reserva['num_personas'] ?></p>
-        <p><strong>Total:</strong> $<?= number_format((float) $reserva['precio_total'], 2, '.', ',') ?></p>
-        <p><strong>Pagado hasta ahora:</strong> $<?= number_format((float) $reserva['monto_pagado'], 2, '.', ',') ?></p>
+        <p><strong>Total:</strong> $<?= number_format((float) $reserva['precio_total'], 2, '.', ',') ?> <?= htmlspecialchars($reserva['paquete_moneda'], ENT_QUOTES, 'UTF-8') ?></p>
+        <p><strong>Pagado hasta ahora:</strong> $<?= number_format((float) $reserva['monto_pagado'], 2, '.', ',') ?> <?= htmlspecialchars($reserva['paquete_moneda'], ENT_QUOTES, 'UTF-8') ?></p>
         <?php if ($reserva['estado'] === 'pendiente' && !empty($reserva['expira_en'])): ?>
           <p>Tienes hasta el <strong><?= htmlspecialchars(date('d/m/Y H:i', strtotime($reserva['expira_en'])), ENT_QUOTES, 'UTF-8') ?></strong> para confirmar tu pago antes de que se libere el cupo.</p>
         <?php endif; ?>

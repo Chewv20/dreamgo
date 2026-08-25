@@ -144,30 +144,138 @@ entre sesiones y para llevar seguimiento de qué se implementó.
    editado a mano en `bloques_pagina`. Con `reservas.estado = 'confirmada'` ya identificado por
    cliente, se puede pedir una reseña real post-viaje (reusando el cron de recordatorio) y
    mostrarla ligada al paquete.
-   - Estado: **pendiente**
+   - Estado: **hecho** (2026-08-24). Decisiones tomadas con el usuario: requiere **aprobación de
+     un admin** antes de publicarse, el nombre público se muestra como "Nombre + inicial de
+     apellido" (privacidad), y el formato es **estrellas (1-5) + texto**.
+     Tabla nueva `resenas` (migraciones `0006`-`0008`: tabla+permisos, enum de
+     `log_correos_enviados`, config `dias_solicitud_resena`) ligada a `reserva_id` (`UNIQUE`,
+     una reseña por reserva), `cliente_id`, `paquete_id`. Acceso público sin cuenta reusando el
+     mismo patrón de `Reserva::porCodigoYEmail()` que ya usa `/mi-reserva` (código+email, sin
+     inventar un sistema de tokens nuevo) vía `App\Controllers\Public\ResenaPublicaController`
+     (`GET`/`POST /resena/{codigo}`). Nuevo cron `cron/solicitar_resena.php` (mismo patrón que
+     `recordatorio_viaje.php`) pide la reseña N días después de terminado el viaje
+     (`COALESCE(fecha_regreso, fecha_salida)`), con doble guarda anti-duplicado (log de correos
+     + `NOT EXISTS` contra `resenas`). Moderación en `/admin/resenas`
+     (`ResenaAdminController`, permisos `resenas.ver`/`resenas.gestionar`, nuevos). Reseñas
+     aprobadas se muestran en `app/Views/public/paquetes/ficha.php` reusando el markup de
+     `tarjeta-testimonio` ya existente en el home.
+     Probado en vivo end-to-end: cron con datos de prueba (confirma que no reenvía si ya hay
+     reseña o si el correo ya se envió), formulario público (código+email inválido → error
+     genérico; válido pero viaje no terminado o reserva no confirmada → error explicativo;
+     reenvío tras ya dejar reseña → idempotente sin duplicar), moderación admin, visualización
+     en la ficha del paquete, y gateo de permisos con un rol sin `resenas.ver`. Datos de prueba
+     borrados al terminar.
 
 5. **Dashboard con métricas de negocio** — `DashboardController` (`app/Controllers/Admin/DashboardController.php`)
    solo cuenta filas. Agregar ingresos por periodo (`SUM(precio_total)` de reservas
    confirmadas), tasa de conversión cotización→reserva, y ocupación por salida
    (`cupo_disponible/cupo_maximo`).
-   - Estado: **pendiente**
+   - Estado: **hecho** (2026-08-24). Ingresos por periodo se filtra por `confirmada_en` (no
+     `creado_en`): el ingreso se realiza cuando la reserva se confirma, no cuando se solicita
+     (nuevo índice `idx_reservas_estado_confirmada`, migración `0005`). Tasa de conversión se
+     aproxima como `COUNT(estado='convertida') / COUNT(*)` sobre `cotizaciones` en el periodo —
+     no hay FK real entre `cotizaciones` y `reservas`, así que es una aproximación, documentada
+     en el código. Filtro de periodo (`?desde=&hasta=`) validado con `preg_match` en el
+     controller, con fallback al mes actual si la entrada es inválida o `desde > hasta`. Sin
+     librerías de gráficos nuevas (el proyecto no tenía ninguna): tarjetas numéricas + tabla de
+     ocupación de próximas salidas con badges de color (verde/ámbar/rojo por % de ocupación).
+     Probado en vivo contra la base de datos real: filtro con basura en la URL y `desde > hasta`
+     caen al fallback sin error 500, badges calculan bien, y un rol sin `reservas.ver`/
+     `cotizaciones.ver` no ve las tarjetas nuevas.
 
 6. **Exportar a CSV** en listados de reservas/cotizaciones — para contabilidad o CRM externo.
-   - Estado: **pendiente**
+   - Estado: **hecho** (2026-08-24). Nuevo `Core\Response::csv()` (BOM UTF-8 para que Excel no
+     rompa acentos, headers `Content-Disposition` correctos) reusado luego por la exportación de
+     suscriptores (#7). Exporta el listado completo (no solo la página visible) vía
+     `Reserva::todasAdmin()`/`Cotizacion::todasAdmin()`. Bug real encontrado y corregido durante
+     la prueba: PHP 8.4+ marca como deprecated el `$escape` implícito de `fputcsv()`, y ese aviso
+     se filtraba dentro del propio archivo CSV descargado, corrompiéndolo — se corrigió pasando
+     el parámetro explícito. Probado en vivo con datos reales (incluyendo texto con comas y
+     comillas, para validar el escapado) y confirmando que la ruta `/admin/reservas/{id}` sigue
+     funcionando tras agregar la ruta de exportación antes en el router.
 
 7. **Newsletter / alertas de ofertas** — captar email en el home, tabla nueva `suscriptores`
    con opt-in, reusar `MailerService` para mandar ofertas nuevas.
-   - Estado: **pendiente**
+   - Estado: **hecho** (2026-08-24). Decisiones tomadas con el usuario: **doble opt-in**
+     (confirmación por correo antes de quedar activo, evita que alguien suscriba el correo de
+     otra persona sin su consentimiento) y el formulario vive en una **sección propia del home**
+     (no en el footer global). Tabla nueva `suscriptores` (migraciones `0009`-`0010`) con
+     `token` único que sirve tanto para el link de confirmación (`/suscribir/confirmar/{token}`)
+     como para el de baja (`/suscribir/baja/{token}`, incluido en cada correo de oferta — buena
+     práctica básica de correo masivo, mismo costo que ya requería el token). "Ofertas" en el
+     código es literalmente `App\Models\CodigoDescuento`/`OfertaAdminController`: se agregó un
+     botón manual "Enviar a suscriptores" en `/admin/ofertas` (no automático al guardar, para
+     evitar disparos accidentales), reusando el permiso `ofertas.gestionar` ya existente; solo
+     nuevo permiso agregado: `suscriptores.ver` para el listado admin
+     (`SuscriptorAdminController`, con exportación CSV reusando `Core\Response::csv()` de #6).
+     Probado en vivo end-to-end: alta con email nuevo (normalizado a minúsculas), confirmación
+     por token, reenvío con email ya confirmado (idempotente, sin duplicar), baja, envío manual
+     de aviso de oferta registrado en `log_correos_enviados`, y gateo de permisos. Datos de
+     prueba borrados al terminar.
 
 ## Bajo impacto / pulido
 
 8. **Multi-moneda real** — el campo `moneda` existe por paquete pero no hay conversión ni
    selector. Solo vale la pena si venden a extranjeros.
-   - Estado: **pendiente**
+   - Estado: **hecho** (2026-08-24). El catálogo tenía 8 paquetes, todos en MXN — el propio
+     escenario que este ítem marcaba como "no vale la pena todavía" — pero el usuario pidió
+     implementarlo igual. Decisión tomada con el usuario entre 2 interpretaciones muy distintas:
+     esto es **moneda real por paquete** (el admin elige USD/EUR/etc. al crear un paquete), no
+     un conversor de moneda de visualización para visitantes con tipo de cambio en vivo (esa
+     alternativa habría requerido una API externa nueva y tenía riesgo real de discrepancia
+     entre el precio "convertido" que ve el visitante y lo que Mercado Pago cobra realmente).
+     Hallazgo clave: `MercadoPagoService` ya leía `$paquete['moneda']` dinámicamente y cobraba
+     en esa moneda — el hueco real era que el admin no podía asignarla
+     (`PaqueteAdminController::datosFormulario()` nunca incluía `moneda`, y el label del form
+     decía literalmente "Precio desde (MXN)" a las patadas). No hizo falta ninguna migración: la
+     columna `moneda CHAR(3)` ya existía en `paquetes`.
+     Riesgo real encontrado y mitigado durante el diseño (no en el pedido original):
+     `reservas`/`salidas` no guardan su propia moneda, la heredan vía join a `paquetes.moneda` —
+     si un admin cambiara la moneda de un paquete después de que ya existieran reservas, esas
+     reservas viejas empezarían a mostrarse con el código de moneda nuevo sobre un monto
+     histórico en la moneda vieja. Se agregó `Paquete::tieneReservas()` y el campo moneda queda
+     bloqueado (`disabled` + servidor ignora cualquier valor manipulado) en el form de edición
+     una vez que el paquete tiene al menos una reserva.
+     También se corrigió una inconsistencia existente: varias vistas mostraban el total de una
+     reserva sin el código de moneda (`admin/reservas/detalle.php`, `/mi-reserva`, los 2 correos
+     transaccionales, el export CSV) — se agregó `p.moneda AS paquete_moneda` a los 3 métodos de
+     `Reserva` que hacen join a `paquetes` y alimentan esas vistas.
+     Probado en vivo end-to-end: paquete creado en USD se ve correcto en ficha/catálogo/admin;
+     selector sigue editable sin reservas; tras crear una reserva de prueba el campo se bloquea
+     y un POST manipulado a mano intentando cambiarlo es ignorado por el servidor (verificado
+     que la moneda en BD no cambió); una moneda fuera de la whitelist es rechazada; el detalle
+     admin, `/mi-reserva` y el CSV ya muestran "USD" junto al monto. Datos de prueba borrados al
+     terminar.
 
 9. **Comparador de paquetes** (2-3 lado a lado) — útil si el catálogo crece; prematuro con
    pocos paquetes.
-   - Estado: **pendiente**
+   - Estado: **hecho** (2026-08-24), con una salvedad de prueba explicada abajo. Mismo caso que
+     #8: el catálogo tiene 8 paquetes (cabrían todos en una sola página), pero el usuario pidió
+     implementarlo igual. Decisión tomada con el usuario sobre cómo se elige qué comparar:
+     **checkboxes + `localStorage` + barra flotante** (en vez de un formulario GET sin JS
+     limitado a una sola página de resultados) — esto es, con conocimiento explícito del
+     trade-off, la primera vez que el sitio público usa JavaScript con estado y `localStorage`
+     (antes `site.js` solo tenía menú móvil, scroll-reveal y service worker).
+     `Paquete::porSlugsPublicados()` (nuevo, no existía ningún método batch, solo el singular
+     `porSlugPublicado()`). Ruta `GET /comparar?paquetes=slug1,slug2,slug3`
+     (`PaqueteController::comparar()`), tope defensivo de 3 y descarte de slugs
+     inválidos/no publicados tanto en cliente como en servidor; con menos de 2 válidos muestra un
+     mensaje en vez de la tabla (sin error 500). Tabla comparativa con `incluye`/`no_incluye`
+     aplanados vía `strip_tags()` (son HTML libre en la ficha, un bloque de HTML variable
+     rompería la alineación de columnas).
+     **Bug real encontrado y corregido durante la prueba:** la vista `comparar.php` declaraba
+     una función PHP con nombre global para aplanar texto. `Controller::view()` usa `require`
+     (no `require_once`), y el servidor embebido de PHP no forkea por request — una segunda
+     visita a `/comparar` en el mismo proceso habría fallado con "Cannot redeclare function". Se
+     corrigió usando un closure local en vez de una función con nombre; confirmado con dos
+     requests consecutivas al mismo proceso que ya no rompe.
+     Probado por HTTP: filtro sin parámetros, con slugs válidos, con duplicados/espacios, con un
+     slug inexistente mezclado con uno válido, y con más de 3 slugs (recorta a 3) — todos sin
+     errores PHP. **Lo que no se pudo probar:** la interacción real en navegador (marcar
+     checkboxes, que la barra flotante aparezca/actualice, que la selección persista entre
+     páginas via `localStorage`, quitar chips) — no había herramienta de navegador/Playwright
+     disponible en el entorno para hacer clicks reales; la lógica de `initComparador()` se
+     revisó a mano con cuidado pero queda pendiente que el usuario la pruebe en su navegador.
 
 ## Orden de trabajo acordado
 
@@ -179,5 +287,15 @@ Se empieza por el grupo de **alto impacto**, en este orden (decidido 2026-08-24)
 
 Progreso y decisiones de cada una se documentan aquí a medida que se implementan.
 
-**Las 3 mejoras de alto impacto ya están implementadas** (2026-08-24). Sigue el grupo de
-medio impacto (#4-#7) cuando se retome este backlog.
+**Las 3 mejoras de alto impacto ya están implementadas** (2026-08-24), en el orden: #5
+Dashboard → #6 Exportar CSV → #4 Reseñas verificadas → #7 Newsletter (decidido con el usuario:
+Dashboard primero por ser autocontenido y sin tablas nuevas; el resto se abordó una mejora a la
+vez, probando y revisando cada una antes de seguir con la siguiente).
+
+**Las 4 mejoras de medio impacto ya están implementadas** (2026-08-24). El grupo de bajo
+impacto (#8 y #9) se implementó también por decisión explícita del usuario, pese a que ambos
+ítems ya estaban marcados como "no vale la pena todavía" con el catálogo actual (8 paquetes,
+todos en MXN) — orden: #9 Comparador de paquetes → #8 Multi-moneda real.
+
+**Las 9 mejoras del backlog están implementadas.** No queda ningún ítem pendiente en
+`MEJORAS.md`; próximos cambios funcionales requieren un análisis nuevo del estado del proyecto.

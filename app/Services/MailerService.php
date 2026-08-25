@@ -49,6 +49,33 @@ final class MailerService
         return $this->enviar($reserva['cliente_email'], $asunto, $html, 'recordatorio_viaje', 'reserva', (int) $reserva['id']);
     }
 
+    public function enviarSolicitudResena(array $reserva): bool
+    {
+        $asunto = 'Cuentanos que tal estuvo tu viaje: ' . $reserva['paquete_titulo'];
+        $urlResena = rtrim($_ENV['APP_URL'] ?? '', '/') . '/resena/' . $reserva['codigo_reserva'];
+        $html = $this->renderPlantilla('solicitud_resena', ['reserva' => $reserva, 'urlResena' => $urlResena]);
+
+        return $this->enviar($reserva['cliente_email'], $asunto, $html, 'solicitud_resena', 'reserva', (int) $reserva['id']);
+    }
+
+    public function enviarConfirmacionSuscripcion(array $suscriptor): bool
+    {
+        $asunto = 'Confirma tu suscripcion a Dream Go';
+        $urlConfirmar = rtrim($_ENV['APP_URL'] ?? '', '/') . '/suscribir/confirmar/' . $suscriptor['token'];
+        $html = $this->renderPlantilla('confirmacion_suscripcion', ['urlConfirmar' => $urlConfirmar]);
+
+        return $this->enviar($suscriptor['email'], $asunto, $html, 'confirmacion_suscripcion', 'suscriptor', (int) $suscriptor['id']);
+    }
+
+    public function enviarAvisoOferta(array $suscriptor, array $oferta): bool
+    {
+        $asunto = 'Nueva oferta: ' . $oferta['codigo'];
+        $urlBaja = rtrim($_ENV['APP_URL'] ?? '', '/') . '/suscribir/baja/' . $suscriptor['token'];
+        $html = $this->renderPlantilla('aviso_oferta', ['oferta' => $oferta, 'urlBaja' => $urlBaja]);
+
+        return $this->enviar($suscriptor['email'], $asunto, $html, 'aviso_oferta', 'suscriptor', (int) $suscriptor['id']);
+    }
+
     public function enviarReportePeriodico(string $destino, string $periodo, array $datos): bool
     {
         $asunto = 'Reporte ' . $periodo . ' de Dream Go';

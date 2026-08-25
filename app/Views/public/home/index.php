@@ -123,3 +123,15 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
     </section>
   <?php endif; ?>
 <?php endforeach; ?>
+
+<section class="seccion contenedor" id="newsletter">
+  <div class="seccion__encabezado">
+    <h2>No te pierdas nuestras ofertas</h2>
+    <p>Suscribete y enterate primero de descuentos y paquetes nuevos.</p>
+  </div>
+  <form method="post" action="/suscribir" style="max-width:420px;margin:0 auto;display:flex;gap:0.75rem;">
+    <?= \App\Helpers\Csrf::field() ?>
+    <input type="email" name="email" required placeholder="tu@correo.com" style="flex:1;">
+    <button type="submit" class="btn btn-primario">Suscribirme</button>
+  </form>
+</section>
