@@ -35,7 +35,7 @@
 
   function initComparador() {
     var KEY = 'dreamgo_comparar';
-    var MAX = 3;
+    var MAX = parseInt(document.body.getAttribute('data-comparar-max'), 10) || 3;
     var basePath = null;
 
     function leer() {

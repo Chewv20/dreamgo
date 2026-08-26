@@ -40,7 +40,7 @@
 
       (porDia[dia] || []).forEach(function (s) {
         var badge = document.createElement('a');
-        badge.href = '/admin/paquetes/' + '';
+        badge.href = '/admin/paquetes/' + s.paquete_id + '/salidas';
         badge.textContent = s.paquete_titulo + ' (' + s.cupo_disponible + '/' + s.cupo_maximo + ')';
         badge.style.cssText = 'display:block;background:#faf3ef;color:#a85f4d;border-radius:6px;padding:0.2rem 0.4rem;margin-top:0.25rem;text-decoration:none;font-size:0.72rem;';
         celda.appendChild(badge);

@@ -4,10 +4,26 @@ declare(strict_types=1);
 
 require dirname(__DIR__) . '/config/config.php';
 
+/**
+ * Auditoria 2026-08-25, hallazgo CFG-03: cron.log crecia sin limite (FILE_APPEND puro, sin
+ * ningun mecanismo de purga). Rotacion minima de una sola generacion -- no hace falta mas
+ * para el volumen de este sitio: si el archivo actual supera 5MB, se conserva como
+ * cron.log.1 (pisando la rotacion anterior) y se empieza uno nuevo.
+ */
+function cron_rotar_log_si_crecio(string $ruta, int $maxBytes = 5 * 1024 * 1024): void
+{
+    if (is_file($ruta) && filesize($ruta) >= $maxBytes) {
+        rename($ruta, $ruta . '.1');
+    }
+}
+
 function cron_log(string $script, string $mensaje): void
 {
+    $ruta = BASE_PATH . '/storage/logs/cron.log';
+    cron_rotar_log_si_crecio($ruta);
+
     $linea = sprintf('[%s] [%s] %s' . PHP_EOL, date('Y-m-d H:i:s'), $script, $mensaje);
-    file_put_contents(BASE_PATH . '/storage/logs/cron.log', $linea, FILE_APPEND);
+    file_put_contents($ruta, $linea, FILE_APPEND);
     echo $linea;
 }
 

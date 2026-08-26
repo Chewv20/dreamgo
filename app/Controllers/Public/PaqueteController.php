@@ -13,6 +13,11 @@ class PaqueteController extends Controller
 {
     private const POR_PAGINA = 12;
 
+    /** Fuente unica del limite del comparador: PHP lo aplica server-side, y se expone al JS
+     *  (site.js) via data-comparar-max en el <body> del layout publico para no repetir el
+     *  numero a mano en dos lenguajes. */
+    public const MAX_COMPARAR = 3;
+
     public function catalogo(): void
     {
         $categoriaSlug = (string) $this->request->query('categoria', '');
@@ -99,7 +104,7 @@ class PaqueteController extends Controller
             'trim',
             explode(',', (string) $this->request->query('paquetes', ''))
         ))));
-        $slugsPedidos = array_slice($slugsPedidos, 0, 3);
+        $slugsPedidos = array_slice($slugsPedidos, 0, self::MAX_COMPARAR);
 
         $encontrados = $slugsPedidos !== [] ? Paquete::porSlugsPublicados($slugsPedidos) : [];
         $porSlug = array_column($encontrados, null, 'slug');

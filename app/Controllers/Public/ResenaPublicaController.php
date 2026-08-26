@@ -2,10 +2,12 @@
 
 namespace App\Controllers\Public;
 
+use App\Helpers\RateLimiter;
 use App\Helpers\Validator;
 use App\Models\Resena;
 use App\Models\Reserva;
 use Core\Controller;
+use PDOException;
 
 class ResenaPublicaController extends Controller
 {
@@ -38,6 +40,12 @@ class ResenaPublicaController extends Controller
 
             return;
         }
+
+        $ip = $this->request->ip();
+        if (RateLimiter::demasiados('resena', $valores['email'], $ip)) {
+            $this->abort(429, 'Demasiados intentos con este correo. Espera unos minutos e intenta de nuevo.');
+        }
+        RateLimiter::registrar('resena', $valores['email'], $ip);
 
         $reserva = Reserva::porCodigoYEmail($codigo, $valores['email']);
 
@@ -72,14 +80,33 @@ class ResenaPublicaController extends Controller
             return;
         }
 
-        Resena::insert([
-            'reserva_id' => $reserva['id'],
-            'cliente_id' => $reserva['cliente_id'],
-            'paquete_id' => $reserva['paquete_id'],
-            'calificacion' => (int) $valores['calificacion'],
-            'comentario' => trim($valores['comentario']),
-            'estado' => 'pendiente',
-        ]);
+        try {
+            Resena::insert([
+                'reserva_id' => $reserva['id'],
+                'cliente_id' => $reserva['cliente_id'],
+                'paquete_id' => $reserva['paquete_id'],
+                'calificacion' => (int) $valores['calificacion'],
+                'comentario' => trim($valores['comentario']),
+                'estado' => 'pendiente',
+            ]);
+        } catch (PDOException $e) {
+            // Ventana TOCTOU entre existePara() y este INSERT (doble clic, doble pestana):
+            // uq_resena_reserva ya protege la integridad, esto solo evita que la segunda
+            // peticion reviente como 500 en vez de mostrar el mismo mensaje de "ya existe".
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+
+            $this->view('public/resena/formulario', [
+                'codigo' => $codigo,
+                'enviado' => true,
+                'yaExistia' => true,
+                'errores' => [],
+                'valores' => $valores,
+            ], ['title' => 'Deja tu resena | Dream Go Operadora Turistica']);
+
+            return;
+        }
 
         $this->view('public/resena/formulario', [
             'codigo' => $codigo,

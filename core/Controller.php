@@ -52,6 +52,7 @@ abstract class Controller
         $view = match ($status) {
             403 => 'errors/403',
             404 => 'errors/404',
+            429 => 'errors/429',
             default => 'errors/500',
         };
         $this->view($view, ['message' => $message]);

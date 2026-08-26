@@ -3,7 +3,7 @@
 // CACHE_VERSION: sube este numero cada vez que cambie SHELL_ASSETS o la logica
 // de este archivo, para que los navegadores con una version vieja instalada
 // descarten su cache automaticamente.
-const CACHE_VERSION = 'dreamgo-v4';
+const CACHE_VERSION = 'dreamgo-v5';
 const SHELL_CACHE = CACHE_VERSION + '-shell';
 const PAGES_CACHE = CACHE_VERSION + '-pages';
 
@@ -51,6 +51,14 @@ function esAssetEstatico(url) {
   return /\/assets\//.test(url.pathname) || url.pathname === BASE + 'manifest.json';
 }
 
+// Auditoria 2026-08-25, hallazgo CFG-01: el scope del service worker es todo el origen
+// (document root = public/), asi que sin esta exclusion el panel admin (datos de clientes,
+// reservas) quedaba cacheado en el navegador igual que cualquier pagina publica, recuperable
+// desde Cache Storage aunque la sesion ya haya cerrado.
+function esRutaAdmin(url) {
+  return url.pathname.indexOf(BASE + 'admin') === 0;
+}
+
 self.addEventListener('fetch', function (event) {
   const request = event.request;
   if (request.method !== 'GET') return;
@@ -68,6 +76,15 @@ self.addEventListener('fetch', function (event) {
         });
       })
     );
+    return;
+  }
+
+  if (esRutaAdmin(url)) {
+    // Network-only, sin cache.put: nunca debe quedar una copia de una pagina del panel en
+    // Cache Storage. Si la red falla, se deja fallar la peticion tal cual en vez de mostrar
+    // una version cacheada (no deberia haber ninguna) u offline.html (que confundiria mas
+    // que ayudar dentro del panel).
+    event.respondWith(fetch(request));
     return;
   }
 

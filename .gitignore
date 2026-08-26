@@ -10,3 +10,4 @@
 !/public/uploads/paquetes/thumbs/.gitkeep
 .DS_Store
 Thumbs.db
+/.phpunit.cache/

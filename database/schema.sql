@@ -63,6 +63,20 @@ CREATE INDEX idx_intentos_login_email ON intentos_login(email, creado_en);
 CREATE INDEX idx_intentos_login_ip ON intentos_login(ip, creado_en);
 
 -- ==========================================================
+-- INTENTOS DE ACCIONES PUBLICAS (rate limiting generico: reservar, suscribir,
+-- consultar reserva, dejar resena)
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS intentos_accion (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  accion VARCHAR(40) NOT NULL,
+  identificador VARCHAR(190) NULL,
+  ip VARCHAR(45) NOT NULL,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE INDEX idx_intentos_accion_identificador ON intentos_accion(accion, identificador, creado_en);
+CREATE INDEX idx_intentos_accion_ip ON intentos_accion(accion, ip, creado_en);
+
+-- ==========================================================
 -- CATEGORIAS / DESTINOS
 -- ==========================================================
 CREATE TABLE IF NOT EXISTS categorias (
@@ -267,7 +281,20 @@ CREATE TABLE IF NOT EXISTS suscriptores (
   confirmado_en DATETIME NULL,
   baja_en DATETIME NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-CREATE INDEX idx_suscriptores_estado ON suscriptores(estado);
+CREATE INDEX idx_suscriptores_estado_creado ON suscriptores(estado, creado_en);
+
+-- ==========================================================
+-- COLA DE ENVIO DE AVISOS DE OFERTA (ver cron/enviar_avisos_oferta.php)
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS ofertas_envio_cola (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  oferta_id INT UNSIGNED NOT NULL,
+  suscriptor_id INT UNSIGNED NOT NULL,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_ofertas_cola_oferta FOREIGN KEY (oferta_id) REFERENCES codigos_descuento(id) ON DELETE CASCADE,
+  CONSTRAINT fk_ofertas_cola_suscriptor FOREIGN KEY (suscriptor_id) REFERENCES suscriptores(id) ON DELETE CASCADE,
+  CONSTRAINT uq_ofertas_cola UNIQUE (oferta_id, suscriptor_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ==========================================================
 -- CONFIGURACION DEL SITIO (clave/valor)

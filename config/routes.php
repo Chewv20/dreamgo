@@ -91,8 +91,8 @@ $router->post('/admin/paquetes/{paqueteId}/salidas/{id}/editar', [SalidaAdminCon
 $router->get('/admin/reservas', [ReservaAdminController::class, 'index'], ['auth' => true, 'permiso' => 'reservas.ver']);
 $router->get('/admin/reservas/calendario', [ReservaAdminController::class, 'calendario'], ['auth' => true, 'permiso' => 'reservas.ver']);
 $router->get('/admin/reservas/calendario/datos', [ReservaAdminController::class, 'calendarioDatos'], ['auth' => true, 'permiso' => 'reservas.ver']);
-$router->get('/admin/reservas/crear', [ReservaAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'reservas.ver']);
-$router->post('/admin/reservas', [ReservaAdminController::class, 'crear'], ['auth' => true, 'permiso' => 'reservas.ver']);
+$router->get('/admin/reservas/crear', [ReservaAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'reservas.crear']);
+$router->post('/admin/reservas', [ReservaAdminController::class, 'crear'], ['auth' => true, 'permiso' => 'reservas.crear']);
 $router->get('/admin/reservas/exportar', [ReservaAdminController::class, 'exportarCsv'], ['auth' => true, 'permiso' => 'reservas.ver']);
 $router->get('/admin/reservas/{id}', [ReservaAdminController::class, 'detalle'], ['auth' => true, 'permiso' => 'reservas.ver']);
 $router->post('/admin/reservas/{id}/confirmar', [ReservaAdminController::class, 'confirmar'], ['auth' => true, 'permiso' => 'reservas.confirmar']);

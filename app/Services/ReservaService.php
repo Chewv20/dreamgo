@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Cliente;
 use App\Models\ConfiguracionSitio;
+use App\Models\Reserva;
 use Core\Database;
 use PDO;
 use RuntimeException;
@@ -16,6 +17,16 @@ use RuntimeException;
  */
 final class ReservaService
 {
+    /**
+     * Tope de personas por reserva. No es un parametro de negocio configurable (no va en
+     * configuracion_sitio): es una cota de sanidad para que un num_personas fuera de rango
+     * (negativo, cero, o absurdamente grande) nunca llegue a tocar cupo_disponible ni el
+     * INSERT de reservas. Valida aca (no solo en los controladores) porque este es el unico
+     * punto de la app que descuenta cupo, y cualquier llamador presente o futuro debe quedar
+     * cubierto sin depender de que cada controlador repita la misma validacion.
+     */
+    private const MAX_PERSONAS_POR_RESERVA = 30;
+
     public function __construct(private readonly PDO $db)
     {
     }
@@ -26,6 +37,12 @@ final class ReservaService
      */
     public function crear(array $datos): int
     {
+        if ($datos['num_personas'] < 1 || $datos['num_personas'] > self::MAX_PERSONAS_POR_RESERVA) {
+            throw new RuntimeException(
+                'El numero de personas debe estar entre 1 y ' . self::MAX_PERSONAS_POR_RESERVA . '.'
+            );
+        }
+
         return Database::transaction($this->db, function () use ($datos): int {
             $stmtSalida = $this->db->prepare('SELECT * FROM salidas WHERE id = :id FOR UPDATE');
             $stmtSalida->execute(['id' => $datos['salida_id']]);
@@ -90,6 +107,26 @@ final class ReservaService
         });
     }
 
+    /**
+     * Crea la reserva y dispara el correo de "reserva pendiente" si se creo bien. Comparte
+     * esta orquestacion entre ReservaPublicaController y ReservaAdminController (antes
+     * duplicada casi linea por linea en los dos -- auditoria 2026-08-25, hallazgo CAL-02).
+     * Lo unico que sigue siendo distinto entre ambos es COMO le muestran el error al usuario
+     * si crear() lanza (uno re-renderiza el formulario, el otro redirige con flash), asi que
+     * eso se queda en cada controlador en vez de forzarlo aca.
+     *
+     * @param array{salida_id:int, nombre:string, email:string, telefono:string, num_personas:int, codigo_descuento?:?string} $datos
+     * @return array datos completos de la reserva recien creada (Reserva::conDetalle)
+     */
+    public function crearYNotificar(array $datos): array
+    {
+        $reservaId = $this->crear($datos);
+        $reserva = Reserva::conDetalle($reservaId);
+        (new MailerService($this->db))->enviarReservaPendiente($reserva);
+
+        return $reserva;
+    }
+
     public function confirmar(int $reservaId): bool
     {
         $stmt = $this->db->prepare(
@@ -123,15 +160,32 @@ final class ReservaService
     }
 
     /**
+     * Tolerancia en la comparacion del monto pagado contra el anticipo esperado, para
+     * absorber diferencias de redondeo de centavos entre lo que esta app calcula y lo que
+     * Mercado Pago reporta de vuelta.
+     */
+    private const TOLERANCIA_MONTO_PAGO = 0.01;
+
+    /**
      * Registra un pago aprobado (Mercado Pago u otro medio futuro) y confirma la reserva si
-     * seguia pendiente. Devuelve true solo cuando ESTA llamada fue la que confirmo, para que
-     * el webhook que la invoca sepa si debe mandar el correo de confirmacion (evita mandarlo
-     * dos veces si Mercado Pago reintenta la notificacion del mismo pago).
+     * seguia pendiente y el monto pagado alcanza el anticipo esperado. Devuelve true solo
+     * cuando ESTA llamada fue la que confirmo, para que el webhook que la invoca sepa si debe
+     * mandar el correo de confirmacion (evita mandarlo dos veces si Mercado Pago reintenta la
+     * notificacion del mismo pago).
+     *
+     * Auditoria 2026-08-25, hallazgo SEG-02: antes se confirmaba con lo que fuera que
+     * reportara Mercado Pago, sin comparar contra el anticipo real de la reserva. Hoy no es
+     * explotable (external_reference y el monto de la preferencia se generan enteramente
+     * server-side), pero es la unica capa que detectaria un monto pagado menor al esperado si
+     * en el futuro se agrega otro medio de pago o se permite ajustar el monto de la
+     * preferencia. Si no alcanza, la reserva queda "pendiente" (no hay un estado intermedio
+     * en el esquema) con el pago igual registrado, para que quede visible en el detalle
+     * admin y quede logueado para revision manual.
      */
     public function registrarPagoAprobado(int $reservaId, string $referenciaPago, float $montoPagado): bool
     {
         return Database::transaction($this->db, function () use ($reservaId, $referenciaPago, $montoPagado): bool {
-            $stmt = $this->db->prepare('SELECT estado FROM reservas WHERE id = :id FOR UPDATE');
+            $stmt = $this->db->prepare('SELECT estado, precio_total FROM reservas WHERE id = :id FOR UPDATE');
             $stmt->execute(['id' => $reservaId]);
             $reserva = $stmt->fetch();
 
@@ -139,12 +193,23 @@ final class ReservaService
                 return false;
             }
 
+            $porcentajeAnticipo = max(1, min(100, (int) ConfiguracionSitio::get('porcentaje_anticipo_reserva', 100)));
+            $anticipoEsperado = round(((float) $reserva['precio_total']) * $porcentajeAnticipo / 100, 2);
+
             $fueConfirmadaAhora = false;
             if ($reserva['estado'] === 'pendiente') {
-                $this->db->prepare(
-                    'UPDATE reservas SET estado = "confirmada", confirmada_en = NOW() WHERE id = :id'
-                )->execute(['id' => $reservaId]);
-                $fueConfirmadaAhora = true;
+                if ($montoPagado + self::TOLERANCIA_MONTO_PAGO >= $anticipoEsperado) {
+                    $this->db->prepare(
+                        'UPDATE reservas SET estado = "confirmada", confirmada_en = NOW() WHERE id = :id'
+                    )->execute(['id' => $reservaId]);
+                    $fueConfirmadaAhora = true;
+                } else {
+                    error_log(
+                        "[ReservaService] Pago {$referenciaPago} de la reserva {$reservaId} por "
+                        . "{$montoPagado} no alcanza el anticipo esperado ({$anticipoEsperado}). "
+                        . 'La reserva queda pendiente para revision manual.'
+                    );
+                }
             }
 
             $this->db->prepare(

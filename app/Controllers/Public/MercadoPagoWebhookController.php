@@ -47,8 +47,17 @@ class MercadoPagoWebhookController extends Controller
                 error_log('[MercadoPagoWebhook] Firma invalida para el pago ' . $paymentId);
                 $this->json(['error' => 'Firma invalida'], 401);
             }
+        } elseif (($_ENV['APP_ENV'] ?? 'production') !== 'local') {
+            // Auditoria 2026-08-25, hallazgo SEG-03: sin secreto configurado, cualquiera podia
+            // invocar este endpoint con un data.id arbitrario y forzar el momento de la
+            // confirmacion (la re-consulta a la API real de MP evita falsificar el pago en si,
+            // pero no evita el abuso del endpoint). Fuera de 'local' se rechaza de plano en vez
+            // de seguir sin verificar; en 'local' se permite para poder probar el webhook sin
+            // configurar MP_WEBHOOK_SECRET (ver .env.example).
+            error_log('[MercadoPagoWebhook] MP_WEBHOOK_SECRET no configurado: notificacion rechazada.');
+            $this->json(['error' => 'Webhook no configurado'], 401);
         } else {
-            error_log('[MercadoPagoWebhook] MP_WEBHOOK_SECRET no configurado: la notificacion no se esta verificando.');
+            error_log('[MercadoPagoWebhook] MP_WEBHOOK_SECRET no configurado: la notificacion no se esta verificando (APP_ENV=local).');
         }
 
         try {

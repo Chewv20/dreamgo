@@ -94,9 +94,13 @@ class Paquete extends Model
         }
 
         if (!empty($filtros['q'])) {
-            $clausula .= ' AND (p.titulo LIKE :q_titulo OR p.resumen LIKE :q_resumen)';
-            $params['q_titulo'] = '%' . $filtros['q'] . '%';
-            $params['q_resumen'] = '%' . $filtros['q'] . '%';
+            // Escapamos los comodines de LIKE del termino del usuario (no es una cuestion de
+            // inyeccion, el valor va parametrizado igual): sin esto, buscar "10% descuento" o
+            // "todo_incluido" da coincidencias que no tienen que ver con el % o el _ literal.
+            $q = str_replace(['%', '_'], ['\%', '\_'], $filtros['q']);
+            $clausula .= " AND (p.titulo LIKE :q_titulo ESCAPE '\\\\' OR p.resumen LIKE :q_resumen ESCAPE '\\\\')";
+            $params['q_titulo'] = '%' . $q . '%';
+            $params['q_resumen'] = '%' . $q . '%';
         }
 
         if (isset($filtros['precio_min']) && $filtros['precio_min'] !== '' && $filtros['precio_min'] !== null) {

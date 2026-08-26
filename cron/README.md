@@ -1,7 +1,8 @@
 # Tareas programadas (cron) — Dream Go
 
-Los 7 scripts de esta carpeta se ejecutan por PHP CLI y son independientes del servidor web.
-Todos registran su actividad en `storage/logs/cron.log`.
+Los 8 scripts de esta carpeta se ejecutan por PHP CLI y son independientes del servidor web.
+Todos registran su actividad en `storage/logs/cron.log` (con rotacion de una generacion a los
+5MB, ver `cron/_bootstrap.php`).
 
 ## Prueba manual en local (XAMPP / Windows)
 
@@ -15,6 +16,7 @@ php cron/solicitar_resena.php
 php cron/reporte_periodico.php --periodo=diario
 php cron/backup_bd.php
 php cron/limpiar_intentos_login.php
+php cron/enviar_avisos_oferta.php
 ```
 
 ## Configuracion en Hostinger (hPanel > Avanzado > Cron Jobs)
@@ -37,6 +39,8 @@ La ruta base normalmente es `/home/USUARIO/domains/dreamgooperadoraturistica.com
 30 2 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/backup_bd.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
 
 0 4 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/limpiar_intentos_login.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+
+*/5 * * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/enviar_avisos_oferta.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
 ```
 
 ## Que hace cada script
@@ -49,6 +53,7 @@ La ruta base normalmente es `/home/USUARIO/domains/dreamgooperadoraturistica.com
 | `solicitar_resena.php` | diario | Envia un correo pidiendo una resena a clientes con reserva `confirmada` cuyo viaje termino hace N dias (configurable en `/admin/configuracion`). El link lleva a `/resena/{codigo}`. Evita duplicados revisando `log_correos_enviados` y la tabla `resenas`. |
 | `reporte_periodico.php` | diario y/o semanal | Envia un resumen de cotizaciones y reservas nuevas al correo del equipo. Usa `--periodo=diario` o `--periodo=semanal`. |
 | `backup_bd.php` | diario (madrugada) | Genera un dump comprimido (`.sql.gz`) de la base de datos en `storage/backups/`, con `mysqldump` si esta disponible o un respaldo 100% PHP como respaldo. Conserva los ultimos 14 dias. |
-| `limpiar_intentos_login.php` | diario | Purga de `intentos_login` (rate limiting del login admin, ver `core/Auth.php`) los registros con mas de 30 dias. |
+| `limpiar_intentos_login.php` | diario | Purga los registros con mas de 30 dias de `intentos_login` (rate limiting del login admin, ver `core/Auth.php`) y de `intentos_accion` (rate limiting de `/reservar`, `/suscribir`, `/mi-reserva`, `/resena`, ver `App\Helpers\RateLimiter`). |
+| `enviar_avisos_oferta.php` | cada 5 min | Procesa en lotes de 50 la cola `ofertas_envio_cola` (que llena `/admin/ofertas/{id}/enviar-suscriptores`) y manda el correo de aviso de oferta a cada suscriptor confirmado. |
 
 `storage/` nunca es accesible por URL (queda fuera de `public/`), asi que los backups y logs no estan expuestos publicamente.

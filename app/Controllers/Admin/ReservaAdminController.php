@@ -9,6 +9,7 @@ use App\Models\Salida;
 use App\Services\MailerService;
 use App\Services\ReservaService;
 use Core\Response;
+use PDOException;
 use RuntimeException;
 
 class ReservaAdminController extends AdminController
@@ -97,14 +98,15 @@ class ReservaAdminController extends AdminController
             ->requerido('nombre', 'El nombre')
             ->requerido('email', 'El correo')->email('email', 'El correo')
             ->requerido('telefono', 'El telefono')
-            ->requerido('num_personas', 'El numero de personas')->entero('num_personas', 'El numero de personas');
+            ->requerido('num_personas', 'El numero de personas')->entero('num_personas', 'El numero de personas')
+            ->enRango('num_personas', 1, 30, 'El numero de personas');
 
         $this->redirigirSiInvalido($validator, '/admin/reservas/crear?salida_id=' . (int) $datos['salida_id']);
 
         $service = new ReservaService($this->db);
 
         try {
-            $reservaId = $service->crear([
+            $reserva = $service->crearYNotificar([
                 'salida_id' => (int) $datos['salida_id'],
                 'nombre' => $datos['nombre'],
                 'email' => $datos['email'],
@@ -112,16 +114,17 @@ class ReservaAdminController extends AdminController
                 'num_personas' => (int) $datos['num_personas'],
                 'codigo_descuento' => $datos['codigo_descuento'] ?: null,
             ]);
+        } catch (PDOException $e) {
+            error_log('[ReservaAdminController] Error de base de datos al crear reserva: ' . $e->getMessage());
+            Flash::set('error', 'Ocurrio un error al procesar la reserva. Intenta de nuevo.');
+            $this->redirect('/admin/reservas/crear?salida_id=' . (int) $datos['salida_id']);
         } catch (RuntimeException $e) {
             Flash::set('error', $e->getMessage());
             $this->redirect('/admin/reservas/crear?salida_id=' . (int) $datos['salida_id']);
         }
 
-        $reserva = Reserva::conDetalle($reservaId);
-        (new MailerService($this->db))->enviarReservaPendiente($reserva);
-
         Flash::set('exito', 'Reserva ' . $reserva['codigo_reserva'] . ' creada. El cupo ya quedo apartado.');
-        $this->redirect('/admin/reservas/' . $reservaId);
+        $this->redirect('/admin/reservas/' . $reserva['id']);
     }
 
     public function confirmar(int $id): void

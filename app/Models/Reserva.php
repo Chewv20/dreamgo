@@ -93,7 +93,7 @@ class Reserva extends Model
     public static function calendarioMes(int $anio, int $mes): array
     {
         $stmt = self::db()->prepare(
-            'SELECT s.id AS salida_id, s.fecha_salida, s.cupo_maximo, s.cupo_disponible, s.estado AS salida_estado,
+            'SELECT s.id AS salida_id, s.paquete_id, s.fecha_salida, s.cupo_maximo, s.cupo_disponible, s.estado AS salida_estado,
                     p.titulo AS paquete_titulo,
                     SUM(CASE WHEN r.estado = "pendiente" THEN 1 ELSE 0 END) AS pendientes,
                     SUM(CASE WHEN r.estado = "confirmada" THEN 1 ELSE 0 END) AS confirmadas

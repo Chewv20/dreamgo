@@ -86,7 +86,7 @@ Activa el certificado SSL gratuito (Let's Encrypt) desde hPanel → **SSL**. Una
 
 ## 8. Cron Jobs
 
-Sigue `cron/README.md` para las 7 tareas programadas. Ajusta las rutas de ejemplo a la ruta real de tu
+Sigue `cron/README.md` para las 8 tareas programadas. Ajusta las rutas de ejemplo a la ruta real de tu
 cuenta de Hostinger (hPanel te la muestra al crear el primer cron job).
 
 ## 9. Primer acceso al panel

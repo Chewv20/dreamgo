@@ -5,9 +5,8 @@ namespace App\Controllers\Admin;
 use App\Helpers\Flash;
 use App\Helpers\Validator;
 use App\Models\CodigoDescuento;
+use App\Models\OfertaEnvioCola;
 use App\Models\Paquete;
-use App\Models\Suscriptor;
-use App\Services\MailerService;
 
 class OfertaAdminController extends AdminController
 {
@@ -91,23 +90,27 @@ class OfertaAdminController extends AdminController
         $this->redirect('/admin/ofertas');
     }
 
+    /**
+     * Auditoria 2026-08-25, hallazgo CFG-02: antes esto mandaba el correo a cada suscriptor
+     * uno por uno dentro de esta misma request admin (riesgo real de agotar
+     * max_execution_time a mitad del envio con una lista mediana, sin que el admin se
+     * enterara de que se corto). Ahora solo encola (INSERT rapido); cron/enviar_avisos_oferta.php
+     * procesa la cola en lotes.
+     */
     public function enviarSuscriptores(int $id): void
     {
         $this->verifyCsrf();
 
-        $oferta = $this->encontrarO404(CodigoDescuento::class, $id);
+        $this->encontrarO404(CodigoDescuento::class, $id);
 
-        $suscriptores = Suscriptor::confirmados();
-        $mailer = new MailerService($this->db);
-        $enviados = 0;
+        $encolados = OfertaEnvioCola::encolarParaOferta($id);
 
-        foreach ($suscriptores as $suscriptor) {
-            if ($mailer->enviarAvisoOferta($suscriptor, $oferta)) {
-                $enviados++;
-            }
-        }
-
-        Flash::set('exito', "Aviso enviado a {$enviados} de " . count($suscriptores) . ' suscriptor(es).');
+        Flash::set(
+            'exito',
+            $encolados > 0
+                ? "Se encolo el envio a {$encolados} suscriptor(es); se enviaran en los proximos minutos."
+                : 'No hay suscriptores nuevos para avisar (ya se les habia encolado este aviso, o no hay suscriptores confirmados).'
+        );
         $this->redirect('/admin/ofertas');
     }
 

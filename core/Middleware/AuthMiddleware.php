@@ -13,6 +13,11 @@ final class AuthMiddleware
 
     public static function handle(): void
     {
+        // Auditoria 2026-08-25, hallazgo CFG-01: capa extra junto con la exclusion de /admin/
+        // en public/sw.js -- evita que el propio navegador (bfcache, "guardar pagina", algun
+        // otro service worker) conserve una copia de una pagina del panel despues del logout.
+        header('Cache-Control: no-store, private');
+
         if (!Auth::check()) {
             Response::redirect('/admin/login');
         }

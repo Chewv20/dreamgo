@@ -350,3 +350,221 @@ te la pasen por un canal aparte.
 No queda nada pendiente de la lista original de este archivo. Detalle completo de cada
 hallazgo (archivo:línea, severidad, escenario de explotación) en el informe interactivo
 enlazado arriba.
+
+## Auditoría 2026-08-25 — sitio completo (seguimiento)
+
+Segunda auditoría completa, sobre el estado del repositorio tras `01ee0b0` y `f48d71d`
+(pago en línea con Mercado Pago, búsqueda/comparador de paquetes, reserva y consulta
+pública, reseñas, suscripción a newsletter). Cuatro revisiones independientes en paralelo
+(seguridad, base de datos, configuración/infraestructura, calidad de código), contrastadas
+contra la auditoría del 23-08 — nada de lo corregido ahí se reabrió con el código nuevo.
+
+**Informe interactivo:** https://claude.ai/code/artifact/e8e17720-98d3-4852-b673-665e0b4c328c
+
+21 hallazgos: 2 Alto, 10 Medio, 7 Bajo, 2 informativo. Se corrigieron los 2 Alto y, a
+continuación en la misma sesión, todo el resto salvo un hallazgo Medio (BD-01) que no se
+tocó a propósito por una regla explícita del propio proyecto. Detalle completo de cada
+hallazgo (archivo:línea, escenario de explotación) en el informe interactivo enlazado
+arriba; acá el resumen de qué se hizo y cómo se probó.
+
+### Corregido
+
+1. **DoS de inventario + validación de `num_personas` insuficiente** —
+   `Validator::entero()` no exigía rango, así que `ReservaPublicaController::crear()`
+   aceptaba cualquier entero. Con un valor grande, una sola petición anónima a `/reservar`
+   podía vaciar el cupo real de cualquier salida (bloqueándola 48h, sin CAPTCHA ni límite de
+   tasa). Con un valor negativo, el `UPDATE cupo_disponible = cupo_disponible - :personas`
+   se invertía, y el único freno era el `CHECK` de precio de la BD (auditoría anterior,
+   punto 15) — cuyo `SQLSTATE` se mostraba crudo al visitante porque `PDOException` extiende
+   `RuntimeException` en PHP 8 y caía en el mismo `catch`.
+
+   Arreglado en dos capas: `ReservaService::crear()` ahora rechaza `num_personas` fuera de
+   `[1, 30]` *antes* de tocar la base de datos (`self::MAX_PERSONAS_POR_RESERVA`, defensa en
+   profundidad — cubre a cualquier llamador presente o futuro, no solo al controlador
+   público), y `enRango('num_personas', 1, 30, ...)` se agregó tanto en
+   `ReservaPublicaController` como en `ReservaAdminController` para dar el error al usuario
+   sin llegar al servicio. Se agregó además un `catch (PDOException)` separado del
+   `catch (RuntimeException)` en ambos controladores (`PDOException` va primero, por la
+   jerarquía de PHP 8) que loggea el detalle real y muestra un mensaje genérico en vez del
+   `SQLSTATE` crudo.
+
+   Probado en vivo con `php -S localhost:8090 -t public` + MariaDB real, contra la salida
+   `id=9` (cupo inicial 20): `num_personas=-5` → rechazado con "debe estar entre 1 y 30",
+   cupo sin cambios. `num_personas=999` → mismo rechazo, cupo sin cambios.
+   `num_personas=2` → reserva `DG-2026-000010` creada correctamente, cupo bajó a 18. Datos
+   de prueba (reserva, cliente, cupo) limpiados después de verificar.
+
+2. **Cero tests automatizados** (142 archivos PHP, ~8300 líneas) — se instaló PHPUnit 10.5
+   como dependencia de desarrollo (`composer require --dev`, ya excluida de producción por
+   el `--no-dev` que documenta `DEPLOY.md`) y se escribieron 21 tests (`composer test`,
+   todos en verde):
+   - `tests/Unit/Services/MercadoPagoServiceTest.php` — 10 casos sobre
+     `verificarFirmaWebhook()`, la única barrera contra webhooks de pago falsificados: firma
+     válida, `data.id`/`request-id` alterados, secreto incorrecto, mayúsculas/minúsculas,
+     headers malformados o incompletos, replay con `ts` alterado.
+   - `tests/Unit/Services/ReservaServiceTest.php` — el guard de `num_personas` del punto 1,
+     con un PDO simulado que falla el test si el servicio llega a invocar `prepare()`/
+     `query()` (confirma que el guard corta *antes* de tocar la base de datos).
+   - `tests/Unit/Helpers/ValidatorTest.php` — 9 casos sobre `Validator`, incluyendo
+     `enRango()` y el comportamiento de `entero()` (documentado a propósito: acepta
+     negativos, por eso hacía falta `enRango()` además).
+
+   Cobertura inicial, no exhaustiva — se priorizó la lógica pura de mayor riesgo (firma de
+   pagos, validación de reservas) sobre cobertura total. Sin cobertura todavía:
+   `Database::transaction()` y los flujos completos de `ReservaService` contra una base de
+   datos real (necesitan fixture/BD de pruebas, fuera de este alcance). Documentado en una
+   sección nueva de `README.md`.
+
+3. **Permiso `reservas.ver` alcanzaba para crear reservas manuales** (SEG-06) — faltaba un
+   permiso `reservas.crear` separado (el esquema ya distinguía `.ver`/`.confirmar`/
+   `.cancelar`). Agregado a `database/seeds/seed_demo.sql` (instalación nueva) y a la
+   migración `0012_permiso_reservas_crear.sql` (BD ya existente, `INSERT IGNORE` +
+   asignado al rol Administrador). `config/routes.php` ahora exige `reservas.crear` en
+   `GET/POST /admin/reservas/crear`. Migración aplicada y verificada contra la BD local
+   (`rol_permiso` correcto para el rol 1).
+
+4. **Monto/moneda del pago de Mercado Pago no se validaba contra el anticipo esperado**
+   (SEG-02) — `ReservaService::registrarPagoAprobado()` ahora calcula el anticipo esperado
+   server-side (`precio_total × porcentaje_anticipo_reserva`, con 1 centavo de tolerancia
+   por redondeo) y solo confirma la reserva si el monto pagado lo alcanza; si no, la reserva
+   queda `pendiente` (no hay estado intermedio en el esquema) con el pago igual registrado y
+   un `error_log` para revisión manual. Probado en vivo con una reserva real
+   (`precio_total=1000`, anticipo 30% = 300): pago de 200 → no confirma, queda pendiente,
+   log de advertencia; pago de 300 → confirma. Reserva de prueba limpiada después.
+
+5. **Webhook de Mercado Pago sin `MP_WEBHOOK_SECRET` aceptaba cualquier origen** (SEG-03) —
+   `MercadoPagoWebhookController` ahora rechaza (401) si el secreto no está configurado,
+   *salvo* en `APP_ENV=local` (para poder probar el webhook sin configurarlo en desarrollo,
+   como ya documentaba `.env.example`). Revisado por lectura de código + lint; no se pudo
+   probar en vivo el camino de rechazo real sin mockear la API de Mercado Pago, fuera de
+   alcance razonable para esta sesión.
+
+6. **Sin límite de intentos en `/reservar`, `/mi-reserva`, `/resena/{codigo}` y
+   `/suscribir`** (SEG-04, SEG-05, SEG-07) — se generalizó el mismo patrón de ventana móvil
+   que ya usaba el login (`intentos_login` / `Core\Auth::bloqueado()`) a cualquier acción
+   pública sensible: tabla nueva `intentos_accion` (migración `0013`) + modelo
+   `App\Models\IntentoAccion` + helper `App\Helpers\RateLimiter` con límites por acción
+   (`reservar`: 20/IP/30min sin límite por email — el email lo pone el propio atacante;
+   `reserva_consulta` y `resena`: 8 por email + 30 por IP/15min; `suscribir`: 15/IP/30min).
+   Nuevo código de estado 429 en `Core\Controller::abort()` + vista `errors/429.php`.
+
+   Probado en vivo contra el servidor real: 9 intentos seguidos a `POST /mi-reserva` con el
+   mismo email → los primeros 8 pasan, el 9º da 429 con el mensaje esperado (verificado
+   contra `intentos_accion`: exactamente 8 filas). 21 intentos a `POST /reservar` con
+   `num_personas` inválido (para no tocar cupo real) desde la misma IP → los primeros 20
+   pasan (validación normal), el 21º da 429; `cupo_disponible` de la salida de prueba sin
+   cambios en ningún momento. Filas de prueba limpiadas de `intentos_accion` después.
+
+7. **El service worker cacheaba páginas de `/admin/` sin exclusión** (CFG-01) — `public/sw.js`
+   (bump a `dreamgo-v5`, fuerza que los navegadores con una versión vieja instalada
+   descarten esa cache) ahora sirve cualquier ruta bajo `/admin/` con `fetch(request)`
+   directo (network-only, sin `cache.put`). Capa extra en
+   `Core\Middleware\AuthMiddleware::handle()`: manda `Cache-Control: no-store, private` en
+   toda respuesta autenticada. Probado en vivo con `curl` (GET real, no HEAD): `/admin/reservas`
+   sin sesión responde 302 con `Cache-Control: no-store, private` en las cabeceras.
+
+8. **Envío de newsletter 100% síncrono dentro de una request admin** (CFG-02) —
+   `OfertaAdminController::enviarSuscriptores()` ya no manda correos en el hilo de la
+   request: solo encola (`ofertas_envio_cola`, migración `0014`, `UNIQUE(oferta_id,
+   suscriptor_id)` para no reencolar ni duplicar). Cron nuevo
+   `cron/enviar_avisos_oferta.php` (sugerido cada 5 min en `cron/README.md` y `DEPLOY.md`,
+   ahora 8 tareas en vez de 7) procesa la cola en lotes de 50 y saca cada fila
+   independientemente de si el envío tuvo éxito (un problema de SMTP persistente no debe
+   dejar la cola creciendo para siempre).
+
+   Probado en vivo: se creó una oferta y un suscriptor confirmado de prueba,
+   `OfertaEnvioCola::encolarParaOferta()` encoló 1 fila la primera vez y 0 la segunda
+   (dedup funcionando), y `php cron/enviar_avisos_oferta.php` la procesó (falló el envío
+   real por no haber SMTP configurado en local, igual que el resto de los crons de correo
+   probados en la auditoría anterior — quedó registrado en `log_correos_enviados` como
+   fallido) y la sacó de la cola. Datos de prueba limpiados después.
+
+9. **Logs sin rotación ni purga** (CFG-03) — rotación de una sola generación (a los 5MB, el
+   archivo actual pasa a `.1` y se pisa la rotación anterior) agregada en
+   `cron_log()` (`cron/_bootstrap.php`) para `cron.log`, y en `config/config.php` para
+   `php-error.log` (se revisa en cada request fuera de `local`, un `stat()` es barato).
+   Además, `cron/limpiar_intentos_login.php` ahora también purga `intentos_accion` (mismo
+   tipo de tabla de solo-crecimiento que `intentos_login`, no ameritaba un cron aparte).
+   Probado en vivo: se generó un `cron.log` de más de 5MB a mano y se corrió el cron — el
+   archivo viejo quedó como `cron.log.1` (5MB) y el nuevo arrancó limpio con la línea del
+   propio cron. Archivos de prueba limpiados después.
+
+10. **Sin cache headers ni compresión para assets estáticos** (CFG-04) — bloques
+    `mod_expires`/`mod_headers`/`mod_deflate` en `public/.htaccess`: CSS/JS con cache corto
+    (1 día, sin `immutable`) porque `site.css`/`site.js` se referencian por nombre fijo sin
+    versión ni hash — un cache largo dejaría a los visitantes con la versión vieja hasta que
+    expirara sola en cada deploy; fuentes e imágenes sí llevan cache largo (1 año), son
+    estables entre deploys. **No verificado en vivo**: el flujo local de este proyecto usa
+    `php -S -t public` (ver README), que no procesa `.htaccess` — son directivas de Apache
+    puro, solo se pueden confirmar en un entorno con Apache real (Hostinger en producción).
+    Revisado por lectura, sintaxis estándar.
+
+11. **Doble envío concurrente en reseñas/suscripciones daba un 500 genérico** (BD-02) —
+    mismo patrón que ya se había corregido para `Cliente::encontrarOCrear()` en la auditoría
+    anterior, replicado ahora en `ResenaPublicaController::guardar()` y
+    `SuscripcionController::suscribir()`: `catch (PDOException)` con `getCode() === '23000'`
+    que recupera la fila que ganó la carrera (en suscripciones) o muestra el mismo mensaje
+    de "ya existe" (en reseñas) en vez de dejar subir la excepción como 500.
+
+12. **Índice ausente `(estado, creado_en)` en `suscriptores`** (BD-03) — migración `0011`:
+    se borró el índice viejo (solo `estado`, redundante frente al compuesto) y se creó
+    `idx_suscriptores_estado_creado`. Aplicada y confirmada con `SHOW INDEX` contra la BD
+    local.
+
+13. **Duplicación sustancial entre `ReservaAdminController::crear()` y
+    `ReservaPublicaController::crear()`** (CAL-02) — extraído `ReservaService::
+    crearYNotificar()`: crea la reserva, trae el detalle y manda el correo de "reserva
+    pendiente", los tres pasos que antes estaban repetidos línea por línea en ambos
+    controladores. Lo que sigue siendo distinto entre ambos (cómo le muestran el error al
+    usuario si falla: re-renderizar el formulario vs. redirigir con flash) se quedó en cada
+    controlador a propósito — mismo criterio que ya usó este archivo en el punto 12 de la
+    auditoría anterior para no forzar una abstracción sobre lógica que en realidad difiere.
+
+    Probado en vivo end-to-end en ambos flujos contra la salida `id=9` (cupo 20): reserva
+    pública con `num_personas=2` → cupo bajó a 18, reserva creada, sin pago en línea
+    configurado localmente se comportó como antes. Reserva admin (con un usuario de prueba
+    y su sesión real) con `num_personas=1` → cupo bajó a 19, reserva `DG-2026-000012`
+    creada, redirige a su detalle. Ambas reservas, cliente y usuario de prueba, y el cupo,
+    limpiados después.
+
+14. **Enlace roto en el calendario admin** (CAL-03) — `Reserva::calendarioMes()` ahora
+    selecciona `s.paquete_id`; `admin-calendario.js` arma el href real
+    (`/admin/paquetes/{id}/salidas`) en vez de concatenar con un string vacío.
+
+15. **Magic number del límite del comparador (3) duplicado en JS y PHP** (CAL-04) — fuente
+    única en `PaqueteController::MAX_COMPARAR`, expuesta al JS vía
+    `data-comparar-max="…"` en el `<body>` del layout público (mismo patrón `data-*` que ya
+    usa el resto del sitio, ver auditoría anterior punto 7) en vez de repetir el número a
+    mano en `site.js`.
+
+16. **Búsqueda de texto libre no escapaba comodines de `LIKE`** (CAL-05) — `Paquete::
+    clausulaFiltrosPublicados()` ahora escapa `%`/`_` del término de búsqueda antes de
+    envolverlo, con `ESCAPE '\\'` explícito en el `LIKE`.
+
+17. **`config/database.php` caía a credenciales de desarrollo si faltaban variables de
+    entorno** (CAL-06, informativo) — fuera de `APP_ENV=local`, ahora lanza una
+    `RuntimeException` clara si falta `DB_NAME` o `DB_USER` en vez de conectar en silencio
+    con los valores por defecto de desarrollo (`host`/`port`/`password` sí mantienen
+    default, son razonables aunque falten). Probado: con `.env` local normal
+    (`APP_ENV=local`) sigue arrancando igual que antes.
+
+### No corregido (a propósito)
+
+- **Migraciones 0006 y 0009 no son re-ejecutables tras un fallo parcial** (BD-01) — mismo
+  tipo de trampa que ya se había corregido para la 0002 en la auditoría anterior, pero
+  corregirla ahora requeriría editar esos dos archivos, y `database/migrations/README.md`
+  prohíbe explícitamente editar una migración ya commiteada/aplicada ("agrega una nueva,
+  igual que con cualquier sistema de migraciones"). En vez de romper esa regla, se agregó
+  la recomendación al propio `README.md` de migraciones para que ninguna migración nueva
+  repita el problema (`CREATE TABLE IF NOT EXISTS` + `INSERT IGNORE` en permisos).
+
+### Confirmado sin cambios necesarios
+
+- **Condición de carrera entre el webhook de pago y la consulta pública** (BD-04) —
+  `registrarPagoAprobado()` ya bloqueaba la fila con `FOR UPDATE` igual que el resto de
+  `ReservaService`; se revisó explícitamente por ser el punto de mayor riesgo del código
+  nuevo y no hizo falta ningún cambio.
+
+No queda pendiente ningún hallazgo Alto o Medio salvo BD-01 (documentado arriba). Detalle
+completo de cada hallazgo con archivo:línea y escenario de explotación en el informe
+interactivo enlazado al principio de esta sección.

@@ -27,7 +27,18 @@ if ($appEnv === 'local') {
     error_reporting(E_ALL);
     ini_set('display_errors', '0');
     ini_set('log_errors', '1');
-    ini_set('error_log', BASE_PATH . '/storage/logs/php-error.log');
+
+    $rutaErrorLog = BASE_PATH . '/storage/logs/php-error.log';
+
+    // Auditoria 2026-08-25, hallazgo CFG-03: mismo problema y misma solucion minima que
+    // cron.log (ver cron/_bootstrap.php) -- PHP solo hace append via log_errors, nunca rota
+    // por si solo. Se revisa en cada request (un stat() es barato) para no depender de un
+    // cron aparte.
+    if (is_file($rutaErrorLog) && filesize($rutaErrorLog) >= 5 * 1024 * 1024) {
+        rename($rutaErrorLog, $rutaErrorLog . '.1');
+    }
+
+    ini_set('error_log', $rutaErrorLog);
 }
 
 if (PHP_SAPI !== 'cli') {

@@ -3,10 +3,12 @@
 namespace App\Controllers\Public;
 
 use App\Helpers\Flash;
+use App\Helpers\RateLimiter;
 use App\Helpers\Validator;
 use App\Models\Suscriptor;
 use App\Services\MailerService;
 use Core\Controller;
+use PDOException;
 
 class SuscripcionController extends Controller
 {
@@ -24,6 +26,12 @@ class SuscripcionController extends Controller
             $this->redirect('/#newsletter');
         }
 
+        $ip = $this->request->ip();
+        if (RateLimiter::demasiados('suscribir', null, $ip)) {
+            $this->abort(429, 'Demasiados intentos. Espera unos minutos e intenta de nuevo.');
+        }
+        RateLimiter::registrar('suscribir', null, $ip);
+
         $existente = Suscriptor::porEmail($email);
 
         if ($existente && $existente['estado'] === 'confirmado') {
@@ -37,13 +45,31 @@ class SuscripcionController extends Controller
             Suscriptor::update($existente['id'], ['estado' => 'pendiente', 'token' => $token]);
             $suscriptor = Suscriptor::find($existente['id']);
         } else {
-            $id = Suscriptor::insert([
-                'email' => $email,
-                'estado' => 'pendiente',
-                'token' => $token,
-                'ip_origen' => $this->request->ip(),
-            ]);
-            $suscriptor = Suscriptor::find($id);
+            try {
+                $id = Suscriptor::insert([
+                    'email' => $email,
+                    'estado' => 'pendiente',
+                    'token' => $token,
+                    'ip_origen' => $this->request->ip(),
+                ]);
+                $suscriptor = Suscriptor::find($id);
+            } catch (PDOException $e) {
+                // Ventana TOCTOU entre porEmail() y este INSERT (doble submit del mismo
+                // correo nuevo): suscriptores.email UNIQUE ya protege la integridad, esto
+                // solo evita un 500 y recupera la fila que gano la carrera, igual que
+                // Cliente::encontrarOCrear() hace para el mismo tipo de condicion.
+                if ($e->getCode() !== '23000') {
+                    throw $e;
+                }
+
+                $ganador = Suscriptor::porEmail($email);
+                if (!$ganador) {
+                    throw $e;
+                }
+
+                Suscriptor::update($ganador['id'], ['estado' => 'pendiente', 'token' => $token]);
+                $suscriptor = Suscriptor::find($ganador['id']);
+            }
         }
 
         (new MailerService($this->db))->enviarConfirmacionSuscripcion($suscriptor);

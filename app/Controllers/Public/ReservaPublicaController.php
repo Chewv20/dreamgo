@@ -3,15 +3,15 @@
 namespace App\Controllers\Public;
 
 use App\Helpers\Flash;
+use App\Helpers\RateLimiter;
 use App\Helpers\Validator;
 use App\Models\ConfiguracionSitio;
 use App\Models\Paquete;
-use App\Models\Reserva;
 use App\Models\Salida;
-use App\Services\MailerService;
 use App\Services\MercadoPagoService;
 use App\Services\ReservaService;
 use Core\Controller;
+use PDOException;
 use RuntimeException;
 
 class ReservaPublicaController extends Controller
@@ -52,6 +52,17 @@ class ReservaPublicaController extends Controller
     {
         $this->verifyCsrf();
 
+        // Auditoria 2026-08-25, hallazgos SEG-01/SEG-05/SEG-07: sin esto, una sola IP podia
+        // mandar POSTs ilimitados a este endpoint para vaciar cupo real o probar codigos de
+        // descuento por fuerza bruta. Se limita por IP (no por email: el propio formulario lo
+        // manda el atacante, rotarlo no cuesta nada).
+        $ip = $this->request->ip();
+        if (RateLimiter::demasiados('reservar', null, $ip)) {
+            RateLimiter::registrar('reservar', null, $ip);
+            $this->abort(429, 'Demasiados intentos. Espera unos minutos e intenta de nuevo.');
+        }
+        RateLimiter::registrar('reservar', null, $ip);
+
         $datos = $this->request->only(['salida_id', 'nombre', 'email', 'telefono', 'num_personas', 'codigo_descuento']);
         $salidaId = (int) ($datos['salida_id'] ?? 0);
 
@@ -66,7 +77,8 @@ class ReservaPublicaController extends Controller
         $validator->requerido('nombre', 'El nombre')->maxLength('nombre', 150, 'El nombre')
             ->requerido('email', 'El correo')->email('email', 'El correo')
             ->requerido('telefono', 'El telefono')->telefono('telefono', 'El telefono')
-            ->requerido('num_personas', 'El numero de personas')->entero('num_personas', 'El numero de personas');
+            ->requerido('num_personas', 'El numero de personas')->entero('num_personas', 'El numero de personas')
+            ->enRango('num_personas', 1, 30, 'El numero de personas');
 
         $precioUnitario = $salida['precio_override'] !== null
             ? (float) $salida['precio_override']
@@ -88,7 +100,7 @@ class ReservaPublicaController extends Controller
         $service = new ReservaService($this->db);
 
         try {
-            $reservaId = $service->crear([
+            $reserva = $service->crearYNotificar([
                 'salida_id' => $salidaId,
                 'nombre' => $datos['nombre'],
                 'email' => $datos['email'],
@@ -96,6 +108,21 @@ class ReservaPublicaController extends Controller
                 'num_personas' => (int) $datos['num_personas'],
                 'codigo_descuento' => $datos['codigo_descuento'] ?: null,
             ]);
+        } catch (PDOException $e) {
+            // PDOException extiende RuntimeException en PHP 8: se captura aparte para nunca
+            // mostrarle al visitante un SQLSTATE crudo (ej. un CHECK de la BD) si algo llega
+            // a fallar a ese nivel pese a la validacion previa.
+            error_log('[ReservaPublicaController] Error de base de datos al crear reserva: ' . $e->getMessage());
+            $this->view('public/reservar/formulario', [
+                'paquete' => $paquete,
+                'salida' => $salida,
+                'precioUnitario' => $precioUnitario,
+                'porcentajeAnticipo' => $this->porcentajeAnticipo(),
+                'errores' => ['general' => 'Ocurrio un error al procesar tu reserva. Intenta de nuevo.'],
+                'valores' => $datos,
+            ], ['title' => 'Reservar ' . $paquete['titulo'] . ' | Dream Go Operadora Turistica']);
+
+            return;
         } catch (RuntimeException $e) {
             $this->view('public/reservar/formulario', [
                 'paquete' => $paquete,
@@ -108,9 +135,6 @@ class ReservaPublicaController extends Controller
 
             return;
         }
-
-        $reserva = Reserva::conDetalle($reservaId);
-        (new MailerService($this->db))->enviarReservaPendiente($reserva);
 
         $accessToken = $_ENV['MP_ACCESS_TOKEN'] ?? '';
         if ($accessToken === '') {

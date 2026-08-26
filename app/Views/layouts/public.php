@@ -34,7 +34,7 @@ foreach ($coloresClaves as $claveColor) {
 <script type="application/ld+json"><?= $meta['jsonLd'] ?></script>
 <?php endif; ?>
 </head>
-<body>
+<body data-comparar-max="<?= \App\Controllers\Public\PaqueteController::MAX_COMPARAR ?>">
 <a href="#contenido-principal" class="sr-only-focusable">Saltar al contenido principal</a>
 
 <header class="header">

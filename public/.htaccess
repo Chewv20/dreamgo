@@ -9,6 +9,35 @@ Require all granted
     Require all denied
 </FilesMatch>
 
+# Auditoria 2026-08-25, hallazgo CFG-04: sin esto, cada visita revalidaba CSS/JS/fuentes/
+# imagenes de assets/ sin ningun cache de largo plazo ni compresion.
+#
+# CSS/JS con cache corto (1 dia), no largo: site.css/site.js se referencian por nombre fijo
+# sin query string de version ni hash de contenido (ver app/Views/layouts/*.php), asi que un
+# cache "immutable" de un año dejaria a los visitantes con la version vieja hasta que expirara
+# solos, sin forma de forzar la actualizacion en un deploy. Fuentes e imagenes si son estables
+# entre deploys (no cambian de contenido bajo el mismo nombre), asi que llevan cache largo.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    <FilesMatch "\.(css|js)$">
+        ExpiresDefault "access plus 1 day"
+    </FilesMatch>
+    <FilesMatch "\.(woff2?|avif|webp|png|jpe?g|svg|ico)$">
+        ExpiresDefault "access plus 1 year"
+    </FilesMatch>
+</IfModule>
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=86400"
+    </FilesMatch>
+    <FilesMatch "\.(woff2?|avif|webp|png|jpe?g|svg|ico)$">
+        Header set Cache-Control "public, max-age=31536000"
+    </FilesMatch>
+</IfModule>
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 

@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Public;
 
+use App\Helpers\RateLimiter;
 use App\Helpers\Validator;
 use App\Models\Reserva;
 use Core\Controller;
@@ -43,6 +44,12 @@ class ReservaConsultaController extends Controller
 
             return;
         }
+
+        $ip = $this->request->ip();
+        if (RateLimiter::demasiados('reserva_consulta', $valores['email'], $ip)) {
+            $this->abort(429, 'Demasiados intentos con este correo. Espera unos minutos e intenta de nuevo.');
+        }
+        RateLimiter::registrar('reserva_consulta', $valores['email'], $ip);
 
         $reserva = Reserva::porCodigoYEmail($valores['codigo'], $valores['email']);
 

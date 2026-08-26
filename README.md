@@ -33,11 +33,18 @@ lugar se corre con el servidor embebido de PHP, apuntando directo a `public/`:
 app/            Controladores, Modelos, Vistas, Services y Helpers (logica de negocio)
 core/           "Framework" propio: Router, Database, Auth, Controller/Model base
 config/         Bootstrap, rutas, credenciales de BD
-cron/           7 tareas programadas (ver cron/README.md)
+cron/           8 tareas programadas (ver cron/README.md)
 database/       Esquema SQL y datos iniciales
 storage/        Logs y backups (nunca accesible por URL)
 public/         Document root real (front controller, assets, uploads)
 ```
+
+## Tests
+
+`composer test` corre la suite de PHPUnit (`tests/Unit/`). Por ahora cubre las piezas de
+logica pura mas sensibles: verificacion de firma del webhook de Mercado Pago
+(`MercadoPagoService::verificarFirmaWebhook`), el guard de rango de `ReservaService::crear`
+y `Validator`. No requiere base de datos.
 
 ## Documentacion relacionada
 
