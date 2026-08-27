@@ -149,7 +149,8 @@ class ReservaPublicaController extends Controller
                 $reserva,
                 $montoAnticipo,
                 $paquete['moneda'] ?? 'MXN',
-                (string) ($_ENV['APP_URL'] ?? '')
+                (string) ($_ENV['APP_URL'] ?? ''),
+                'anticipo'
             );
         } catch (RuntimeException $e) {
             error_log('[ReservaPublicaController] No se pudo crear la preferencia de Mercado Pago: ' . $e->getMessage());
@@ -163,8 +164,13 @@ class ReservaPublicaController extends Controller
     public function gracias(string $codigo): void
     {
         $status = (string) $this->request->query('status', '');
+        $esSaldo = $this->request->query('concepto') === 'saldo';
 
-        $mensajes = [
+        $mensajes = $esSaldo ? [
+            'approved' => 'Tu pago del saldo fue aprobado. En unos minutos veras el saldo actualizado en Mi reserva.',
+            'pending' => 'Tu pago del saldo esta en revision. Te avisaremos por correo apenas se acredite.',
+            'failure' => 'El pago del saldo no se pudo completar. Puedes intentarlo de nuevo desde Mi reserva o contactarnos.',
+        ] : [
             'approved' => 'Tu pago fue aprobado. En unos minutos tu reserva quedara confirmada.',
             'pending' => 'Tu pago esta en revision. Te avisaremos por correo apenas se confirme.',
             'failure' => 'Tu pago no se pudo completar. Puedes intentarlo de nuevo o contactarnos para coordinar el pago de otra forma.',

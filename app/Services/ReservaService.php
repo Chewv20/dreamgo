@@ -84,11 +84,12 @@ final class ReservaService
             $stmtUpdate->execute(['personas' => $datos['num_personas'], 'id' => $salida['id']]);
 
             $stmtInsert = $this->db->prepare(
-                'INSERT INTO reservas (codigo_reserva, salida_id, cliente_id, num_personas, codigo_descuento_id, precio_total, estado, expira_en)
-                 VALUES (:codigo, :salida_id, :cliente_id, :num_personas, :descuento_id, :precio_total, "pendiente", DATE_ADD(NOW(), INTERVAL :horas HOUR))'
+                'INSERT INTO reservas (codigo_reserva, token_publico, salida_id, cliente_id, num_personas, codigo_descuento_id, precio_total, estado, expira_en)
+                 VALUES (:codigo, :token, :salida_id, :cliente_id, :num_personas, :descuento_id, :precio_total, "pendiente", DATE_ADD(NOW(), INTERVAL :horas HOUR))'
             );
             $stmtInsert->execute([
                 'codigo' => 'TEMP',
+                'token' => bin2hex(random_bytes(16)),
                 'salida_id' => $salida['id'],
                 'cliente_id' => $clienteId,
                 'num_personas' => $datos['num_personas'],
@@ -166,57 +167,105 @@ final class ReservaService
      */
     private const TOLERANCIA_MONTO_PAGO = 0.01;
 
+    /** Resultados posibles de registrarPagoAprobado(). */
+    public const PAGO_CONFIRMO = 'confirmada';
+    public const PAGO_REGISTRADO = 'registrada';
+    public const PAGO_DUPLICADO = 'duplicada';
+    public const PAGO_INSUFICIENTE = 'insuficiente';
+
     /**
-     * Registra un pago aprobado (Mercado Pago u otro medio futuro) y confirma la reserva si
-     * seguia pendiente y el monto pagado alcanza el anticipo esperado. Devuelve true solo
-     * cuando ESTA llamada fue la que confirmo, para que el webhook que la invoca sepa si debe
-     * mandar el correo de confirmacion (evita mandarlo dos veces si Mercado Pago reintenta la
-     * notificacion del mismo pago).
+     * Descompone el external_reference que viaja en la preferencia de Mercado Pago.
+     * Formato: "{reservaId}" (anticipo, retrocompatible con lo ya emitido) o
+     * "{reservaId}:{concepto}" (concepto = anticipo | saldo).
      *
-     * Auditoria 2026-08-25, hallazgo SEG-02: antes se confirmaba con lo que fuera que
-     * reportara Mercado Pago, sin comparar contra el anticipo real de la reserva. Hoy no es
-     * explotable (external_reference y el monto de la preferencia se generan enteramente
-     * server-side), pero es la unica capa que detectaria un monto pagado menor al esperado si
-     * en el futuro se agrega otro medio de pago o se permite ajustar el monto de la
-     * preferencia. Si no alcanza, la reserva queda "pendiente" (no hay un estado intermedio
-     * en el esquema) con el pago igual registrado, para que quede visible en el detalle
-     * admin y quede logueado para revision manual.
+     * @return array{0:int, 1:string} [reservaId, concepto]
      */
-    public function registrarPagoAprobado(int $reservaId, string $referenciaPago, float $montoPagado): bool
+    public static function parseReferenciaExterna(string $referencia): array
     {
-        return Database::transaction($this->db, function () use ($reservaId, $referenciaPago, $montoPagado): bool {
+        $partes = explode(':', $referencia, 2);
+        $reservaId = (int) ($partes[0] ?? 0);
+        $concepto = isset($partes[1]) && $partes[1] !== '' ? $partes[1] : 'anticipo';
+
+        return [$reservaId, in_array($concepto, ['anticipo', 'saldo'], true) ? $concepto : 'otro'];
+    }
+
+    /**
+     * Registra un pago aprobado (Mercado Pago u otro medio futuro) en pagos_reserva y
+     * recalcula reservas.monto_pagado como la suma de todos los pagos. Confirma la reserva si
+     * seguia pendiente y lo pagado acumulado alcanza el anticipo esperado.
+     *
+     * Devuelve:
+     *  - PAGO_CONFIRMO: esta llamada fue la que confirmo la reserva (el webhook manda el
+     *    correo de confirmacion).
+     *  - PAGO_REGISTRADO: el pago entro sobre una reserva ya confirmada (tipico del saldo);
+     *    el webhook manda el aviso de "pago recibido".
+     *  - PAGO_DUPLICADO: referencia_pago ya registrada (reintento de notificacion) o la
+     *    reserva no existe; no hacer nada.
+     *  - PAGO_INSUFICIENTE: pago nuevo pero lo acumulado no cubre el anticipo; la reserva
+     *    queda "pendiente" (no hay estado intermedio en el esquema) con el pago igual
+     *    registrado y una linea en el log para revision manual.
+     *
+     * Dedup por UNIQUE(referencia_pago): Mercado Pago reintenta la notificacion del mismo
+     * pago varias veces, y con el modelo aditivo un doble conteo inflaria monto_pagado.
+     *
+     * Auditoria 2026-08-25, hallazgo SEG-02: se compara contra el anticipo real calculado
+     * server-side, no contra lo que reporte Mercado Pago.
+     */
+    public function registrarPagoAprobado(int $reservaId, string $referenciaPago, float $montoPagado, string $concepto = 'otro'): string
+    {
+        return Database::transaction($this->db, function () use ($reservaId, $referenciaPago, $montoPagado, $concepto): string {
             $stmt = $this->db->prepare('SELECT estado, precio_total FROM reservas WHERE id = :id FOR UPDATE');
             $stmt->execute(['id' => $reservaId]);
             $reserva = $stmt->fetch();
 
             if (!$reserva) {
-                return false;
+                return self::PAGO_DUPLICADO;
+            }
+
+            $ins = $this->db->prepare(
+                'INSERT IGNORE INTO pagos_reserva (reserva_id, referencia_pago, metodo_pago, concepto, monto)
+                 VALUES (:rid, :ref, "mercadopago", :concepto, :monto)'
+            );
+            $ins->execute([
+                'rid' => $reservaId,
+                'ref' => $referenciaPago,
+                'concepto' => in_array($concepto, ['anticipo', 'saldo'], true) ? $concepto : 'otro',
+                'monto' => $montoPagado,
+            ]);
+
+            if ($ins->rowCount() === 0) {
+                return self::PAGO_DUPLICADO;
+            }
+
+            $sum = $this->db->prepare('SELECT COALESCE(SUM(monto), 0) FROM pagos_reserva WHERE reserva_id = :id');
+            $sum->execute(['id' => $reservaId]);
+            $totalPagado = (float) $sum->fetchColumn();
+
+            $this->db->prepare(
+                'UPDATE reservas SET metodo_pago = "mercadopago", referencia_pago = :ref, monto_pagado = :monto WHERE id = :id'
+            )->execute(['ref' => $referenciaPago, 'monto' => $totalPagado, 'id' => $reservaId]);
+
+            if ($reserva['estado'] !== 'pendiente') {
+                return self::PAGO_REGISTRADO;
             }
 
             $porcentajeAnticipo = max(1, min(100, (int) ConfiguracionSitio::get('porcentaje_anticipo_reserva', 100)));
             $anticipoEsperado = round(((float) $reserva['precio_total']) * $porcentajeAnticipo / 100, 2);
 
-            $fueConfirmadaAhora = false;
-            if ($reserva['estado'] === 'pendiente') {
-                if ($montoPagado + self::TOLERANCIA_MONTO_PAGO >= $anticipoEsperado) {
-                    $this->db->prepare(
-                        'UPDATE reservas SET estado = "confirmada", confirmada_en = NOW() WHERE id = :id'
-                    )->execute(['id' => $reservaId]);
-                    $fueConfirmadaAhora = true;
-                } else {
-                    error_log(
-                        "[ReservaService] Pago {$referenciaPago} de la reserva {$reservaId} por "
-                        . "{$montoPagado} no alcanza el anticipo esperado ({$anticipoEsperado}). "
-                        . 'La reserva queda pendiente para revision manual.'
-                    );
-                }
+            if ($totalPagado + self::TOLERANCIA_MONTO_PAGO >= $anticipoEsperado) {
+                $this->db->prepare(
+                    'UPDATE reservas SET estado = "confirmada", confirmada_en = NOW() WHERE id = :id'
+                )->execute(['id' => $reservaId]);
+
+                return self::PAGO_CONFIRMO;
             }
 
-            $this->db->prepare(
-                'UPDATE reservas SET metodo_pago = "mercadopago", referencia_pago = :ref, monto_pagado = :monto WHERE id = :id'
-            )->execute(['ref' => $referenciaPago, 'monto' => $montoPagado, 'id' => $reservaId]);
+            error_log(
+                "[ReservaService] Pago {$referenciaPago} de la reserva {$reservaId}: total pagado {$totalPagado} "
+                . "no alcanza el anticipo esperado ({$anticipoEsperado}). La reserva queda pendiente para revision manual."
+            );
 
-            return $fueConfirmadaAhora;
+            return self::PAGO_INSUFICIENTE;
         });
     }
 

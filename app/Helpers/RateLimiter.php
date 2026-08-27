@@ -28,6 +28,7 @@ final class RateLimiter
         'reserva_consulta' => [8, 30, 15],
         'resena' => [8, 30, 15],
         'suscribir' => [null, 15, 30],
+        'pagar_saldo' => [null, 20, 30],
     ];
 
     public static function demasiados(string $accion, ?string $identificador, string $ip): bool

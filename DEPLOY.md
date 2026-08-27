@@ -73,6 +73,10 @@ MP_WEBHOOK_SECRET=<clave secreta de la notificacion webhook, ver paso 4.1>
 Si tienes acceso SSH: `composer install --no-dev --optimize-autoloader` dentro de la carpeta del proyecto.
 Si no tienes SSH, sube la carpeta `vendor/` ya generada localmente (excluida de git, pero necesaria en el servidor).
 
+Al actualizar una instalacion ya desplegada, vuelve a correr `composer install` (o resube
+`vendor/`) para traer dependencias nuevas — p. ej. `dompdf/dompdf`, que genera el comprobante
+PDF de las reservas. Tambien corre `php database/migrate.php` para aplicar migraciones nuevas.
+
 ## 6. Permisos de carpetas
 
 `storage/logs/`, `storage/backups/`, `public/uploads/paquetes/original/` y `public/uploads/paquetes/thumbs/`
@@ -86,7 +90,7 @@ Activa el certificado SSL gratuito (Let's Encrypt) desde hPanel → **SSL**. Una
 
 ## 8. Cron Jobs
 
-Sigue `cron/README.md` para las 8 tareas programadas. Ajusta las rutas de ejemplo a la ruta real de tu
+Sigue `cron/README.md` para las 9 tareas programadas. Ajusta las rutas de ejemplo a la ruta real de tu
 cuenta de Hostinger (hPanel te la muestra al crear el primer cron job).
 
 ## 9. Primer acceso al panel

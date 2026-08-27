@@ -49,4 +49,23 @@ final class Response
         fclose($out);
         exit;
     }
+
+    /**
+     * Devuelve bytes crudos como descarga (PDF, etc.). $contenido ya viene generado en memoria.
+     */
+    public static function archivo(string $nombreArchivo, string $contenido, string $mime): never
+    {
+        // El rewrite de rutas de public/index.php (ob_start solo activo si BASE_URL_PATH != '')
+        // opera sobre texto HTML; se descartan los buffers pendientes para no arriesgar el binario.
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        http_response_code(200);
+        header('Content-Type: ' . $mime);
+        header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
+        header('Content-Length: ' . strlen($contenido));
+        echo $contenido;
+        exit;
+    }
 }

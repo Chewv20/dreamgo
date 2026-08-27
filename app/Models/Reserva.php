@@ -88,6 +88,32 @@ class Reserva extends Model
     }
 
     /**
+     * Descarga publica del comprobante: exige codigo + token_publico (32 hex, no correlativo).
+     * El token acompaña al link en el correo de confirmacion para que no sea enumerable a
+     * partir del codigo. Devuelve la misma forma que conDetalle().
+     */
+    public static function porCodigoYToken(string $codigo, string $token): array|false
+    {
+        if (strlen($token) !== 32) {
+            return false;
+        }
+
+        $stmt = self::db()->prepare(
+            'SELECT r.*, c.nombre AS cliente_nombre, c.email AS cliente_email, c.telefono AS cliente_telefono,
+                    s.fecha_salida, s.fecha_regreso, p.titulo AS paquete_titulo, p.moneda AS paquete_moneda
+             FROM reservas r
+             INNER JOIN clientes c ON c.id = r.cliente_id
+             INNER JOIN salidas s ON s.id = r.salida_id
+             INNER JOIN paquetes p ON p.id = s.paquete_id
+             WHERE r.codigo_reserva = :codigo AND r.token_publico = :token
+             LIMIT 1'
+        );
+        $stmt->execute(['codigo' => $codigo, 'token' => $token]);
+
+        return $stmt->fetch();
+    }
+
+    /**
      * Datos para el calendario admin: salidas de un mes con conteo de reservas por estado.
      */
     public static function calendarioMes(int $anio, int $mes): array

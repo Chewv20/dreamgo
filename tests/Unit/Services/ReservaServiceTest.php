@@ -54,4 +54,24 @@ final class ReservaServiceTest extends TestCase
             'excesivo' => [31],
         ];
     }
+
+    /**
+     * @dataProvider proveedorDeReferenciasExternas
+     */
+    public function testParseReferenciaExterna(string $entrada, int $reservaEsperada, string $conceptoEsperado): void
+    {
+        $this->assertSame([$reservaEsperada, $conceptoEsperado], ReservaService::parseReferenciaExterna($entrada));
+    }
+
+    public static function proveedorDeReferenciasExternas(): array
+    {
+        return [
+            'bare id = anticipo (retrocompatible)' => ['13', 13, 'anticipo'],
+            'id con concepto saldo' => ['13:saldo', 13, 'saldo'],
+            'id con concepto anticipo explicito' => ['13:anticipo', 13, 'anticipo'],
+            'concepto desconocido cae en otro' => ['13:loquesea', 13, 'otro'],
+            'sufijo vacio = anticipo' => ['13:', 13, 'anticipo'],
+            'basura no numerica' => ['abc', 0, 'anticipo'],
+        ];
+    }
 }

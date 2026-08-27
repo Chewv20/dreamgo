@@ -45,8 +45,22 @@ $etiquetasEstado = [
         <p><strong>Personas:</strong> <?= (int) $reserva['num_personas'] ?></p>
         <p><strong>Total:</strong> $<?= number_format((float) $reserva['precio_total'], 2, '.', ',') ?> <?= htmlspecialchars($reserva['paquete_moneda'], ENT_QUOTES, 'UTF-8') ?></p>
         <p><strong>Pagado hasta ahora:</strong> $<?= number_format((float) $reserva['monto_pagado'], 2, '.', ',') ?> <?= htmlspecialchars($reserva['paquete_moneda'], ENT_QUOTES, 'UTF-8') ?></p>
+        <?php
+        $saldoReserva = max(0, (float) $reserva['precio_total'] - (float) $reserva['monto_pagado']);
+        ?>
+        <?php if ($reserva['estado'] === 'confirmada' && $saldoReserva > 0): ?>
+          <p><strong>Saldo pendiente:</strong> $<?= number_format($saldoReserva, 2, '.', ',') ?> <?= htmlspecialchars($reserva['paquete_moneda'], ENT_QUOTES, 'UTF-8') ?></p>
+        <?php endif; ?>
         <?php if ($reserva['estado'] === 'pendiente' && !empty($reserva['expira_en'])): ?>
           <p>Tienes hasta el <strong><?= htmlspecialchars(date('d/m/Y H:i', strtotime($reserva['expira_en'])), ENT_QUOTES, 'UTF-8') ?></strong> para confirmar tu pago antes de que se libere el cupo.</p>
+        <?php endif; ?>
+        <?php if ($reserva['estado'] === 'confirmada' && !empty($reserva['token_publico'])): ?>
+          <p style="margin-top:1rem;display:flex;gap:.75rem;flex-wrap:wrap;">
+            <a class="btn btn-primario" href="/reserva/<?= rawurlencode((string) $reserva['codigo_reserva']) ?>/comprobante?t=<?= rawurlencode((string) $reserva['token_publico']) ?>">Descargar comprobante (PDF)</a>
+            <?php if ($saldoReserva > 0): ?>
+              <a class="btn btn-secundario" href="/reserva/<?= rawurlencode((string) $reserva['codigo_reserva']) ?>/pagar-saldo?t=<?= rawurlencode((string) $reserva['token_publico']) ?>">Pagar saldo</a>
+            <?php endif; ?>
+          </p>
         <?php endif; ?>
         <p>Si tienes dudas sobre tu reserva, contactanos por <a href="/contacto">nuestra pagina de contacto</a>.</p>
       </div>

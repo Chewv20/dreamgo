@@ -71,7 +71,7 @@ class MercadoPagoWebhookController extends Controller
             $this->json(['ok' => true, 'estado_pago' => $pago['status'] ?? null]);
         }
 
-        $reservaId = (int) ($pago['external_reference'] ?? 0);
+        [$reservaId, $concepto] = ReservaService::parseReferenciaExterna((string) ($pago['external_reference'] ?? ''));
         $reserva = $reservaId > 0 ? Reserva::find($reservaId) : false;
 
         if (!$reserva) {
@@ -80,17 +80,19 @@ class MercadoPagoWebhookController extends Controller
         }
 
         $service = new ReservaService($this->db);
-        $fueConfirmadaAhora = $service->registrarPagoAprobado(
+        $resultado = $service->registrarPagoAprobado(
             $reservaId,
             (string) $paymentId,
-            (float) ($pago['transaction_amount'] ?? 0)
+            (float) ($pago['transaction_amount'] ?? 0),
+            $concepto
         );
 
-        if ($fueConfirmadaAhora) {
-            $reservaDetalle = Reserva::conDetalle($reservaId);
-            (new MailerService($this->db))->enviarConfirmacionReserva($reservaDetalle);
+        if ($resultado === ReservaService::PAGO_CONFIRMO) {
+            (new MailerService($this->db))->enviarConfirmacionReserva(Reserva::conDetalle($reservaId));
+        } elseif ($resultado === ReservaService::PAGO_REGISTRADO) {
+            (new MailerService($this->db))->enviarPagoRecibido(Reserva::conDetalle($reservaId));
         }
 
-        $this->json(['ok' => true]);
+        $this->json(['ok' => true, 'resultado' => $resultado]);
     }
 }

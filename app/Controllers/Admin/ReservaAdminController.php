@@ -4,8 +4,10 @@ namespace App\Controllers\Admin;
 
 use App\Helpers\Flash;
 use App\Helpers\Validator;
+use App\Models\PagoReserva;
 use App\Models\Reserva;
 use App\Models\Salida;
+use App\Services\ComprobanteReservaService;
 use App\Services\MailerService;
 use App\Services\ReservaService;
 use Core\Response;
@@ -69,7 +71,24 @@ class ReservaAdminController extends AdminController
 
         $this->view('admin/reservas/detalle', [
             'reserva' => $reserva,
+            'pagos' => PagoReserva::historialDeReserva($id),
         ], ['title' => 'Reserva ' . $reserva['codigo_reserva'] . ' | Dream Go', 'heading' => 'Reserva ' . $reserva['codigo_reserva']]);
+    }
+
+    public function comprobante(int $id): void
+    {
+        $reserva = Reserva::conDetalle($id);
+        if (!$reserva) {
+            $this->abort(404);
+        }
+
+        $servicio = new ComprobanteReservaService();
+
+        Response::archivo(
+            $servicio->nombreArchivo($reserva),
+            $servicio->generarPdf($reserva),
+            'application/pdf'
+        );
     }
 
     public function crearForm(): void

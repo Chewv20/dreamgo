@@ -299,3 +299,129 @@ todos en MXN) — orden: #9 Comparador de paquetes → #8 Multi-moneda real.
 
 **Las 9 mejoras del backlog están implementadas.** No queda ningún ítem pendiente en
 `MEJORAS.md`; próximos cambios funcionales requieren un análisis nuevo del estado del proyecto.
+
+## Segunda ronda — análisis 2026-08-26
+
+Revisión nueva del estado del proyecto (funciones actuales y dónde extender). Prioridades
+detectadas: cerrar el ciclo de venta (cobro del saldo pendiente, comprobante PDF), tracking
+de origen de lead (UTM), CRM ligero de cotizaciones + bitácora de acciones admin, y
+SEO/contenido (reseñas agregadas + schema.org, blog de destinos). Se arranca por el
+comprobante PDF.
+
+### 1. Comprobante / voucher PDF de la reserva
+
+- Estado: **hecho** (2026-08-26). Decisión tomada con el usuario: librería **`dompdf/dompdf`**
+  (PHP puro, MIT, en `require` porque `DEPLOY.md` usa `composer install --no-dev`), frente a
+  la alternativa "sin librería" (página imprimible), que no permitía adjuntar el PDF al correo.
+
+  **Piezas nuevas:**
+  - `App\Services\ComprobanteReservaService` — `generarPdf(array $reserva)` (bytes del PDF) y
+    `nombreArchivo()`. Render server-side de `app/Views/comprobantes/reserva.php` con estilos
+    inline propios (dompdf no comparte la CSP del sitio) y fuente DejaVu (incluida en dompdf,
+    sin escritura extra en disco). `isRemoteEnabled` off.
+  - Migración `0015_token_publico_reservas.sql` — `reservas.token_publico CHAR(32) NULL UNIQUE`
+    + backfill de filas existentes; reflejada en `schema.sql`. `ReservaService::crear()` lo
+    genera con `bin2hex(random_bytes(16))`. Sirve para que el link de descarga en el correo no
+    sea enumerable a partir del `codigo_reserva` correlativo (mismo criterio que el token de
+    `suscriptores`/`resenas`).
+  - `Reserva::porCodigoYToken()` (nuevo) — exige código + token de 32 hex; misma forma que
+    `conDetalle()`.
+  - `Core\Response::archivo(nombre, contenido, mime)` — descarga de bytes crudos (precedente:
+    `Response::csv()`); descarta buffers pendientes para no arriesgar el binario con el rewrite
+    de rutas de `public/index.php`.
+  - Rutas: `GET /reserva/{codigo}/comprobante?t={token}` (público, 404 si no coincide o la
+    reserva no está `confirmada`; sin CSRF por ser GET, sin rate-limit propio porque el token
+    ya hace el link no adivinable) y `GET /admin/reservas/{id}/comprobante`
+    (`reservas.ver`).
+  - `MailerService::enviarConfirmacionReserva()` adjunta el PDF (`addStringAttachment`) y el
+    cuerpo del correo incluye el link con token; si dompdf falla, el correo se manda igual
+    (log de advertencia). `enviar()` recibió un parámetro opcional `$adjunto`.
+  - Botón "Descargar comprobante" en `app/Views/admin/reservas/detalle.php` (si `confirmada`)
+    y en el resultado de `/mi-reserva` (ahí el email ya está verificado; el link lleva token).
+  - Test `tests/Unit/Services/ComprobanteReservaServiceTest.php` (3 casos, sin BD: precarga la
+    cache de `ConfiguracionSitio` por reflexión). Suite: 24 tests en verde.
+
+  **Nota real de la prueba:** `pdftotext` en modo `-layout`/plano reordenaba el texto (dompdf
+  emite primero toda la columna de etiquetas y luego la de valores), lo que hacía *parecer*
+  que la tabla estaba desalineada. Con `pdftotext -table` (reconstrucción por coordenadas) se
+  confirmó que el PDF renderiza bien: etiqueta a la izquierda, valor a la derecha en la misma
+  línea.
+
+  **Probado en vivo** (`php -S localhost:8090 -t public` + MariaDB real): reserva de prueba
+  creada y confirmada, PDF válido (`%PDF-1.7`, ~24 KB) con código, titular, total, anticipo y
+  **saldo pendiente** (= total − pagado); ruta pública con token válido (200,
+  `application/pdf`, `Content-Disposition: attachment`), token inválido / sin token / código
+  inexistente / reserva `pendiente` → 404; ruta admin sin sesión → 302 a login, y con llamada
+  directa al controlador → PDF y camino 404 correctos; `/mi-reserva` muestra el botón solo si
+  `confirmada`; `MailerService` genera y adjunta el PDF sin error (el envío falla solo por no
+  haber SMTP en local, como el resto de los correos). Smoke test del sitio: 200 en todas.
+  Datos de prueba borrados y `cupo_disponible` de la salida restaurado al terminar.
+
+  **Lo que NO se pudo probar en local:** el correo real llegando con el adjunto (no hay SMTP
+  configurado — misma limitación que todos los correos del proyecto, ver `AUDITORIA.md`).
+
+### 2. Cobro del saldo pendiente
+
+- Estado: **hecho** (2026-08-26). Continuación natural del comprobante (#1): ahora que el
+  comprobante muestra el saldo, el cliente puede pagarlo en línea.
+
+  **Piezas nuevas:**
+  - Tabla `pagos_reserva` (migración `0016`, + `schema.sql`) — historial de pagos de una
+    reserva (anticipo + saldo) con `UNIQUE(referencia_pago)` como guarda anti-duplicado ante
+    los reintentos de notificación de Mercado Pago. `reservas.monto_pagado` pasa de un
+    *overwrite* con el último pago a `SUM(pagos_reserva.monto)`.
+  - `ReservaService::registrarPagoAprobado()` reescrito: aditivo, con dedup, acepta `concepto`
+    (`anticipo`|`saldo`) y devuelve un string (`confirmada` / `registrada` / `duplicada` /
+    `insuficiente`) en vez de `bool`, para que el webhook sepa qué correo mandar. `crear()`
+    ya no cambió. Nuevo helper puro `ReservaService::parseReferenciaExterna()` (unit-testeado,
+    6 casos): descompone el `external_reference` de Mercado Pago — `"13"` (anticipo,
+    retrocompatible con lo ya emitido) o `"13:saldo"`.
+  - `MercadoPagoService::crearPreferencia()` acepta `$concepto`: cambia el título del ítem, el
+    `external_reference` y el `back_url` (`?concepto=saldo`).
+  - `App\Controllers\Public\PagoSaldoController` (nuevo): `GET /reserva/{codigo}/pagar-saldo?t={token}`
+    (página con el saldo + botón) y `POST` (crea la preferencia MP del saldo y redirige a
+    Checkout Pro). Gateado por código + `token_publico` (mismo criterio que el comprobante),
+    CSRF en el POST, rate-limit `pagar_saldo` (20/IP/30min, agregado a `RateLimiter`). El
+    monto lo calcula el servidor (`precio_total - monto_pagado`), nunca viene del cliente.
+    Degradación elegante si MP no está configurado o su API falla (igual que el flujo de
+    anticipo).
+  - `MercadoPagoWebhookController` parsea el concepto y, según el resultado de
+    `registrarPagoAprobado()`, manda `enviarConfirmacionReserva` (confirmó ahora) o
+    `enviarPagoRecibido` (pago sobre reserva ya confirmada, típico del saldo).
+  - `MailerService::enviarRecordatorioSaldo()` y `::enviarPagoRecibido()` (con comprobante
+    actualizado adjunto). Vistas `emails/recordatorio_saldo.php` y `emails/pago_recibido.php`.
+    Enum de `log_correos_enviados` +`recordatorio_saldo`/`pago_recibido` (migración `0017`).
+  - Cron `cron/recordatorio_saldo.php` (patrón de `recordatorio_viaje.php`): reservas
+    `confirmada` con `monto_pagado < precio_total` cuya salida es en N días
+    (`dias_recordatorio_saldo`, default 7, migración `0017` + `seed_demo.sql` + editable en
+    `/admin/configuracion`), con dedup por `log_correos_enviados`. Sube a **9 crons**
+    (`cron/README.md`, `DEPLOY.md`, `README.md`).
+  - `/mi-reserva` muestra el saldo pendiente + botón "Pagar saldo"; `admin/reservas/detalle.php`
+    muestra pagado/saldo + la tabla de `pagos_reserva`.
+
+  **Probado en vivo** (`php -S` + MariaDB real): con una reserva de prueba (total 23 000,
+  anticipo 30 % = 6 900, saldo 16 100) —
+  - `registrarPagoAprobado` con el anticipo → `confirmada`, `monto_pagado=6900`;
+  - reintento del mismo `referencia_pago` → `duplicada`, `monto_pagado` sin cambios, sin fila
+    nueva en `pagos_reserva`;
+  - pago del saldo → `registrada`, `monto_pagado=23000` (suma), estado sigue `confirmada`,
+    2 filas en `pagos_reserva` (anticipo + saldo);
+  - pago menor al anticipo → `insuficiente`, reserva queda `pendiente`, pago igual registrado,
+    línea en el log.
+  - HTTP: `GET /reserva/{codigo}/pagar-saldo` con token válido → 200 con saldo y botón; token
+    inválido → 404; reserva pendiente → "aún no confirmada"; reserva sin saldo → "todo
+    listo". `POST` sin CSRF → 403; `POST` con CSRF y MP sin configurar → 200 con mensaje de
+    error, sin romperse.
+  - `/mi-reserva` muestra el botón "Pagar saldo" solo cuando hay saldo; webhook con
+    `merchant_order` sigue ignorado (200).
+  - `cron/recordatorio_saldo.php`: encuentra la reserva `confirmada` con saldo cuya salida
+    cae en N días y excluye las ya pagadas por completo. Smoke test del sitio: 200 en todo.
+    Suite: 30 tests en verde. Datos de prueba borrados y cupo restaurado al terminar.
+
+  **Lo que NO se pudo probar en local** (sin credenciales de Mercado Pago): el redirect real
+  a Checkout Pro y el webhook real de un pago de saldo aprobado end-to-end. Cada pieza se
+  probó por separado (parser unit-testeado, `registrarPagoAprobado` contra la BD real, la
+  degradación elegante cuando MP no responde).
+
+  **Follow-ups anotados** (no en este alcance): registrar a mano un pago de saldo offline
+  (efectivo/transferencia) desde el panel; pagos parciales de importe libre; reembolsos.

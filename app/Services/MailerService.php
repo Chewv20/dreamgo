@@ -36,9 +36,83 @@ final class MailerService
     public function enviarConfirmacionReserva(array $reserva): bool
     {
         $asunto = 'Reserva confirmada: ' . $reserva['codigo_reserva'];
-        $html = $this->renderPlantilla('confirmacion_reserva', ['reserva' => $reserva]);
 
-        return $this->enviar($reserva['cliente_email'], $asunto, $html, 'confirmacion_reserva', 'reserva', (int) $reserva['id']);
+        $html = $this->renderPlantilla('confirmacion_reserva', [
+            'reserva' => $reserva,
+            'urlComprobante' => $this->linkReserva($reserva, '/comprobante'),
+        ]);
+
+        return $this->enviar(
+            $reserva['cliente_email'],
+            $asunto,
+            $html,
+            'confirmacion_reserva',
+            'reserva',
+            (int) $reserva['id'],
+            $this->comprobanteAdjunto($reserva)
+        );
+    }
+
+    public function enviarRecordatorioSaldo(array $reserva): bool
+    {
+        $asunto = 'Saldo pendiente de tu reserva ' . $reserva['codigo_reserva'];
+        $html = $this->renderPlantilla('recordatorio_saldo', [
+            'reserva' => $reserva,
+            'urlPagarSaldo' => $this->linkReserva($reserva, '/pagar-saldo'),
+        ]);
+
+        return $this->enviar($reserva['cliente_email'], $asunto, $html, 'recordatorio_saldo', 'reserva', (int) $reserva['id']);
+    }
+
+    public function enviarPagoRecibido(array $reserva): bool
+    {
+        $asunto = 'Pago recibido - reserva ' . $reserva['codigo_reserva'];
+        $html = $this->renderPlantilla('pago_recibido', [
+            'reserva' => $reserva,
+            'urlComprobante' => $this->linkReserva($reserva, '/comprobante'),
+        ]);
+
+        return $this->enviar(
+            $reserva['cliente_email'],
+            $asunto,
+            $html,
+            'pago_recibido',
+            'reserva',
+            (int) $reserva['id'],
+            $this->comprobanteAdjunto($reserva)
+        );
+    }
+
+    /**
+     * Link publico a una accion de la reserva (/comprobante, /pagar-saldo) con el token que
+     * la hace no adivinable. Devuelve '' si la reserva no tiene token (no deberia pasar).
+     */
+    private function linkReserva(array $reserva, string $accion): string
+    {
+        if (empty($reserva['token_publico'])) {
+            return '';
+        }
+
+        return rtrim($_ENV['APP_URL'] ?? '', '/')
+            . '/reserva/' . rawurlencode((string) $reserva['codigo_reserva'])
+            . $accion . '?t=' . rawurlencode((string) $reserva['token_publico']);
+    }
+
+    /**
+     * @return array{contenido:string, nombre:string}|null  null si dompdf falla (el correo se
+     *   manda igual, sin adjunto).
+     */
+    private function comprobanteAdjunto(array $reserva): ?array
+    {
+        try {
+            $servicio = new ComprobanteReservaService();
+
+            return ['contenido' => $servicio->generarPdf($reserva), 'nombre' => $servicio->nombreArchivo($reserva)];
+        } catch (\Throwable $e) {
+            error_log('[MailerService] No se pudo generar el comprobante PDF de la reserva ' . ($reserva['id'] ?? '?') . ': ' . $e->getMessage());
+
+            return null;
+        }
     }
 
     public function enviarRecordatorioViaje(array $reserva): bool
@@ -97,13 +171,17 @@ final class MailerService
         return ob_get_clean();
     }
 
+    /**
+     * @param array{contenido:string, nombre:string}|null $adjunto
+     */
     private function enviar(
         string $destinatario,
         string $asunto,
         string $htmlBody,
         string $tipo,
         ?string $referenciaTipo = null,
-        ?int $referenciaId = null
+        ?int $referenciaId = null,
+        ?array $adjunto = null
     ): bool {
         $exitoso = false;
         $errorDetalle = null;
@@ -113,6 +191,9 @@ final class MailerService
             $mail->addAddress($destinatario);
             $mail->Subject = $asunto;
             $mail->Body = $htmlBody;
+            if ($adjunto !== null) {
+                $mail->addStringAttachment($adjunto['contenido'], $adjunto['nombre'], PHPMailer::ENCODING_BASE64, 'application/pdf');
+            }
             $mail->send();
             $exitoso = true;
         } catch (PHPMailerException $e) {

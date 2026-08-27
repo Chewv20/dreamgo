@@ -1,6 +1,6 @@
 # Tareas programadas (cron) — Dream Go
 
-Los 8 scripts de esta carpeta se ejecutan por PHP CLI y son independientes del servidor web.
+Los 9 scripts de esta carpeta se ejecutan por PHP CLI y son independientes del servidor web.
 Todos registran su actividad en `storage/logs/cron.log` (con rotacion de una generacion a los
 5MB, ver `cron/_bootstrap.php`).
 
@@ -12,6 +12,7 @@ Desde la raiz del proyecto:
 php cron/liberar_reservas_expiradas.php
 php cron/desactivar_ofertas_vencidas.php
 php cron/recordatorio_viaje.php
+php cron/recordatorio_saldo.php
 php cron/solicitar_resena.php
 php cron/reporte_periodico.php --periodo=diario
 php cron/backup_bd.php
@@ -30,6 +31,8 @@ La ruta base normalmente es `/home/USUARIO/domains/dreamgooperadoraturistica.com
 0 3 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/desactivar_ofertas_vencidas.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
 
 0 8 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/recordatorio_viaje.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+
+0 8 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/recordatorio_saldo.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
 
 0 9 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/solicitar_resena.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
 
@@ -50,6 +53,7 @@ La ruta base normalmente es `/home/USUARIO/domains/dreamgooperadoraturistica.com
 | `liberar_reservas_expiradas.php` | cada 15 min | Libera el cupo de reservas `pendiente` cuyo `expira_en` ya paso, y las marca `expirada`. |
 | `desactivar_ofertas_vencidas.php` | diario (madrugada) | Desactiva codigos de descuento cuya `fecha_fin` ya paso. |
 | `recordatorio_viaje.php` | diario | Envia un correo recordatorio a clientes con reserva `confirmada` cuya salida es en N dias (configurable en `/admin/configuracion`). Evita duplicados revisando `log_correos_enviados`. |
+| `recordatorio_saldo.php` | diario | Envia un correo a clientes con reserva `confirmada` que aun tienen saldo pendiente (`monto_pagado < precio_total`) y cuya salida es en N dias (`dias_recordatorio_saldo`, configurable en `/admin/configuracion`). El correo lleva el link de pago del saldo. Evita duplicados revisando `log_correos_enviados`. |
 | `solicitar_resena.php` | diario | Envia un correo pidiendo una resena a clientes con reserva `confirmada` cuyo viaje termino hace N dias (configurable en `/admin/configuracion`). El link lleva a `/resena/{codigo}`. Evita duplicados revisando `log_correos_enviados` y la tabla `resenas`. |
 | `reporte_periodico.php` | diario y/o semanal | Envia un resumen de cotizaciones y reservas nuevas al correo del equipo. Usa `--periodo=diario` o `--periodo=semanal`. |
 | `backup_bd.php` | diario (madrugada) | Genera un dump comprimido (`.sql.gz`) de la base de datos en `storage/backups/`, con `mysqldump` si esta disponible o un respaldo 100% PHP como respaldo. Conserva los ultimos 14 dias. |

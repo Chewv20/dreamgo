@@ -17,12 +17,14 @@ use App\Controllers\Admin\RolAdminController;
 use App\Controllers\Admin\SalidaAdminController;
 use App\Controllers\Admin\SuscriptorAdminController;
 use App\Controllers\Admin\UsuarioAdminController;
+use App\Controllers\Public\ComprobanteReservaController;
 use App\Controllers\Public\ContactoController;
 use App\Controllers\Public\CotizadorController;
 use App\Controllers\Public\DestinoController;
 use App\Controllers\Public\HomeController;
 use App\Controllers\Public\MercadoPagoWebhookController;
 use App\Controllers\Public\NosotrosController;
+use App\Controllers\Public\PagoSaldoController;
 use App\Controllers\Public\PaqueteController;
 use App\Controllers\Public\ResenaPublicaController;
 use App\Controllers\Public\ReservaConsultaController;
@@ -49,6 +51,9 @@ $router->get('/contacto', [ContactoController::class, 'index']);
 
 $router->get('/mi-reserva', [ReservaConsultaController::class, 'mostrar']);
 $router->post('/mi-reserva', [ReservaConsultaController::class, 'buscar']);
+$router->get('/reserva/{codigo}/comprobante', [ComprobanteReservaController::class, 'descargar']);
+$router->get('/reserva/{codigo}/pagar-saldo', [PagoSaldoController::class, 'mostrar']);
+$router->post('/reserva/{codigo}/pagar-saldo', [PagoSaldoController::class, 'iniciar']);
 
 $router->get('/resena/{codigo}', [ResenaPublicaController::class, 'formulario']);
 $router->post('/resena/{codigo}', [ResenaPublicaController::class, 'guardar']);
@@ -95,6 +100,7 @@ $router->get('/admin/reservas/crear', [ReservaAdminController::class, 'crearForm
 $router->post('/admin/reservas', [ReservaAdminController::class, 'crear'], ['auth' => true, 'permiso' => 'reservas.crear']);
 $router->get('/admin/reservas/exportar', [ReservaAdminController::class, 'exportarCsv'], ['auth' => true, 'permiso' => 'reservas.ver']);
 $router->get('/admin/reservas/{id}', [ReservaAdminController::class, 'detalle'], ['auth' => true, 'permiso' => 'reservas.ver']);
+$router->get('/admin/reservas/{id}/comprobante', [ReservaAdminController::class, 'comprobante'], ['auth' => true, 'permiso' => 'reservas.ver']);
 $router->post('/admin/reservas/{id}/confirmar', [ReservaAdminController::class, 'confirmar'], ['auth' => true, 'permiso' => 'reservas.confirmar']);
 $router->post('/admin/reservas/{id}/cancelar', [ReservaAdminController::class, 'cancelar'], ['auth' => true, 'permiso' => 'reservas.cancelar']);
 

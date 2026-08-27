@@ -201,6 +201,7 @@ CREATE INDEX idx_descuento_activo_fechas ON codigos_descuento(activo, fecha_inic
 CREATE TABLE IF NOT EXISTS reservas (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   codigo_reserva VARCHAR(20) NOT NULL UNIQUE,
+  token_publico CHAR(32) NULL UNIQUE,
   salida_id INT UNSIGNED NOT NULL,
   cliente_id INT UNSIGNED NOT NULL,
   num_personas SMALLINT UNSIGNED NOT NULL DEFAULT 1,
@@ -226,6 +227,23 @@ CREATE INDEX idx_reservas_estado ON reservas(estado);
 CREATE INDEX idx_reservas_expira ON reservas(estado, expira_en);
 CREATE INDEX idx_reservas_salida ON reservas(salida_id);
 CREATE INDEX idx_reservas_estado_confirmada ON reservas(estado, confirmada_en);
+
+-- ==========================================================
+-- PAGOS DE RESERVA (anticipo + saldo; historial y dedup del webhook)
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS pagos_reserva (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  reserva_id INT UNSIGNED NOT NULL,
+  referencia_pago VARCHAR(100) NOT NULL,
+  metodo_pago VARCHAR(30) NOT NULL DEFAULT 'mercadopago',
+  concepto ENUM('anticipo','saldo','otro') NOT NULL DEFAULT 'otro',
+  monto DECIMAL(10,2) NOT NULL,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_pago_referencia (referencia_pago),
+  INDEX idx_pagos_reserva (reserva_id),
+  CONSTRAINT fk_pago_reserva FOREIGN KEY (reserva_id) REFERENCES reservas(id) ON DELETE CASCADE,
+  CONSTRAINT chk_pago_monto CHECK (monto >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ==========================================================
 -- COTIZACIONES (leads del formulario publico)
@@ -328,7 +346,7 @@ CREATE TABLE IF NOT EXISTS bloques_pagina (
 -- ==========================================================
 CREATE TABLE IF NOT EXISTS log_correos_enviados (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  tipo ENUM('cotizacion_equipo','confirmacion_reserva','reserva_pendiente','recordatorio_viaje','reporte_periodico','solicitud_resena','confirmacion_suscripcion','aviso_oferta','otro') NOT NULL,
+  tipo ENUM('cotizacion_equipo','confirmacion_reserva','reserva_pendiente','recordatorio_viaje','reporte_periodico','solicitud_resena','confirmacion_suscripcion','aviso_oferta','recordatorio_saldo','pago_recibido','otro') NOT NULL,
   destinatario VARCHAR(150) NOT NULL,
   asunto VARCHAR(200) NOT NULL,
   referencia_tipo VARCHAR(30) NULL,

@@ -33,7 +33,7 @@ lugar se corre con el servidor embebido de PHP, apuntando directo a `public/`:
 app/            Controladores, Modelos, Vistas, Services y Helpers (logica de negocio)
 core/           "Framework" propio: Router, Database, Auth, Controller/Model base
 config/         Bootstrap, rutas, credenciales de BD
-cron/           8 tareas programadas (ver cron/README.md)
+cron/           9 tareas programadas (ver cron/README.md)
 database/       Esquema SQL y datos iniciales
 storage/        Logs y backups (nunca accesible por URL)
 public/         Document root real (front controller, assets, uploads)
@@ -43,8 +43,13 @@ public/         Document root real (front controller, assets, uploads)
 
 `composer test` corre la suite de PHPUnit (`tests/Unit/`). Por ahora cubre las piezas de
 logica pura mas sensibles: verificacion de firma del webhook de Mercado Pago
-(`MercadoPagoService::verificarFirmaWebhook`), el guard de rango de `ReservaService::crear`
-y `Validator`. No requiere base de datos.
+(`MercadoPagoService::verificarFirmaWebhook`), el guard de rango de `ReservaService::crear`,
+el parser de `external_reference` (`ReservaService::parseReferenciaExterna`), la generacion
+del comprobante PDF (`ComprobanteReservaService`) y `Validator`. No requiere base de datos.
+
+El comprobante PDF de reserva se genera con `dompdf/dompdf` (dependencia de produccion, en
+`require`). Solo usa la fuente DejaVu que viene incluida en el paquete, asi que no necesita
+permisos de escritura extra en el servidor.
 
 ## Documentacion relacionada
 

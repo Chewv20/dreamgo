@@ -19,24 +19,29 @@ final class MercadoPagoService
 
     /**
      * @param array{id:int, codigo_reserva:string, paquete_titulo:string} $reserva
+     * @param string $concepto 'anticipo' (default) o 'saldo': cambia el titulo del item, el
+     *   external_reference (bare id para anticipo -retrocompatible-, "{id}:saldo" para saldo)
+     *   y el back_url de retorno.
      * @return array<string, mixed> respuesta decodificada de Mercado Pago (incluye init_point)
      */
-    public function crearPreferencia(array $reserva, float $montoAnticipo, string $moneda, string $appUrl): array
+    public function crearPreferencia(array $reserva, float $monto, string $moneda, string $appUrl, string $concepto = 'anticipo'): array
     {
+        $esSaldo = $concepto === 'saldo';
         $backUrl = rtrim($appUrl, '/') . '/reservar/' . $reserva['codigo_reserva'] . '/gracias';
+        $sep = $esSaldo ? '?concepto=saldo&' : '?';
 
         $body = [
             'items' => [[
-                'title' => 'Anticipo reserva ' . $reserva['codigo_reserva'] . ' - ' . $reserva['paquete_titulo'],
+                'title' => ($esSaldo ? 'Saldo' : 'Anticipo') . ' reserva ' . $reserva['codigo_reserva'] . ' - ' . $reserva['paquete_titulo'],
                 'quantity' => 1,
                 'currency_id' => $moneda,
-                'unit_price' => $montoAnticipo,
+                'unit_price' => $monto,
             ]],
-            'external_reference' => (string) $reserva['id'],
+            'external_reference' => $esSaldo ? $reserva['id'] . ':saldo' : (string) $reserva['id'],
             'back_urls' => [
-                'success' => $backUrl . '?status=approved',
-                'pending' => $backUrl . '?status=pending',
-                'failure' => $backUrl . '?status=failure',
+                'success' => $backUrl . $sep . 'status=approved',
+                'pending' => $backUrl . $sep . 'status=pending',
+                'failure' => $backUrl . $sep . 'status=failure',
             ],
             'auto_return' => 'approved',
             'notification_url' => rtrim($appUrl, '/') . '/webhooks/mercadopago',

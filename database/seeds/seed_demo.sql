@@ -169,6 +169,7 @@ INSERT INTO configuracion_sitio (clave, valor, descripcion) VALUES
   ('horas_expiracion_reserva', '48', 'Horas antes de liberar automaticamente una reserva pendiente'),
   ('porcentaje_anticipo_reserva', '30', 'Porcentaje del precio total que se cobra como anticipo en linea al reservar (1-100)'),
   ('dias_recordatorio_viaje', '3', 'Dias de anticipacion para enviar el recordatorio de viaje'),
+  ('dias_recordatorio_saldo', '7', 'Dias antes de la salida para enviar el recordatorio de saldo pendiente al cliente'),
   ('dias_solicitud_resena', '3', 'Dias despues de terminado el viaje (fecha_regreso o fecha_salida) para pedir una resena al cliente'),
   ('email_equipo_reportes', 'admin@dreamgooperadoraturistica.com', 'Correo que recibe el reporte periodico y notificaciones de cotizacion'),
   ('meta_title_default', 'Dream Go Operadora Turistica | Excursiones y paquetes de viaje', 'Titulo SEO por defecto'),
