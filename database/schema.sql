@@ -265,6 +265,8 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   fecha_tentativa DATE NULL,
   mensaje TEXT NULL,
   estado ENUM('nueva','contactada','convertida','descartada') NOT NULL DEFAULT 'nueva',
+  asignado_a INT UNSIGNED NULL,
+  seguimiento_en DATE NULL,
   ip_origen VARCHAR(45) NULL,
   utm_source VARCHAR(100) NULL,
   utm_medium VARCHAR(100) NULL,
@@ -274,11 +276,29 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   referrer VARCHAR(255) NULL,
   landing_page VARCHAR(255) NULL,
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_cotizacion_paquete FOREIGN KEY (paquete_id) REFERENCES paquetes(id) ON DELETE SET NULL
+  CONSTRAINT fk_cotizacion_paquete FOREIGN KEY (paquete_id) REFERENCES paquetes(id) ON DELETE SET NULL,
+  CONSTRAINT fk_cotizacion_asignado FOREIGN KEY (asignado_a) REFERENCES usuarios_admin(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE INDEX idx_cotizaciones_estado ON cotizaciones(estado);
 CREATE INDEX idx_cotizaciones_creado ON cotizaciones(creado_en);
 CREATE INDEX idx_cotizaciones_utm_source ON cotizaciones(utm_source);
+CREATE INDEX idx_cotizaciones_asignado ON cotizaciones(asignado_a);
+CREATE INDEX idx_cotizaciones_seguimiento ON cotizaciones(seguimiento_en);
+
+-- ==========================================================
+-- NOTAS DE SEGUIMIENTO DE COTIZACIONES (CRM ligero)
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS cotizacion_notas (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  cotizacion_id INT UNSIGNED NOT NULL,
+  usuario_id INT UNSIGNED NULL,
+  usuario_nombre VARCHAR(150) NULL,
+  nota TEXT NOT NULL,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_cotnotas_cotizacion (cotizacion_id),
+  CONSTRAINT fk_cotnota_cotizacion FOREIGN KEY (cotizacion_id) REFERENCES cotizaciones(id) ON DELETE CASCADE,
+  CONSTRAINT fk_cotnota_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios_admin(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ==========================================================
 -- RESENAS (moderadas, ligadas a una reserva confirmada)

@@ -1,23 +1,47 @@
 <?php
 /** @var array $cotizaciones */
 /** @var list<string> $fuentes */
-/** @var string|null $origenActivo */
+/** @var array $asesores */
+/** @var array $filtros */
 $fuentes ??= [];
-$origenActivo ??= null;
-$queryExtra = $origenActivo !== null ? ['origen' => $origenActivo] : [];
+$asesores ??= [];
+$filtros ??= [];
+$origenActivo = $filtros['origen'] ?? null;
+$asignadoActivo = $filtros['asignado'] ?? null;
+$seguimientoActivo = $filtros['seguimiento'] ?? null;
+$queryExtra = array_filter([
+    'origen' => $origenActivo,
+    'asignado' => $asignadoActivo,
+    'seguimiento' => $seguimientoActivo,
+], static fn ($v) => $v !== null && $v !== '');
+$hoy = date('Y-m-d');
 ?>
 <div class="admin-acciones" style="margin-bottom:1.25rem;display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
   <a href="/admin/cotizaciones/exportar" class="btn btn-secundario">Exportar CSV</a>
 
-  <form method="get" action="/admin/cotizaciones" style="display:flex;gap:0.4rem;align-items:center;">
-    <label for="filtro-origen" style="font-size:0.9rem;">Origen:</label>
-    <select id="filtro-origen" name="origen" data-autosubmit>
-      <option value="">Todos</option>
-      <option value="<?= htmlspecialchars(\App\Models\Cotizacion::ORIGEN_DIRECTO, ENT_QUOTES, 'UTF-8') ?>" <?= $origenActivo === \App\Models\Cotizacion::ORIGEN_DIRECTO ? 'selected' : '' ?>>Directo / sin UTM</option>
-      <?php foreach ($fuentes as $fuente): ?>
-        <option value="<?= htmlspecialchars($fuente, ENT_QUOTES, 'UTF-8') ?>" <?= $origenActivo === $fuente ? 'selected' : '' ?>><?= htmlspecialchars($fuente, ENT_QUOTES, 'UTF-8') ?></option>
-      <?php endforeach; ?>
-    </select>
+  <form method="get" action="/admin/cotizaciones" style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+    <label style="font-size:0.9rem;">Origen:
+      <select name="origen" data-autosubmit>
+        <option value="">Todos</option>
+        <option value="<?= htmlspecialchars(\App\Models\Cotizacion::ORIGEN_DIRECTO, ENT_QUOTES, 'UTF-8') ?>" <?= $origenActivo === \App\Models\Cotizacion::ORIGEN_DIRECTO ? 'selected' : '' ?>>Directo / sin UTM</option>
+        <?php foreach ($fuentes as $fuente): ?>
+          <option value="<?= htmlspecialchars($fuente, ENT_QUOTES, 'UTF-8') ?>" <?= $origenActivo === $fuente ? 'selected' : '' ?>><?= htmlspecialchars($fuente, ENT_QUOTES, 'UTF-8') ?></option>
+        <?php endforeach; ?>
+      </select>
+    </label>
+    <label style="font-size:0.9rem;">Asesor:
+      <select name="asignado" data-autosubmit>
+        <option value="">Todos</option>
+        <option value="<?= htmlspecialchars(\App\Models\Cotizacion::SIN_ASIGNAR, ENT_QUOTES, 'UTF-8') ?>" <?= $asignadoActivo === \App\Models\Cotizacion::SIN_ASIGNAR ? 'selected' : '' ?>>Sin asignar</option>
+        <?php foreach ($asesores as $asesor): ?>
+          <option value="<?= (int) $asesor['id'] ?>" <?= (string) $asignadoActivo === (string) $asesor['id'] ? 'selected' : '' ?>><?= htmlspecialchars($asesor['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+        <?php endforeach; ?>
+      </select>
+    </label>
+    <label style="font-size:0.9rem;display:inline-flex;align-items:center;gap:0.3rem;">
+      <input type="checkbox" name="seguimiento" value="vencidos" data-autosubmit <?= $seguimientoActivo === 'vencidos' ? 'checked' : '' ?>>
+      Solo seguimientos vencidos
+    </label>
     <noscript><button type="submit" class="btn btn-secundario">Filtrar</button></noscript>
   </form>
 </div>
@@ -25,9 +49,10 @@ $queryExtra = $origenActivo !== null ? ['origen' => $origenActivo] : [];
 <div class="admin-panel">
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
-      <thead><tr><th>Fecha</th><th>Nombre</th><th>Contacto</th><th>Paquete</th><th>Origen</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>Fecha</th><th>Nombre</th><th>Contacto</th><th>Paquete</th><th>Origen</th><th>Asesor</th><th>Estado</th><th></th></tr></thead>
       <tbody>
         <?php foreach ($cotizaciones as $c): ?>
+          <?php $vencida = !empty($c['seguimiento_en']) && $c['seguimiento_en'] < $hoy && in_array($c['estado'], ['nueva', 'contactada'], true); ?>
           <tr>
             <td><?= date('d M Y H:i', strtotime($c['creado_en'])) ?></td>
             <td><?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?></td>
@@ -36,31 +61,25 @@ $queryExtra = $origenActivo !== null ? ['origen' => $origenActivo] : [];
             <td>
               <?php if (!empty($c['utm_source'])): ?>
                 <?= htmlspecialchars($c['utm_source'], ENT_QUOTES, 'UTF-8') ?>
-                <?php if (!empty($c['utm_medium']) || !empty($c['utm_campaign'])): ?>
-                  <br><small><?= htmlspecialchars(trim(($c['utm_medium'] ?? '') . ' / ' . ($c['utm_campaign'] ?? ''), ' /'), ENT_QUOTES, 'UTF-8') ?></small>
-                <?php endif; ?>
               <?php else: ?>
                 <small style="color:#888;">Directo</small>
+              <?php endif; ?>
+            </td>
+            <td>
+              <?= htmlspecialchars($c['asignado_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?: '<small style="color:#888;">&mdash;</small>' ?>
+              <?php if ($vencida): ?>
+                <br><span class="admin-badge admin-badge--rojo">Seguimiento vencido</span>
               <?php endif; ?>
             </td>
             <td>
               <?php $badge = ['nueva' => 'ambar', 'contactada' => 'verde', 'convertida' => 'verde', 'descartada' => 'gris'][$c['estado']]; ?>
               <span class="admin-badge admin-badge--<?= $badge ?>"><?= ucfirst($c['estado']) ?></span>
             </td>
-            <td>
-              <form method="post" action="/admin/cotizaciones/<?= (int) $c['id'] ?>/estado" style="display:flex;gap:0.4rem;">
-                <?= \App\Helpers\Csrf::field() ?>
-                <select name="estado" data-autosubmit>
-                  <?php foreach (['nueva', 'contactada', 'convertida', 'descartada'] as $estado): ?>
-                    <option value="<?= $estado ?>" <?= $c['estado'] === $estado ? 'selected' : '' ?>><?= ucfirst($estado) ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </form>
-            </td>
+            <td><a href="/admin/cotizaciones/<?= (int) $c['id'] ?>" class="btn btn-secundario">Ver</a></td>
           </tr>
         <?php endforeach; ?>
         <?php if (empty($cotizaciones)): ?>
-          <tr><td colspan="7">No hay cotizaciones para este filtro.</td></tr>
+          <tr><td colspan="8">No hay cotizaciones para este filtro.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>

@@ -309,8 +309,9 @@ SEO/contenido (reseñas agregadas + schema.org, blog de destinos).
 
 **Hechos en esta ronda:** #1 Comprobante PDF, #2 Cobro del saldo pendiente (2026-08-26),
 #3 Atribución de leads / UTM, #3-bis GA4 + Meta Pixel, #3-ter banner de consentimiento +
-Aviso de Privacidad y #4-a Bitácora de acciones admin (2026-08-27).
-**Pendientes:** #4-b CRM ligero de cotizaciones, #5 reseñas agregadas + schema.org + blog
+Aviso de Privacidad, #4-a Bitácora de acciones admin y #4-b CRM ligero de cotizaciones
+(2026-08-27).
+**Pendientes:** #5 reseñas agregadas + schema.org + blog
 — detallados en la sección "Pendiente de la segunda ronda" más abajo.
 
 ### 1. Comprobante / voucher PDF de la reserva
@@ -590,27 +591,54 @@ Aviso de Privacidad y #4-a Bitácora de acciones admin (2026-08-27).
   y reporta el conteo. Suite: **52 tests** (+2 de `AuditoriaTest`, que verifican que
   `registrar()` no lanza aunque no haya BD).
 
+### 4-b. CRM ligero de cotizaciones
+
+- Estado: **hecho** (2026-08-27). Segunda mitad de #4.
+
+  **Piezas nuevas:**
+  - Migración `0020` + `schema.sql`: `cotizaciones.asignado_a` (FK `usuarios_admin`
+    `ON DELETE SET NULL`) y `cotizaciones.seguimiento_en` (DATE); tabla `cotizacion_notas`
+    (`cotizacion_id` con `ON DELETE CASCADE`, `usuario_id`/`usuario_nombre` desnormalizado,
+    `nota`, `creado_en`). Nota real: `ADD CONSTRAINT IF NOT EXISTS ... FOREIGN KEY` da
+    error de sintaxis en MariaDB 10.6 — el `IF NOT EXISTS` va **después** de `FOREIGN KEY`
+    (`ADD CONSTRAINT x FOREIGN KEY IF NOT EXISTS (...)`); se corrigió y la migración se
+    reaplicó sobre el estado parcial sin problema (las columnas ya llevaban `IF NOT EXISTS`).
+  - `Cotizacion::conDetalle()`, `seguimientosVencidos()`, y `adminListado()`/`contarTotal()`
+    refactorizados para tomar un `array $filtros` (`origen` + `asignado` + `seguimiento`).
+    `clausulaFiltros(array): array` es pública y pura (5 tests nuevos en
+    `tests/Unit/Models/CotizacionFiltrosTest.php`, incluido un caso de intento de inyección
+    en `asignado`). Constante nueva `Cotizacion::SIN_ASIGNAR`.
+  - `App\Models\CotizacionNota` (`porCotizacion`, `agregar` — atribuye al usuario en sesión).
+  - `CotizacionAdminController`: `detalle()` (`GET /admin/cotizaciones/{id}`, permiso
+    `cotizaciones.ver`; la ruta va **después** de `/exportar` para no capturarla), `asignar()`
+    / `seguimiento()` / `agregarNota()` (`POST .../asignar|seguimiento|nota`, permiso
+    `cotizaciones.gestionar`). `cambiarEstado()` acepta `volver=detalle` para redirigir al
+    detalle en vez del listado. Cada acción registra en la bitácora
+    (`cotizacion.asignar` / `cotizacion.seguimiento` / `cotizacion.nota`, además del ya
+    existente `cotizacion.estado`).
+  - Vista `admin/cotizaciones/detalle.php` (datos de contacto, mensaje, origen, y los 3
+    formularios de gestión + historial de notas). El listado suma columna "Asesor", enlace
+    "Ver", filtros por asesor / "sin asignar" y checkbox "solo seguimientos vencidos", y una
+    fila con seguimiento vencido se marca en rojo.
+  - Dashboard: tile "Seguimientos vencidos" (bajo `cotizaciones.ver`) con enlace a
+    `/admin/cotizaciones?seguimiento=vencidos`.
+
+  **Decisión:** el cron opcional que avisa por correo al asesor de seguimientos vencidos
+  **no** se hizo — para un equipo chico rinde más la señal in-panel (tile + filtro + fila en
+  rojo). Queda anotado como follow-up si más adelante quieren el nudge por correo.
+
+  **Probado en vivo** (BD real): asignar, fijar seguimiento (fecha de ayer) y agregar nota
+  dejan los datos correctos y las 3 líneas en la bitácora; `seguimientosVencidos()` y el
+  filtro `seguimiento=vencidos` devuelven la cotización de prueba; el detalle renderiza con
+  las 3 secciones y el historial; borrar la cotización arrastra sus notas (CASCADE);
+  `/admin/cotizaciones/exportar` sigue siendo el CSV (no lo captura la ruta de detalle);
+  rutas nuevas → 302 login sin sesión. Suite: **57 tests**. Datos de prueba borrados.
+
 ## Pendiente de la segunda ronda (para otra sesión)
 
 Ítems detectados en el análisis del 2026-08-26 y todavía sin implementar. Orden sugerido:
-#4-b → #5. Cada uno es autocontenido; conviene abordar uno por sesión, probando y
-revisando antes de seguir. Antes de arrancar cualquiera, verificar que los archivos/tablas
-citados sigan como se describen aquí.
-
-### 4-b. CRM ligero de cotizaciones
-
-- **Problema:** las cotizaciones solo cambian de `estado` (`CotizacionAdminController::cambiarEstado`).
-  No hay asignación a un asesor, notas de seguimiento ni recordatorio de contacto: es donde
-  se pierde la conversión de leads que ya entran.
-- **Alcance:** en `cotizaciones`, columnas `asignado_a` (FK a `usuarios_admin`, NULL),
-  `seguimiento_en` (DATETIME NULL, próximo contacto). Tabla nueva `cotizacion_notas`
-  (`cotizacion_id`, `usuario_id`, `nota TEXT`, `creado_en`) para el historial de
-  seguimiento. UI en `/admin/cotizaciones` (detalle nuevo, hoy solo hay listado): asignar,
-  agregar nota, fijar fecha de seguimiento. Permiso `cotizaciones.gestionar` ya existe.
-  Registrar en la bitácora (ya existe, ver 4-a) las acciones `cotizacion.asignar` /
-  `cotizacion.nota`. Opcional: cron que avise al asesor de seguimientos vencidos (reusa
-  `MailerService`).
-- Migración nueva + `schema.sql`.
+#5. El ítem es autocontenido; conviene probar y revisar antes de seguir. Antes de arrancar,
+verificar que los archivos/tablas citados sigan como se describen aquí.
 
 ### 5. Reseñas agregadas + schema.org + blog de destinos
 

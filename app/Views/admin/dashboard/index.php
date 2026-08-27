@@ -38,6 +38,15 @@
     <p style="font-family:var(--fuente-titulos);font-size:2rem;margin:0.25rem 0 0;"><?= $totalCotizacionesNuevas ?></p>
   </div>
   <?php endif; ?>
+  <?php if (isset($seguimientosVencidos)): ?>
+  <div class="admin-panel">
+    <p style="margin:0;opacity:0.7;">Seguimientos vencidos</p>
+    <p style="font-family:var(--fuente-titulos);font-size:2rem;margin:0.25rem 0 0;"><?= (int) $seguimientosVencidos ?></p>
+    <?php if ((int) $seguimientosVencidos > 0): ?>
+      <p style="margin:0.25rem 0 0;font-size:0.85rem;"><a href="/admin/cotizaciones?seguimiento=vencidos">Ver cotizaciones</a></p>
+    <?php endif; ?>
+  </div>
+  <?php endif; ?>
   <?php if (isset($conversion)): ?>
   <div class="admin-panel">
     <p style="margin:0;opacity:0.7;">Tasa de conversion (periodo)</p>

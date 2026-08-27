@@ -8,19 +8,23 @@ class Cotizacion extends Model
 {
     protected static string $table = 'cotizaciones';
 
-    /**
-     * Valor de $origen para filtrar solo el trafico sin utm_source (directo / organico).
-     */
+    /** Valor de filtro 'origen' para el trafico sin utm_source (directo / organico). */
     public const ORIGEN_DIRECTO = '__directo__';
+    /** Valor de filtro 'asignado' para las cotizaciones sin asesor. */
+    public const SIN_ASIGNAR = '__sin_asignar__';
 
-    public static function adminListado(int $limite = 20, int $offset = 0, ?string $origen = null): array
+    /**
+     * @param array{origen?:?string, asignado?:?string, seguimiento?:?string} $filtros
+     */
+    public static function adminListado(int $limite = 20, int $offset = 0, array $filtros = []): array
     {
-        [$where, $params] = self::filtroOrigen($origen);
+        [$where, $params] = self::clausulaFiltros($filtros);
 
         $stmt = self::db()->prepare(
-            'SELECT c.*, p.titulo AS paquete_titulo
+            'SELECT c.*, p.titulo AS paquete_titulo, u.nombre AS asignado_nombre
              FROM cotizaciones c
              LEFT JOIN paquetes p ON p.id = c.paquete_id
+             LEFT JOIN usuarios_admin u ON u.id = c.asignado_a
              ' . $where . '
              ORDER BY c.creado_en DESC
              LIMIT :limite OFFSET :offset'
@@ -35,9 +39,12 @@ class Cotizacion extends Model
         return $stmt->fetchAll();
     }
 
-    public static function contarTotal(?string $origen = null): int
+    /**
+     * @param array{origen?:?string, asignado?:?string, seguimiento?:?string} $filtros
+     */
+    public static function contarTotal(array $filtros = []): int
     {
-        [$where, $params] = self::filtroOrigen($origen);
+        [$where, $params] = self::clausulaFiltros($filtros);
 
         $stmt = self::db()->prepare('SELECT COUNT(*) FROM cotizaciones c ' . $where);
         $stmt->execute($params);
@@ -45,20 +52,68 @@ class Cotizacion extends Model
         return (int) $stmt->fetchColumn();
     }
 
-    /**
-     * @return array{0: string, 1: array<string, string>} clausula WHERE (o '') y sus params
-     */
-    private static function filtroOrigen(?string $origen): array
+    public static function conDetalle(int $id): array|false
     {
-        if ($origen === null || $origen === '') {
-            return ['', []];
-        }
+        $stmt = self::db()->prepare(
+            'SELECT c.*, p.titulo AS paquete_titulo, u.nombre AS asignado_nombre
+             FROM cotizaciones c
+             LEFT JOIN paquetes p ON p.id = c.paquete_id
+             LEFT JOIN usuarios_admin u ON u.id = c.asignado_a
+             WHERE c.id = :id
+             LIMIT 1'
+        );
+        $stmt->execute(['id' => $id]);
 
+        return $stmt->fetch();
+    }
+
+    /**
+     * Cotizaciones abiertas (nueva/contactada) con la fecha de seguimiento ya vencida.
+     */
+    public static function seguimientosVencidos(): int
+    {
+        return (int) self::db()->query(
+            "SELECT COUNT(*) FROM cotizaciones
+             WHERE seguimiento_en IS NOT NULL AND seguimiento_en < CURDATE()
+               AND estado IN ('nueva', 'contactada')"
+        )->fetchColumn();
+    }
+
+    /**
+     * Traduce los filtros del panel a una clausula WHERE parametrizada. Publico para poder
+     * probar el armado del SQL sin base de datos.
+     *
+     * @param array{origen?:?string, asignado?:?string, seguimiento?:?string} $filtros
+     * @return array{0:string, 1:array<string,string>} [clausula WHERE (o ''), params]
+     */
+    public static function clausulaFiltros(array $filtros): array
+    {
+        $condiciones = [];
+        $params = [];
+
+        $origen = $filtros['origen'] ?? null;
         if ($origen === self::ORIGEN_DIRECTO) {
-            return ['WHERE c.utm_source IS NULL', []];
+            $condiciones[] = 'c.utm_source IS NULL';
+        } elseif ($origen !== null && $origen !== '') {
+            $condiciones[] = 'c.utm_source = :origen';
+            $params['origen'] = $origen;
         }
 
-        return ['WHERE c.utm_source = :origen', ['origen' => $origen]];
+        $asignado = $filtros['asignado'] ?? null;
+        if ($asignado === self::SIN_ASIGNAR) {
+            $condiciones[] = 'c.asignado_a IS NULL';
+        } elseif ($asignado !== null && $asignado !== '' && ctype_digit((string) $asignado)) {
+            $condiciones[] = 'c.asignado_a = :asignado';
+            $params['asignado'] = (string) $asignado;
+        }
+
+        if (($filtros['seguimiento'] ?? null) === 'vencidos') {
+            $condiciones[] = "c.seguimiento_en IS NOT NULL AND c.seguimiento_en < CURDATE() AND c.estado IN ('nueva', 'contactada')";
+        }
+
+        $where = $condiciones === [] ? '' : 'WHERE ' . implode(' AND ', $condiciones);
+
+        return [$where, $params];
     }
 
     /**
@@ -105,9 +160,10 @@ class Cotizacion extends Model
     public static function todasAdmin(): array
     {
         return self::db()->query(
-            'SELECT c.*, p.titulo AS paquete_titulo
+            'SELECT c.*, p.titulo AS paquete_titulo, u.nombre AS asignado_nombre
              FROM cotizaciones c
              LEFT JOIN paquetes p ON p.id = c.paquete_id
+             LEFT JOIN usuarios_admin u ON u.id = c.asignado_a
              ORDER BY c.creado_en DESC'
         )->fetchAll();
     }

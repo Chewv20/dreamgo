@@ -47,8 +47,9 @@ logica pura mas sensibles: verificacion de firma del webhook de Mercado Pago
 el parser de `external_reference` (`ReservaService::parseReferenciaExterna`), la generacion
 del comprobante PDF (`ComprobanteReservaService`), el saneo de atribucion de leads
 (`App\Helpers\Atribucion`), la validacion de los IDs de analitica (`App\Helpers\Analytics`),
-el manejo de errores de la bitacora (`App\Helpers\Auditoria`) y `Validator`. No requiere
-base de datos.
+el manejo de errores de la bitacora (`App\Helpers\Auditoria`), el armado de filtros del
+listado de cotizaciones (`Cotizacion::clausulaFiltros`) y `Validator`. No requiere base de
+datos.
 
 El comprobante PDF de reserva se genera con `dompdf/dompdf` (dependencia de produccion, en
 `require`). Solo usa la fuente DejaVu que viene incluida en el paquete, asi que no necesita

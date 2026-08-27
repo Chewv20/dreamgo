@@ -111,7 +111,11 @@ $router->post('/admin/reservas/{id}/cancelar', [ReservaAdminController::class, '
 
 $router->get('/admin/cotizaciones', [CotizacionAdminController::class, 'index'], ['auth' => true, 'permiso' => 'cotizaciones.ver']);
 $router->get('/admin/cotizaciones/exportar', [CotizacionAdminController::class, 'exportarCsv'], ['auth' => true, 'permiso' => 'cotizaciones.ver']);
+$router->get('/admin/cotizaciones/{id}', [CotizacionAdminController::class, 'detalle'], ['auth' => true, 'permiso' => 'cotizaciones.ver']);
 $router->post('/admin/cotizaciones/{id}/estado', [CotizacionAdminController::class, 'cambiarEstado'], ['auth' => true, 'permiso' => 'cotizaciones.gestionar']);
+$router->post('/admin/cotizaciones/{id}/asignar', [CotizacionAdminController::class, 'asignar'], ['auth' => true, 'permiso' => 'cotizaciones.gestionar']);
+$router->post('/admin/cotizaciones/{id}/seguimiento', [CotizacionAdminController::class, 'seguimiento'], ['auth' => true, 'permiso' => 'cotizaciones.gestionar']);
+$router->post('/admin/cotizaciones/{id}/nota', [CotizacionAdminController::class, 'agregarNota'], ['auth' => true, 'permiso' => 'cotizaciones.gestionar']);
 
 $router->get('/admin/resenas', [ResenaAdminController::class, 'index'], ['auth' => true, 'permiso' => 'resenas.ver']);
 $router->post('/admin/resenas/{id}/estado', [ResenaAdminController::class, 'cambiarEstado'], ['auth' => true, 'permiso' => 'resenas.gestionar']);
