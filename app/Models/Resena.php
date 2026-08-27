@@ -35,6 +35,79 @@ class Resena extends Model
         return (int) self::db()->query('SELECT COUNT(*) FROM resenas')->fetchColumn();
     }
 
+    /**
+     * Promedio y conteo de reseñas aprobadas de un paquete.
+     *
+     * @return array{promedio: float, total: int}
+     */
+    public static function resumenPorPaquete(int $paqueteId): array
+    {
+        $stmt = self::db()->prepare(
+            'SELECT COUNT(*) AS total, COALESCE(AVG(calificacion), 0) AS promedio
+             FROM resenas WHERE paquete_id = :id AND estado = "aprobada"'
+        );
+        $stmt->execute(['id' => $paqueteId]);
+        $fila = $stmt->fetch();
+
+        return [
+            'promedio' => round((float) $fila['promedio'], 1),
+            'total' => (int) $fila['total'],
+        ];
+    }
+
+    /**
+     * Igual que resumenPorPaquete() pero en lote, para los listados de tarjetas (evita N+1).
+     * Solo incluye paquetes con al menos una reseña aprobada.
+     *
+     * @param list<int> $paqueteIds
+     * @return array<int, array{promedio: float, total: int}>
+     */
+    public static function resumenPorPaquetes(array $paqueteIds): array
+    {
+        $ids = array_values(array_filter(array_map('intval', $paqueteIds)));
+        if ($ids === []) {
+            return [];
+        }
+
+        $marcadores = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = self::db()->prepare(
+            "SELECT paquete_id, COUNT(*) AS total, AVG(calificacion) AS promedio
+             FROM resenas WHERE estado = 'aprobada' AND paquete_id IN ({$marcadores})
+             GROUP BY paquete_id"
+        );
+        $stmt->execute($ids);
+
+        $resumen = [];
+        foreach ($stmt->fetchAll() as $fila) {
+            $resumen[(int) $fila['paquete_id']] = [
+                'promedio' => round((float) $fila['promedio'], 1),
+                'total' => (int) $fila['total'],
+            ];
+        }
+
+        return $resumen;
+    }
+
+    /**
+     * Nombre publico de quien deja una reseña: primer nombre + inicial del segundo token
+     * ("Juan Perez" -> "Juan P."). Se muestra asi por privacidad (decidido con el usuario en
+     * la primera ronda). Publico para reusarlo entre la vista y el JSON-LD.
+     */
+    public static function nombrePublico(string $nombreCompleto): string
+    {
+        $partes = preg_split('/\s+/', trim($nombreCompleto), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        if ($partes === []) {
+            return '';
+        }
+
+        $publico = $partes[0];
+        if (isset($partes[1])) {
+            $publico .= ' ' . mb_strtoupper(mb_substr($partes[1], 0, 1)) . '.';
+        }
+
+        return $publico;
+    }
+
     public static function aprobadasDelPaquete(int $paqueteId, int $limite = 6): array
     {
         $stmt = self::db()->prepare(

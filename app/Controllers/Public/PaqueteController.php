@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Public;
 
+use App\Helpers\PaqueteJsonLd;
 use App\Models\BloquePagina;
 use App\Models\Categoria;
 use App\Models\Paquete;
@@ -44,8 +45,11 @@ class PaqueteController extends Controller
             Paquete::contarPublicados($filtros)
         );
 
+        $paquetes = Paquete::publicadosConFiltros($filtros, $paginador->porPagina, $paginador->offset());
+
         $this->view('public/paquetes/catalogo', [
-            'paquetes' => Paquete::publicadosConFiltros($filtros, $paginador->porPagina, $paginador->offset()),
+            'paquetes' => $paquetes,
+            'resumenes' => Resena::resumenPorPaquetes(array_column($paquetes, 'id')),
             'categorias' => Categoria::activas(),
             'categoriaActiva' => $categoriaSlug,
             'tipoActivo' => $tipo,
@@ -71,25 +75,17 @@ class PaqueteController extends Controller
 
         $imagenes = Paquete::imagenes($paquete['id']);
         $salidas = Paquete::salidasFuturas($paquete['id']);
+        $resenas = Resena::aprobadasDelPaquete($paquete['id']);
+        $resumen = Resena::resumenPorPaquete($paquete['id']);
 
-        $jsonLd = json_encode([
-            '@context' => 'https://schema.org',
-            '@type' => 'TouristTrip',
-            'name' => $paquete['titulo'],
-            'description' => $paquete['resumen'],
-            'image' => !empty($paquete['imagen_portada']) ? (($_ENV['APP_URL'] ?? '') . $paquete['imagen_portada']) : null,
-            'offers' => [
-                '@type' => 'Offer',
-                'priceCurrency' => $paquete['moneda'],
-                'price' => $paquete['precio_desde'],
-            ],
-        ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        $jsonLd = PaqueteJsonLd::construir($paquete, $resumen, $resenas, (string) ($_ENV['APP_URL'] ?? ''));
 
         $this->view('public/paquetes/ficha', [
             'paquete' => $paquete,
             'imagenes' => $imagenes,
             'salidas' => $salidas,
-            'resenas' => Resena::aprobadasDelPaquete($paquete['id']),
+            'resenas' => $resenas,
+            'resumen' => $resumen,
         ], [
             'title' => $paquete['meta_title'] ?: ($paquete['titulo'] . ' | Dream Go Operadora Turistica'),
             'description' => $paquete['meta_description'] ?: $paquete['resumen'],

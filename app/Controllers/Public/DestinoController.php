@@ -5,6 +5,7 @@ namespace App\Controllers\Public;
 use App\Models\BloquePagina;
 use App\Models\Categoria;
 use App\Models\Paquete;
+use App\Models\Resena;
 use Core\Controller;
 
 class DestinoController extends Controller
@@ -35,6 +36,7 @@ class DestinoController extends Controller
         $this->view('public/destinos/mostrar', [
             'categoria' => $categoria,
             'paquetes' => $paquetes,
+            'resumenes' => Resena::resumenPorPaquetes(array_column($paquetes, 'id')),
         ], [
             'title' => $categoria['nombre'] . ' | Dream Go Operadora Turistica',
             'description' => $categoria['descripcion'] ?? ('Paquetes y excursiones en ' . $categoria['nombre']),

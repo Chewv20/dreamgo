@@ -2,8 +2,13 @@
 /** @var array $paquete */
 /** @var array $imagenes */
 /** @var array $salidas */
+/** @var array $resenas */
+/** @var array{promedio: float, total: int} $resumen */
 use App\Models\ConfiguracionSitio;
+use App\Models\Resena;
 use App\Services\WhatsAppLinkService;
+
+$resumen ??= ['promedio' => 0.0, 'total' => 0];
 
 $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     ConfiguracionSitio::get('whatsapp_numero', ''),
@@ -17,6 +22,15 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     </p>
     <h1><?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?></h1>
     <p><?= htmlspecialchars($paquete['resumen'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
+    <?php if ($resumen['total'] > 0): ?>
+      <p style="margin-top:0.5rem;">
+        <a href="#resenas" style="color:inherit;text-decoration:none;">
+          <span aria-hidden="true" style="letter-spacing:0.08em;"><?= str_repeat('★', (int) round($resumen['promedio'])) . str_repeat('☆', 5 - (int) round($resumen['promedio'])) ?></span>
+          <strong><?= number_format($resumen['promedio'], 1) ?></strong>
+          <span style="opacity:0.9;">(<?= (int) $resumen['total'] ?> <?= $resumen['total'] === 1 ? 'reseña' : 'reseñas' ?>)</span>
+        </a>
+      </p>
+    <?php endif; ?>
   </div>
 </section>
 
@@ -79,18 +93,21 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
 </section>
 
 <?php if (!empty($resenas)): ?>
-<section class="seccion contenedor">
+<section class="seccion contenedor" id="resenas">
   <div class="seccion__encabezado">
     <h2>Lo que dicen nuestros viajeros</h2>
+    <?php if ($resumen['total'] > 0): ?>
+      <p style="opacity:0.8;"><?= number_format($resumen['promedio'], 1) ?> / 5 &middot; <?= (int) $resumen['total'] ?> <?= $resumen['total'] === 1 ? 'reseña aprobada' : 'reseñas aprobadas' ?></p>
+    <?php endif; ?>
   </div>
   <div class="grid-tarjetas grid-tarjetas--3">
     <?php foreach ($resenas as $r): ?>
       <?php
-        $partesNombre = explode(' ', trim($r['cliente_nombre']));
-        $nombrePublico = $partesNombre[0] . (isset($partesNombre[1]) ? ' ' . mb_strtoupper(mb_substr($partesNombre[1], 0, 1)) . '.' : '');
+        $nombrePublico = Resena::nombrePublico((string) $r['cliente_nombre']);
+        $inicial = mb_strtoupper(mb_substr($nombrePublico, 0, 1));
       ?>
       <figure class="tarjeta-testimonio animar-entrada">
-        <span class="tarjeta-testimonio__avatar" aria-hidden="true"><?= htmlspecialchars(mb_strtoupper(mb_substr($partesNombre[0], 0, 1)), ENT_QUOTES, 'UTF-8') ?></span>
+        <span class="tarjeta-testimonio__avatar" aria-hidden="true"><?= htmlspecialchars($inicial, ENT_QUOTES, 'UTF-8') ?></span>
         <p style="color:#a85f4d;letter-spacing:0.1em;margin:0 0 0.5rem;"><?= str_repeat('★', (int) $r['calificacion']) . str_repeat('☆', 5 - (int) $r['calificacion']) ?></p>
         <blockquote>&quot;<?= htmlspecialchars($r['comentario'], ENT_QUOTES, 'UTF-8') ?>&quot;</blockquote>
         <figcaption><?= htmlspecialchars($nombrePublico, ENT_QUOTES, 'UTF-8') ?></figcaption>

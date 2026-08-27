@@ -309,9 +309,9 @@ SEO/contenido (reseñas agregadas + schema.org, blog de destinos).
 
 **Hechos en esta ronda:** #1 Comprobante PDF, #2 Cobro del saldo pendiente (2026-08-26),
 #3 Atribución de leads / UTM, #3-bis GA4 + Meta Pixel, #3-ter banner de consentimiento +
-Aviso de Privacidad, #4-a Bitácora de acciones admin y #4-b CRM ligero de cotizaciones
-(2026-08-27).
-**Pendientes:** #5 reseñas agregadas + schema.org + blog
+Aviso de Privacidad, #4-a Bitácora de acciones admin, #4-b CRM ligero de cotizaciones y
+#5-a Reseñas agregadas + schema.org (2026-08-27).
+**Pendientes:** #5-b Blog de destinos (única mejora que queda de la segunda ronda).
 — detallados en la sección "Pendiente de la segunda ronda" más abajo.
 
 ### 1. Comprobante / voucher PDF de la reserva
@@ -634,36 +634,53 @@ Aviso de Privacidad, #4-a Bitácora de acciones admin y #4-b CRM ligero de cotiz
   `/admin/cotizaciones/exportar` sigue siendo el CSV (no lo captura la ruta de detalle);
   rutas nuevas → 302 login sin sesión. Suite: **57 tests**. Datos de prueba borrados.
 
+### 5-a. Reseñas agregadas + schema.org
+
+- Estado: **hecho** (2026-08-27). Primera mitad de #5 (el blog queda como 5-b abajo).
+
+  **Piezas nuevas:**
+  - `Resena::resumenPorPaquete(int)` → `['promedio' => float, 'total' => int]` (AVG/COUNT
+    sobre `estado='aprobada'`) y `resumenPorPaquetes(array $ids)` (versión en lote para las
+    tarjetas, evita N+1). `Resena::nombrePublico(string)` extraído de la vista ("Juan Pérez"
+    → "Juan P.", por privacidad) y reusado en el JSON-LD.
+  - `App\Helpers\PaqueteJsonLd::construir(paquete, resumen, resenas, appUrl)`: arma un array
+    de nodos JSON-LD para la ficha — `TouristTrip` + `BreadcrumbList` siempre, y un nodo
+    `Product` con `AggregateRating` + `Review` **solo si hay reseñas aprobadas** (Google no
+    muestra el rich snippet de estrellas sobre `TouristTrip`, sí sobre `Product`). Reemplaza
+    el `json_encode` inline que tenía `PaqueteController::ficha()`. El `<script
+    type="application/ld+json">` ya existía en el layout y convive con la CSP estricta.
+  - Estrellas + "N reseñas" en `paquetes/ficha.php` (con ancla `#resenas`) y en
+    `paquetes/_tarjeta.php`. Se pasa `$resumenes` (lote) desde `PaqueteController::catalogo`,
+    `HomeController::index` (destacados) y `DestinoController::mostrar` — la tarjeta se
+    protege si no llega (`isset`).
+  - Tests: `tests/Unit/Helpers/PaqueteJsonLdTest.php` (8 casos: sin reseñas no hay
+    `Product`/`AggregateRating`; con reseñas el `Product` trae `reviewCount`/`review[]` con
+    nombres públicos y fechas; salida es JSON válido y sin `<`/`>` crudos; `nombrePublico`).
+
+  **Probado en vivo** (BD real, con 2 reseñas aprobadas + 1 pendiente en el paquete 1): la
+  pendiente no cuenta (promedio 4.5, total 2); la ficha muestra las estrellas y emite 3
+  nodos JSON-LD válidos (`TouristTrip, Product, BreadcrumbList`) con `ratingValue "4.5"` /
+  `reviewCount 2`; catálogo y home destacados muestran "4.5 · 2 reseñas" en la tarjeta; un
+  paquete sin reseñas no emite `Product` ni la sección `#resenas`. Sin warnings en el log.
+  Suite: **65 tests**. Datos de prueba borrados.
+
+  **No se tocó** Open Graph / Twitter cards (el `og:image` por paquete ya sale bien vía
+  `meta['ogImage']`; no hacía falta más).
+
 ## Pendiente de la segunda ronda (para otra sesión)
 
-Ítems detectados en el análisis del 2026-08-26 y todavía sin implementar. Orden sugerido:
-#5. El ítem es autocontenido; conviene probar y revisar antes de seguir. Antes de arrancar,
-verificar que los archivos/tablas citados sigan como se describen aquí.
+### 5-b. Blog de destinos
 
-### 5. Reseñas agregadas + schema.org + blog de destinos
-
-- **Problema:** las reseñas aprobadas se muestran en la ficha del paquete pero sin promedio
-  ni conteo, y el sitio no emite datos estructurados — se pierde el rich snippet de
-  estrellas en Google. No hay contenido editorial (blog), que es la vía más barata de
-  tráfico orgánico.
-- **Alcance reseñas agregadas:** método `Resena::resumenPorPaquete(int)` →
-  `['promedio' => float, 'total' => int]` (una query `AVG`/`COUNT` sobre
-  `estado = 'aprobada'`). Mostrar estrellas + "(N reseñas)" en `paquetes/ficha.php` y en la
-  tarjeta del catálogo (`paquetes/_tarjeta.php`). Emitir JSON-LD `Product` +
-  `AggregateRating` + `Review` en la ficha, y `BreadcrumbList` en las páginas internas
-  (bloque `<script type="application/ld+json">` — OK con la CSP, no es `script-src`
-  ejecutable; confirmar). Revisar de paso Open Graph / Twitter cards por paquete en
-  `layouts/public.php` (el `view()` ya acepta `meta['ogImage']`).
-- **Alcance blog (más grande, se puede separar en otra sesión):** tabla `articulos`
-  (`slug` único, `titulo`, `resumen`, `contenido` HTML sanitizado con `HtmlSanitizer`,
-  `imagen`, `estado` borrador/publicado, `publicado_en`, SEO meta). CRUD admin reusando el
-  patrón de `PaqueteAdminController` (+`ImageUploadService`, +slug con `Slugify`, permiso
-  nuevo `articulos.gestionar`). Rutas públicas `/blog` y `/blog/{slug}`. Sumar las URLs a
-  `SitemapService`. Enlazar artículos ↔ paquetes/categorías para cross-linking.
-- **Decisión pendiente:** ¿el blog entra en esta ronda o se pospone? ¿los artículos se
-  editan como HTML libre (como `bloques_pagina`) o con un editor más estructurado?
-- Reseñas agregadas + schema.org: sin migración (usa datos existentes). Blog: migraciones
-  nuevas + `schema.sql`.
+- **Problema:** no hay contenido editorial, que es la vía más barata de tráfico orgánico.
+- **Alcance:** tabla `articulos` (`slug` único, `titulo`, `resumen`, `contenido` HTML
+  sanitizado con `HtmlSanitizer`, `imagen`, `estado` borrador/publicado, `publicado_en`, SEO
+  meta). CRUD admin reusando el patrón de `PaqueteAdminController` (+`ImageUploadService`,
+  +slug con `Slugify`, permiso nuevo `articulos.gestionar`; auditar con `Auditoria`). Rutas
+  públicas `/blog` y `/blog/{slug}`. Sumar las URLs a `SitemapService`. JSON-LD `Article` +
+  `BreadcrumbList` en cada nota. Enlazar artículos ↔ paquetes/categorías para cross-linking.
+- **Decisión pendiente:** ¿los artículos se editan como HTML libre (como `bloques_pagina`) o
+  con un editor más estructurado?
+- Migración nueva + `schema.sql` + `seed_demo.sql` (permiso al rol Administrador).
 
 ### Otros candidatos (del análisis, menor prioridad)
 
