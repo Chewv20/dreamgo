@@ -303,10 +303,13 @@ todos en MXN) — orden: #9 Comparador de paquetes → #8 Multi-moneda real.
 ## Segunda ronda — análisis 2026-08-26
 
 Revisión nueva del estado del proyecto (funciones actuales y dónde extender). Prioridades
-detectadas: cerrar el ciclo de venta (cobro del saldo pendiente, comprobante PDF), tracking
+detectadas: cerrar el ciclo de venta (comprobante PDF, cobro del saldo pendiente), tracking
 de origen de lead (UTM), CRM ligero de cotizaciones + bitácora de acciones admin, y
-SEO/contenido (reseñas agregadas + schema.org, blog de destinos). Se arranca por el
-comprobante PDF.
+SEO/contenido (reseñas agregadas + schema.org, blog de destinos).
+
+**Hechos en esta ronda:** #1 Comprobante PDF y #2 Cobro del saldo pendiente (2026-08-26).
+**Pendientes:** #3 UTM, #4 CRM ligero + bitácora, #5 reseñas agregadas + schema.org + blog
+— detallados en la sección "Pendiente de la segunda ronda" más abajo.
 
 ### 1. Comprobante / voucher PDF de la reserva
 
@@ -425,3 +428,86 @@ comprobante PDF.
 
   **Follow-ups anotados** (no en este alcance): registrar a mano un pago de saldo offline
   (efectivo/transferencia) desde el panel; pagos parciales de importe libre; reembolsos.
+
+## Pendiente de la segunda ronda (para otra sesión)
+
+Ítems detectados en el análisis del 2026-08-26 y todavía sin implementar. Orden sugerido:
+#3 → #4 → #5. Cada uno es autocontenido; conviene abordar uno por sesión, probando y
+revisando antes de seguir. Antes de arrancar cualquiera, verificar que los archivos/tablas
+citados sigan como se describen aquí.
+
+### 3. UTM / origen de lead
+
+- **Problema:** `cotizaciones` guarda `ip_origen` pero no de dónde viene el lead. Sin
+  `utm_source/medium/campaign` ni `referrer` no se puede medir qué canal convierte, así que
+  no hay con qué priorizar el resto del backlog.
+- **Alcance:** columnas `utm_source`, `utm_medium`, `utm_campaign`, `referrer` (todas
+  `VARCHAR NULL`) en `cotizaciones` y en `reservas` (o en `clientes`, a decidir — la reserva
+  es el punto de conversión real). Capturarlas en los `POST` de
+  `App\Controllers\Public\CotizadorController::enviar()` y
+  `ReservaPublicaController::crear()` leyendo los `utm_*` de la query (que el front debe
+  arrastrar desde el landing hasta el form — un `<input hidden>` poblado por JS en
+  `site.js`, o `sessionStorage`) y `$_SERVER['HTTP_REFERER']` como respaldo.
+- **Panel:** mostrar/filtrar por `utm_source` en `/admin/cotizaciones` y sumarlo al export
+  CSV (`CotizacionAdminController::exportarCsv`, `Cotizacion::todasAdmin`). Opcional:
+  desglose por canal en el dashboard (`DashboardController`, junto a la tasa de conversión).
+- **Decisión pendiente con el usuario:** ¿registramos también `gclid`/`fbclid`? ¿y GA4 /
+  Meta Pixel con eventos `generate_lead`/`purchase`? (esto último obliga a abrir una
+  excepción en la CSP `script-src` con nonce — ver `AUDITORIA.md` punto 7).
+- Migración nueva + reflejo en `schema.sql`. Sin dependencias externas.
+
+### 4. CRM ligero de cotizaciones + bitácora de acciones admin
+
+- **Problema:** las cotizaciones solo cambian de `estado` (`CotizacionAdminController::cambiarEstado`).
+  No hay asignación a un asesor, notas de seguimiento ni recordatorio de contacto: es donde
+  se pierde la conversión de leads que ya entran. Y no queda registro de quién confirmó o
+  canceló una reserva (solo existe `intentos_login`).
+- **Alcance CRM:** en `cotizaciones`, columnas `asignado_a` (FK a `usuarios_admin`, NULL),
+  `seguimiento_en` (DATETIME NULL, próximo contacto). Tabla nueva `cotizacion_notas`
+  (`cotizacion_id`, `usuario_id`, `nota TEXT`, `creado_en`) para el historial de
+  seguimiento. UI en `/admin/cotizaciones` (detalle nuevo, hoy solo hay listado): asignar,
+  agregar nota, fijar fecha de seguimiento. Permiso `cotizaciones.gestionar` ya existe.
+  Opcional: cron que avise al asesor de seguimientos vencidos (reusa `MailerService`).
+- **Alcance bitácora:** tabla `bitacora_admin` (`usuario_id`, `accion` p. ej.
+  `reserva.confirmar`, `entidad_tipo`, `entidad_id`, `detalle` JSON/TEXT, `ip`, `creado_en`).
+  Un helper `App\Helpers\Auditoria::registrar(...)` llamado desde los puntos sensibles:
+  `ReservaAdminController::confirmar/cancelar/crear`, `CotizacionAdminController::cambiarEstado`,
+  `RolAdminController` (matriz de permisos), `UsuarioAdminController`,
+  `ConfiguracionController`. Vista de solo lectura en `/admin` (permiso nuevo
+  `bitacora.ver`). Cron de purga (>N meses), en `cron/limpiar_intentos_login.php` o aparte.
+- **Decisión pendiente:** ¿bitácora como tabla propia (simple, lo recomendado) o un log
+  estructurado a archivo? ¿se audita también el login exitoso (hoy en `intentos_login`)?
+- Migraciones nuevas + `schema.sql` + `seed_demo.sql` (permisos nuevos al rol Administrador,
+  `INSERT IGNORE`).
+
+### 5. Reseñas agregadas + schema.org + blog de destinos
+
+- **Problema:** las reseñas aprobadas se muestran en la ficha del paquete pero sin promedio
+  ni conteo, y el sitio no emite datos estructurados — se pierde el rich snippet de
+  estrellas en Google. No hay contenido editorial (blog), que es la vía más barata de
+  tráfico orgánico.
+- **Alcance reseñas agregadas:** método `Resena::resumenPorPaquete(int)` →
+  `['promedio' => float, 'total' => int]` (una query `AVG`/`COUNT` sobre
+  `estado = 'aprobada'`). Mostrar estrellas + "(N reseñas)" en `paquetes/ficha.php` y en la
+  tarjeta del catálogo (`paquetes/_tarjeta.php`). Emitir JSON-LD `Product` +
+  `AggregateRating` + `Review` en la ficha, y `BreadcrumbList` en las páginas internas
+  (bloque `<script type="application/ld+json">` — OK con la CSP, no es `script-src`
+  ejecutable; confirmar). Revisar de paso Open Graph / Twitter cards por paquete en
+  `layouts/public.php` (el `view()` ya acepta `meta['ogImage']`).
+- **Alcance blog (más grande, se puede separar en otra sesión):** tabla `articulos`
+  (`slug` único, `titulo`, `resumen`, `contenido` HTML sanitizado con `HtmlSanitizer`,
+  `imagen`, `estado` borrador/publicado, `publicado_en`, SEO meta). CRUD admin reusando el
+  patrón de `PaqueteAdminController` (+`ImageUploadService`, +slug con `Slugify`, permiso
+  nuevo `articulos.gestionar`). Rutas públicas `/blog` y `/blog/{slug}`. Sumar las URLs a
+  `SitemapService`. Enlazar artículos ↔ paquetes/categorías para cross-linking.
+- **Decisión pendiente:** ¿el blog entra en esta ronda o se pospone? ¿los artículos se
+  editan como HTML libre (como `bloques_pagina`) o con un editor más estructurado?
+- Reseñas agregadas + schema.org: sin migración (usa datos existentes). Blog: migraciones
+  nuevas + `schema.sql`.
+
+### Otros candidatos (del análisis, menor prioridad)
+
+- Registrar pago offline del saldo desde el panel (follow-up del #2 de esta ronda).
+- CI (GitHub Actions corriendo `composer test`), observabilidad (Sentry), caché del
+  catálogo/home, CAPTCHA (Turnstile) en formularios públicos como capa sobre el rate-limit.
+- Datos por pasajero en la reserva (hoy solo `num_personas`) para manifiestos de salida.
