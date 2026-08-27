@@ -5,6 +5,7 @@ declare(strict_types=1);
 /** @var Core\Router $router */
 
 use App\Controllers\Admin\AuthController;
+use App\Controllers\Admin\BitacoraController;
 use App\Controllers\Admin\ConfiguracionController;
 use App\Controllers\Admin\ContenidoController;
 use App\Controllers\Admin\CotizacionAdminController;
@@ -81,6 +82,8 @@ $router->get('/admin/cambiar-password', [AuthController::class, 'cambiarPassword
 $router->post('/admin/cambiar-password', [AuthController::class, 'cambiarPassword'], ['auth' => true]);
 
 $router->get('/admin', [DashboardController::class, 'index'], ['auth' => true]);
+
+$router->get('/admin/bitacora', [BitacoraController::class, 'index'], ['auth' => true, 'permiso' => 'bitacora.ver']);
 
 $router->get('/admin/paquetes', [PaqueteAdminController::class, 'index'], ['auth' => true, 'permiso' => 'paquetes.ver']);
 $router->get('/admin/paquetes/crear', [PaqueteAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'paquetes.crear']);

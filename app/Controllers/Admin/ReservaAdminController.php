@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Helpers\Auditoria;
 use App\Helpers\Flash;
 use App\Helpers\Validator;
 use App\Models\PagoReserva;
@@ -142,6 +143,8 @@ class ReservaAdminController extends AdminController
             $this->redirect('/admin/reservas/crear?salida_id=' . (int) $datos['salida_id']);
         }
 
+        Auditoria::registrar('reserva.crear', 'reserva', (int) $reserva['id'], 'Codigo ' . $reserva['codigo_reserva'] . ', ' . (int) $datos['num_personas'] . ' persona(s)');
+
         Flash::set('exito', 'Reserva ' . $reserva['codigo_reserva'] . ' creada. El cupo ya quedo apartado.');
         $this->redirect('/admin/reservas/' . $reserva['id']);
     }
@@ -159,6 +162,8 @@ class ReservaAdminController extends AdminController
         $reserva = Reserva::conDetalle($id);
         (new MailerService($this->db))->enviarConfirmacionReserva($reserva);
 
+        Auditoria::registrar('reserva.confirmar', 'reserva', $id, 'Codigo ' . ($reserva['codigo_reserva'] ?? ''));
+
         Flash::set('exito', 'Reserva confirmada y correo enviado al cliente.');
         $this->redirect('/admin/reservas/' . $id);
     }
@@ -172,6 +177,8 @@ class ReservaAdminController extends AdminController
             Flash::set('error', 'La reserva no se pudo cancelar.');
             $this->redirect('/admin/reservas/' . $id);
         }
+
+        Auditoria::registrar('reserva.cancelar', 'reserva', $id);
 
         Flash::set('exito', 'Reserva cancelada y cupo liberado.');
         $this->redirect('/admin/reservas/' . $id);

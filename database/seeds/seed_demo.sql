@@ -31,7 +31,8 @@ INSERT INTO permisos (clave, modulo, descripcion) VALUES
   ('contenido.gestionar', 'contenido', 'Editar textos, orden y colores de las paginas publicas'),
   ('resenas.ver', 'resenas', 'Ver el listado de resenas de clientes'),
   ('resenas.gestionar', 'resenas', 'Aprobar o rechazar resenas de clientes'),
-  ('suscriptores.ver', 'suscriptores', 'Ver el listado de suscriptores al newsletter');
+  ('suscriptores.ver', 'suscriptores', 'Ver el listado de suscriptores al newsletter'),
+  ('bitacora.ver', 'bitacora', 'Ver la bitacora de acciones del panel');
 
 -- Administrador: todos los permisos
 INSERT INTO rol_permiso (rol_id, permiso_id)

@@ -373,4 +373,23 @@ CREATE TABLE IF NOT EXISTS log_correos_enviados (
 CREATE INDEX idx_logcorreo_tipo ON log_correos_enviados(tipo);
 CREATE INDEX idx_logcorreo_referencia ON log_correos_enviados(referencia_tipo, referencia_id);
 
+-- ==========================================================
+-- BITACORA DE ACCIONES DEL PANEL (auditoria)
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS bitacora_admin (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT UNSIGNED NULL,
+  usuario_nombre VARCHAR(150) NULL,
+  accion VARCHAR(50) NOT NULL,
+  entidad_tipo VARCHAR(30) NULL,
+  entidad_id INT UNSIGNED NULL,
+  detalle VARCHAR(500) NULL,
+  ip VARCHAR(45) NULL,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_bitacora_creado (creado_en),
+  INDEX idx_bitacora_accion (accion),
+  INDEX idx_bitacora_entidad (entidad_tipo, entidad_id),
+  CONSTRAINT fk_bitacora_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios_admin(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 SET FOREIGN_KEY_CHECKS = 1;

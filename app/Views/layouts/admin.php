@@ -31,6 +31,7 @@
       <?php if (Auth::hasPermission('roles.gestionar')): ?><a href="/admin/roles">Roles y permisos</a><?php endif; ?>
       <?php if (Auth::hasPermission('contenido.gestionar')): ?><a href="/admin/contenido">Contenido del sitio</a><a href="/admin/colores">Colores del sitio</a><?php endif; ?>
       <?php if (Auth::hasPermission('configuracion.gestionar')): ?><a href="/admin/configuracion">Configuracion</a><?php endif; ?>
+      <?php if (Auth::hasPermission('bitacora.ver')): ?><a href="/admin/bitacora">Bitacora</a><?php endif; ?>
     </nav>
     <form method="post" action="/admin/logout" class="admin-sidebar__logout">
       <?= \App\Helpers\Csrf::field() ?>

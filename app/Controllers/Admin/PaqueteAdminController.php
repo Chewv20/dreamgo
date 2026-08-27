@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Helpers\Auditoria;
 use App\Helpers\Flash;
 use App\Helpers\HtmlSanitizer;
 use App\Helpers\Slugify;
@@ -76,6 +77,8 @@ class PaqueteAdminController extends AdminController
         $this->procesarImagenPortada($id, $slug);
         (new SitemapService($this->db))->regenerar();
 
+        Auditoria::registrar('paquete.crear', 'paquete', $id, $datos['titulo'] . ' (' . $datos['estado'] . ')');
+
         Flash::set('exito', 'Paquete creado correctamente.');
         $this->redirect('/admin/paquetes');
     }
@@ -136,6 +139,8 @@ class PaqueteAdminController extends AdminController
         $this->procesarImagenPortada($id, $slug);
         (new SitemapService($this->db))->regenerar();
 
+        Auditoria::registrar('paquete.editar', 'paquete', $id, $datos['titulo'] . ' (' . $datos['estado'] . ')');
+
         Flash::set('exito', 'Paquete actualizado correctamente.');
         $this->redirect('/admin/paquetes');
     }
@@ -144,9 +149,10 @@ class PaqueteAdminController extends AdminController
     {
         $this->verifyCsrf();
 
-        $this->encontrarO404(Paquete::class, $id);
+        $paquete = $this->encontrarO404(Paquete::class, $id);
 
         Paquete::update($id, ['estado' => 'archivado']);
+        Auditoria::registrar('paquete.archivar', 'paquete', $id, (string) ($paquete['titulo'] ?? ''));
         Flash::set('exito', 'Paquete archivado.');
         $this->redirect('/admin/paquetes');
     }

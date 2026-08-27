@@ -17,8 +17,14 @@ $stmtLogin->execute();
 $stmtAccion = $db->prepare('DELETE FROM intentos_accion WHERE creado_en < (NOW() - INTERVAL 30 DAY)');
 $stmtAccion->execute();
 
+// bitacora_admin (auditoria del panel, ver App\Helpers\Auditoria) tambien es de solo
+// crecimiento; se conserva mas tiempo que los intentos porque es informacion de auditoria.
+$stmtBitacora = $db->prepare('DELETE FROM bitacora_admin WHERE creado_en < (NOW() - INTERVAL 12 MONTH)');
+$stmtBitacora->execute();
+
 cron_log(
     'limpiar_intentos_login',
     $stmtLogin->rowCount() . ' registro(s) de intentos de login purgado(s), '
-    . $stmtAccion->rowCount() . ' registro(s) de intentos_accion purgado(s).'
+    . $stmtAccion->rowCount() . ' registro(s) de intentos_accion purgado(s), '
+    . $stmtBitacora->rowCount() . ' registro(s) de bitacora_admin purgado(s).'
 );

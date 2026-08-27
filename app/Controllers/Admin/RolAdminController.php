@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Helpers\Auditoria;
 use App\Helpers\Flash;
 use App\Models\Permiso;
 use App\Models\Rol;
@@ -32,11 +33,13 @@ class RolAdminController extends AdminController
             $this->redirect('/admin/roles');
         }
 
-        Rol::insert([
+        $rolId = Rol::insert([
             'nombre' => $nombre,
             'descripcion' => trim((string) $this->request->input('descripcion', '')) ?: null,
             'es_sistema' => 0,
         ]);
+
+        Auditoria::registrar('rol.crear', 'rol', $rolId, 'Nombre: ' . $nombre);
 
         Flash::set('exito', 'Rol creado correctamente. Ahora puedes asignarle permisos.');
         $this->redirect('/admin/roles');
@@ -61,6 +64,7 @@ class RolAdminController extends AdminController
         }
 
         Rol::delete($id);
+        Auditoria::registrar('rol.eliminar', 'rol', $id, 'Nombre: ' . ($rol['nombre'] ?? ''));
         Flash::set('exito', 'Rol eliminado.');
         $this->redirect('/admin/roles');
     }
@@ -83,6 +87,8 @@ class RolAdminController extends AdminController
             $permisoIds = array_map('intval', $seleccion[$rol['id']] ?? []);
             Rol::sincronizarPermisos((int) $rol['id'], $permisoIds);
         }
+
+        Auditoria::registrar('rol.permisos', 'rol', null, 'Se guardo la matriz de permisos de roles');
 
         Flash::set('exito', 'Permisos actualizados correctamente.');
         $this->redirect('/admin/roles');

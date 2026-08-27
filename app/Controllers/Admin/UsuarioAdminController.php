@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Helpers\Auditoria;
 use App\Helpers\Flash;
 use App\Helpers\PasswordPolicy;
 use App\Helpers\Validator;
@@ -49,13 +50,15 @@ class UsuarioAdminController extends AdminController
             $this->redirect('/admin/usuarios/crear');
         }
 
-        Usuario::insert([
+        $usuarioId = Usuario::insert([
             'nombre' => $datos['nombre'],
             'email' => $datos['email'],
             'password_hash' => password_hash((string) $datos['password'], PASSWORD_DEFAULT),
             'rol_id' => (int) $datos['rol_id'],
             'activo' => 1,
         ]);
+
+        Auditoria::registrar('usuario.crear', 'usuario', $usuarioId, $datos['email'] . ', rol #' . (int) $datos['rol_id']);
 
         Flash::set('exito', 'Usuario creado correctamente.');
         $this->redirect('/admin/usuarios');
@@ -103,6 +106,13 @@ class UsuarioAdminController extends AdminController
         }
 
         Usuario::update($id, $datos);
+
+        $cambios = 'rol #' . $datos['rol_id'] . ', ' . ($datos['activo'] ? 'activo' : 'inactivo');
+        if (isset($datos['password_hash'])) {
+            $cambios .= ', contrasena restablecida';
+        }
+        Auditoria::registrar('usuario.editar', 'usuario', $id, $cambios);
+
         Flash::set('exito', 'Usuario actualizado.');
         $this->redirect('/admin/usuarios');
     }

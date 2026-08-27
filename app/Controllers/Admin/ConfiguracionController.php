@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Helpers\Auditoria;
 use App\Helpers\Flash;
 use App\Models\ConfiguracionSitio;
 
@@ -41,9 +42,17 @@ class ConfiguracionController extends AdminController
     {
         $this->verifyCsrf();
 
+        $cambiadas = [];
         foreach (self::CLAVES_EDITABLES as $clave) {
             $valor = (string) $this->request->input($clave, '');
+            if ($valor !== (string) ConfiguracionSitio::get($clave, '')) {
+                $cambiadas[] = $clave;
+            }
             ConfiguracionSitio::set($clave, $valor);
+        }
+
+        if ($cambiadas !== []) {
+            Auditoria::registrar('configuracion.guardar', 'configuracion', null, 'Claves: ' . implode(', ', $cambiadas));
         }
 
         Flash::set('exito', 'Configuracion actualizada correctamente.');

@@ -308,9 +308,9 @@ de origen de lead (UTM), CRM ligero de cotizaciones + bitácora de acciones admi
 SEO/contenido (reseñas agregadas + schema.org, blog de destinos).
 
 **Hechos en esta ronda:** #1 Comprobante PDF, #2 Cobro del saldo pendiente (2026-08-26),
-#3 Atribución de leads / UTM, #3-bis GA4 + Meta Pixel y #3-ter banner de consentimiento +
-Aviso de Privacidad (2026-08-27).
-**Pendientes:** #4 CRM ligero + bitácora, #5 reseñas agregadas + schema.org + blog
+#3 Atribución de leads / UTM, #3-bis GA4 + Meta Pixel, #3-ter banner de consentimiento +
+Aviso de Privacidad y #4-a Bitácora de acciones admin (2026-08-27).
+**Pendientes:** #4-b CRM ligero de cotizaciones, #5 reseñas agregadas + schema.org + blog
 — detallados en la sección "Pendiente de la segunda ronda" más abajo.
 
 ### 1. Comprobante / voucher PDF de la reserva
@@ -554,36 +554,63 @@ Aviso de Privacidad (2026-08-27).
   **Pendiente para la UE (si aplica algún día):** el banner es aceptar/rechazar simple; para
   RGPD haría falta Google Consent Mode v2 y granularidad por finalidad.
 
+### 4-a. Bitácora de acciones admin
+
+- Estado: **hecho** (2026-08-27). Primera mitad del ítem #4 (la otra mitad, el CRM ligero de
+  cotizaciones, queda pendiente como 4-b abajo). Se decidió con el usuario: bitácora primero
+  (menos riesgo, solo escribe registros), CRM después.
+
+  **Piezas nuevas:**
+  - Tabla `bitacora_admin` (migración `0019` + `schema.sql`): `usuario_id` (FK
+    `ON DELETE SET NULL`), `usuario_nombre` desnormalizado (el registro sigue legible aunque
+    se borre el usuario), `accion`, `entidad_tipo`, `entidad_id`, `detalle` (texto corto),
+    `ip`, `creado_en`. Decisión: tabla propia (no log a archivo).
+  - Permiso `bitacora.ver` (migración `INSERT IGNORE` + asignado al rol Administrador;
+    también en `seed_demo.sql`).
+  - `App\Helpers\Auditoria::registrar(accion, entidadTipo?, entidadId?, detalle?)`: toma
+    `usuario_id`/`usuario_nombre` de `Core\Auth` y la IP de `$_SERVER`; trunca a los largos
+    de columna; **todo en try/catch** — una bitácora rota nunca tumba la acción auditada.
+  - `App\Models\Bitacora` + `BitacoraController` + `GET /admin/bitacora` (`bitacora.ver`) +
+    vista con filtro por `accion` y paginación. Enlace en el sidebar (`layouts/admin.php`).
+  - Cableado en: `reserva.crear` / `reserva.confirmar` / `reserva.cancelar`,
+    `cotizacion.estado` (con "anterior -> nuevo"), `rol.crear` / `rol.eliminar` /
+    `rol.permisos`, `usuario.crear` / `usuario.editar`, `configuracion.guardar` (solo si
+    cambió alguna clave, y lista cuáles), `paquete.crear` / `paquete.editar` /
+    `paquete.archivar`, `resena.estado`, `oferta.enviar_suscriptores`.
+  - `cron/limpiar_intentos_login.php` ahora también purga `bitacora_admin` de más de 12
+    meses (se conserva más que los intentos por ser info de auditoría). `cron/README.md`
+    actualizado.
+  - **No se audita el login** (exitoso o fallido): ya está en `intentos_login` (auditoría
+    2026-08-25) y duplicarlo no aporta.
+
+  **Probado en vivo** (BD real): la tabla y el permiso quedan bien; `Auditoria::registrar()`
+  escribe la fila con usuario/entidad/detalle/IP correctos y trunca `accion` a 50 /
+  `detalle` a 500; end-to-end (cambio de estado de cotización) deja el registro y la vista
+  lo muestra con su filtro; `/admin/bitacora` sin sesión → 302 login; el cron de purga corre
+  y reporta el conteo. Suite: **52 tests** (+2 de `AuditoriaTest`, que verifican que
+  `registrar()` no lanza aunque no haya BD).
+
 ## Pendiente de la segunda ronda (para otra sesión)
 
 Ítems detectados en el análisis del 2026-08-26 y todavía sin implementar. Orden sugerido:
-#4 → #5. Cada uno es autocontenido; conviene abordar uno por sesión, probando y
+#4-b → #5. Cada uno es autocontenido; conviene abordar uno por sesión, probando y
 revisando antes de seguir. Antes de arrancar cualquiera, verificar que los archivos/tablas
 citados sigan como se describen aquí.
 
-### 4. CRM ligero de cotizaciones + bitácora de acciones admin
+### 4-b. CRM ligero de cotizaciones
 
 - **Problema:** las cotizaciones solo cambian de `estado` (`CotizacionAdminController::cambiarEstado`).
   No hay asignación a un asesor, notas de seguimiento ni recordatorio de contacto: es donde
-  se pierde la conversión de leads que ya entran. Y no queda registro de quién confirmó o
-  canceló una reserva (solo existe `intentos_login`).
-- **Alcance CRM:** en `cotizaciones`, columnas `asignado_a` (FK a `usuarios_admin`, NULL),
+  se pierde la conversión de leads que ya entran.
+- **Alcance:** en `cotizaciones`, columnas `asignado_a` (FK a `usuarios_admin`, NULL),
   `seguimiento_en` (DATETIME NULL, próximo contacto). Tabla nueva `cotizacion_notas`
   (`cotizacion_id`, `usuario_id`, `nota TEXT`, `creado_en`) para el historial de
   seguimiento. UI en `/admin/cotizaciones` (detalle nuevo, hoy solo hay listado): asignar,
   agregar nota, fijar fecha de seguimiento. Permiso `cotizaciones.gestionar` ya existe.
-  Opcional: cron que avise al asesor de seguimientos vencidos (reusa `MailerService`).
-- **Alcance bitácora:** tabla `bitacora_admin` (`usuario_id`, `accion` p. ej.
-  `reserva.confirmar`, `entidad_tipo`, `entidad_id`, `detalle` JSON/TEXT, `ip`, `creado_en`).
-  Un helper `App\Helpers\Auditoria::registrar(...)` llamado desde los puntos sensibles:
-  `ReservaAdminController::confirmar/cancelar/crear`, `CotizacionAdminController::cambiarEstado`,
-  `RolAdminController` (matriz de permisos), `UsuarioAdminController`,
-  `ConfiguracionController`. Vista de solo lectura en `/admin` (permiso nuevo
-  `bitacora.ver`). Cron de purga (>N meses), en `cron/limpiar_intentos_login.php` o aparte.
-- **Decisión pendiente:** ¿bitácora como tabla propia (simple, lo recomendado) o un log
-  estructurado a archivo? ¿se audita también el login exitoso (hoy en `intentos_login`)?
-- Migraciones nuevas + `schema.sql` + `seed_demo.sql` (permisos nuevos al rol Administrador,
-  `INSERT IGNORE`).
+  Registrar en la bitácora (ya existe, ver 4-a) las acciones `cotizacion.asignar` /
+  `cotizacion.nota`. Opcional: cron que avise al asesor de seguimientos vencidos (reusa
+  `MailerService`).
+- Migración nueva + `schema.sql`.
 
 ### 5. Reseñas agregadas + schema.org + blog de destinos
 

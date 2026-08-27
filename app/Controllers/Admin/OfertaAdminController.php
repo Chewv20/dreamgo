@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Helpers\Auditoria;
 use App\Helpers\Flash;
 use App\Helpers\Validator;
 use App\Models\CodigoDescuento;
@@ -104,6 +105,8 @@ class OfertaAdminController extends AdminController
         $this->encontrarO404(CodigoDescuento::class, $id);
 
         $encolados = OfertaEnvioCola::encolarParaOferta($id);
+
+        Auditoria::registrar('oferta.enviar_suscriptores', 'oferta', $id, $encolados . ' suscriptor(es) encolado(s)');
 
         Flash::set(
             'exito',

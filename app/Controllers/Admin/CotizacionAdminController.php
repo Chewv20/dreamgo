@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Helpers\Auditoria;
 use App\Helpers\Flash;
 use App\Models\Cotizacion;
 use Core\Response;
@@ -56,7 +57,8 @@ class CotizacionAdminController extends AdminController
     {
         $this->verifyCsrf();
 
-        if (!Cotizacion::find($id)) {
+        $cotizacion = Cotizacion::find($id);
+        if (!$cotizacion) {
             $this->abort(404);
         }
 
@@ -66,6 +68,7 @@ class CotizacionAdminController extends AdminController
         }
 
         Cotizacion::update($id, ['estado' => $estado]);
+        Auditoria::registrar('cotizacion.estado', 'cotizacion', $id, ($cotizacion['estado'] ?? '?') . ' -> ' . $estado);
         Flash::set('exito', 'Estado actualizado.');
         $this->redirect('/admin/cotizaciones');
     }
