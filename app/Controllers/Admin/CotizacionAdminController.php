@@ -10,17 +10,25 @@ class CotizacionAdminController extends AdminController
 {
     public function index(): void
     {
-        $paginador = $this->paginar(Cotizacion::contarTotal());
+        $origen = trim((string) $this->request->query('origen', ''));
+        $origen = $origen !== '' ? $origen : null;
+
+        $paginador = $this->paginar(Cotizacion::contarTotal($origen));
 
         $this->view('admin/cotizaciones/index', [
-            'cotizaciones' => Cotizacion::adminListado($paginador->porPagina, $paginador->offset()),
+            'cotizaciones' => Cotizacion::adminListado($paginador->porPagina, $paginador->offset(), $origen),
             'paginador' => $paginador,
+            'fuentes' => Cotizacion::fuentesDistintas(),
+            'origenActivo' => $origen,
         ], ['title' => 'Cotizaciones | Dream Go', 'heading' => 'Cotizaciones']);
     }
 
     public function exportarCsv(): void
     {
-        $encabezados = ['Fecha', 'Nombre', 'Email', 'Telefono', 'Paquete', 'Personas', 'Fecha tentativa', 'Mensaje', 'Estado'];
+        $encabezados = [
+            'Fecha', 'Nombre', 'Email', 'Telefono', 'Paquete', 'Personas', 'Fecha tentativa', 'Mensaje', 'Estado',
+            'UTM source', 'UTM medium', 'UTM campaign', 'UTM term', 'UTM content', 'Referrer', 'Landing page',
+        ];
 
         $filas = array_map(static fn (array $c): array => [
             $c['creado_en'],
@@ -32,6 +40,13 @@ class CotizacionAdminController extends AdminController
             $c['fecha_tentativa'] ?? '',
             $c['mensaje'],
             $c['estado'],
+            $c['utm_source'] ?? '',
+            $c['utm_medium'] ?? '',
+            $c['utm_campaign'] ?? '',
+            $c['utm_term'] ?? '',
+            $c['utm_content'] ?? '',
+            $c['referrer'] ?? '',
+            $c['landing_page'] ?? '',
         ], Cotizacion::todasAdmin());
 
         Response::csv('cotizaciones_' . date('Y-m-d') . '.csv', $encabezados, $filas);

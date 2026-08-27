@@ -19,6 +19,7 @@ class ConfiguracionController extends AdminController
         'horas_expiracion_reserva',
         'porcentaje_anticipo_reserva',
         'dias_recordatorio_viaje',
+        'dias_recordatorio_saldo',
         'email_equipo_reportes',
         'meta_title_default',
         'meta_description_default',

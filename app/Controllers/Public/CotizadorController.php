@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Public;
 
+use App\Helpers\Atribucion;
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
 use App\Helpers\Validator;
@@ -65,7 +66,10 @@ class CotizadorController extends Controller
             'fecha_tentativa' => $datos['fecha_tentativa'] !== '' ? $datos['fecha_tentativa'] : null,
             'mensaje' => $datos['mensaje'] !== '' ? $datos['mensaje'] : null,
             'ip_origen' => $this->request->ip(),
-        ]);
+        ] + Atribucion::desdeFormulario(
+            $this->request->only(Atribucion::campos()),
+            $_SERVER['HTTP_REFERER'] ?? null
+        ));
 
         $mailer = new MailerService($this->db);
         $mailer->enviarNotificacionCotizacion([

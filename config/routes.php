@@ -22,6 +22,7 @@ use App\Controllers\Public\ContactoController;
 use App\Controllers\Public\CotizadorController;
 use App\Controllers\Public\DestinoController;
 use App\Controllers\Public\HomeController;
+use App\Controllers\Public\LegalController;
 use App\Controllers\Public\MercadoPagoWebhookController;
 use App\Controllers\Public\NosotrosController;
 use App\Controllers\Public\PagoSaldoController;
@@ -48,6 +49,7 @@ $router->post('/cotizador', [CotizadorController::class, 'enviar']);
 
 $router->get('/nosotros', [NosotrosController::class, 'index']);
 $router->get('/contacto', [ContactoController::class, 'index']);
+$router->get('/aviso-de-privacidad', [LegalController::class, 'avisoPrivacidad']);
 
 $router->get('/mi-reserva', [ReservaConsultaController::class, 'mostrar']);
 $router->post('/mi-reserva', [ReservaConsultaController::class, 'buscar']);

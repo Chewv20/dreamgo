@@ -26,6 +26,7 @@ class DashboardController extends AdminController
         if (Auth::hasPermission('cotizaciones.ver')) {
             $datos['totalCotizacionesNuevas'] = (int) $db->query("SELECT COUNT(*) FROM cotizaciones WHERE estado = 'nueva'")->fetchColumn();
             $datos['conversion'] = Cotizacion::tasaConversionPeriodo($desde, $hasta);
+            $datos['cotizacionesPorOrigen'] = Cotizacion::porOrigenPeriodo($desde, $hasta);
         }
 
         if (Auth::hasPermission('reservas.ver')) {

@@ -33,6 +33,7 @@ foreach ($coloresClaves as $claveColor) {
 <?php if (!empty($meta['jsonLd'])): ?>
 <script type="application/ld+json"><?= $meta['jsonLd'] ?></script>
 <?php endif; ?>
+<?php require __DIR__ . '/../partials/analytics.php'; ?>
 </head>
 <body data-comparar-max="<?= \App\Controllers\Public\PaqueteController::MAX_COMPARAR ?>">
 <a href="#contenido-principal" class="sr-only-focusable">Saltar al contenido principal</a>
@@ -136,6 +137,7 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
         <li><a href="/cotizador">Cotizar</a></li>
         <li><a href="/nosotros">Nosotros</a></li>
         <li><a href="/mi-reserva">Mi reserva</a></li>
+        <li><a href="/aviso-de-privacidad">Aviso de Privacidad</a></li>
       </ul>
 
       <?php if ($footerTieneRedes): ?>
@@ -164,6 +166,22 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
     <a href="/comparar" data-comparador-link class="btn btn-primario">Comparar</a>
   </div>
 </div>
+
+<?php if (\App\Helpers\Analytics::habilitado()): ?>
+<div class="banner-consentimiento" data-consentimiento hidden role="dialog" aria-label="Aviso de cookies">
+  <div class="contenedor banner-consentimiento__contenido">
+    <p class="banner-consentimiento__texto">
+      Usamos cookies propias y de terceros (Google, Meta) para analizar el uso del sitio y medir
+      nuestras campanas. Puedes aceptarlas o rechazarlas; tu eleccion se guarda en este navegador.
+      Mas informacion en el <a href="/aviso-de-privacidad">Aviso de Privacidad</a>.
+    </p>
+    <div class="banner-consentimiento__acciones">
+      <button type="button" class="btn btn-secundario" data-consentimiento-rechazar>Rechazar</button>
+      <button type="button" class="btn btn-primario" data-consentimiento-aceptar>Aceptar</button>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
 
 <script src="/assets/js/site.js" defer></script>
 </body>

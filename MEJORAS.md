@@ -307,8 +307,10 @@ detectadas: cerrar el ciclo de venta (comprobante PDF, cobro del saldo pendiente
 de origen de lead (UTM), CRM ligero de cotizaciones + bitácora de acciones admin, y
 SEO/contenido (reseñas agregadas + schema.org, blog de destinos).
 
-**Hechos en esta ronda:** #1 Comprobante PDF y #2 Cobro del saldo pendiente (2026-08-26).
-**Pendientes:** #3 UTM, #4 CRM ligero + bitácora, #5 reseñas agregadas + schema.org + blog
+**Hechos en esta ronda:** #1 Comprobante PDF, #2 Cobro del saldo pendiente (2026-08-26),
+#3 Atribución de leads / UTM, #3-bis GA4 + Meta Pixel y #3-ter banner de consentimiento +
+Aviso de Privacidad (2026-08-27).
+**Pendientes:** #4 CRM ligero + bitácora, #5 reseñas agregadas + schema.org + blog
 — detallados en la sección "Pendiente de la segunda ronda" más abajo.
 
 ### 1. Comprobante / voucher PDF de la reserva
@@ -429,32 +431,135 @@ SEO/contenido (reseñas agregadas + schema.org, blog de destinos).
   **Follow-ups anotados** (no en este alcance): registrar a mano un pago de saldo offline
   (efectivo/transferencia) desde el panel; pagos parciales de importe libre; reembolsos.
 
+### 3. Atribución de leads / UTM
+
+- Estado: **hecho** (2026-08-27). Objetivo: saber de qué canal viene cada lead
+  (cotización) y cada conversión (reserva) para poder priorizar el resto del backlog con
+  datos.
+
+  **Piezas nuevas:**
+  - 7 columnas `NULL` en `cotizaciones` **y** `reservas`: `utm_source`, `utm_medium`,
+    `utm_campaign`, `utm_term`, `utm_content`, `referrer`, `landing_page` (migración `0018`
+    con `ADD COLUMN IF NOT EXISTS` — MariaDB 10.6, re-ejecutable — + `schema.sql` +
+    `idx_cotizaciones_utm_source`).
+  - `App\Helpers\Atribucion`: `sanitizar(array)` (quita control chars, colapsa espacios,
+    recorta a 100/255, vacío→null, ignora claves ajenas) y `desdeFormulario(array,
+    ?refererHeader)` (usa el header `Referer` como respaldo si el form no trajo `referrer`).
+  - `site.js` → `initAtribucion()`: en la primera carga con `utm_*` en la URL, guarda el set
+    (utm + `referrer` externo + `landing_page`) en `sessionStorage` **una sola vez por
+    sesión** (first-touch); al cargar un `form[data-atribucion]` (cotizador y reservar)
+    inyecta esos valores como `<input hidden>` si el form no los trae ya. `sw.js` → `dreamgo-v6`
+    (precachea `site.js`).
+  - `CotizadorController::enviar()` mete la atribución saneada en el `insert`;
+    `ReservaPublicaController::crear()` la pasa por `$datos['atribucion']` a
+    `ReservaService::crear()`, que la agrega al `INSERT` de `reservas` (reservas creadas
+    desde el panel quedan con las 7 en `null`).
+  - Panel: `/admin/cotizaciones` con columna "Origen" (`utm_source` + medium/campaign, o
+    "Directo") y filtro `?origen=` (dropdown de fuentes distintas; valor especial
+    `Cotizacion::ORIGEN_DIRECTO` = sin UTM). CSV con las 7 columnas nuevas. Dashboard: bloque
+    "Cotizaciones por origen (periodo)" (`Cotizacion::porOrigenPeriodo`), gateado por
+    `cotizaciones.ver`.
+  - `Cotizacion`: `adminListado`/`contarTotal` con filtro `?string $origen`;
+    `fuentesDistintas()`; `porOrigenPeriodo()`.
+
+  **Probado en vivo** (`php -S` + MariaDB real): `POST /cotizador` con los 7 campos → se
+  guardan todos; sin UTM pero con header `Referer` → `referrer` = header, resto null;
+  `landing_page` con `/ruta?query` se guarda tal cual; `utm_campaign` con `\n`/`\t`/espacios
+  → saneado a una línea. `POST /reservar` con UTM → la reserva los guarda. Filtro admin
+  `origen=google` / `__directo__` / sin filtro devuelven los conteos correctos;
+  `porOrigenPeriodo` agrupa "Directo" + fuentes. Vistas admin y dashboard renderizan.
+  `site.js` servido incluye `initAtribucion`; smoke test 200 en todo. Suite: **36 tests**
+  (+6 de `AtribucionTest`). Datos de prueba borrados y cupo restaurado.
+
+  **Limitación conocida:** sin JS, los `utm_*` se pierden al navegar; solo se captura
+  `referrer` (header).
+
+### 3-bis. GA4 + Meta Pixel
+
+- Estado: **hecho** (2026-08-27). Era lo que #3 había dejado "fuera de alcance"; el usuario
+  pidió hacerlo a continuación.
+
+  **Piezas nuevas:**
+  - CSP relajada a propósito en `config/config.php`: `script-src` ahora lleva
+    `'nonce-<aleatorio-por-petición>'` (constante `CSP_NONCE`, `random_bytes(16)`) +
+    `https://www.googletagmanager.com https://connect.facebook.net`; `img-src`/`connect-src`
+    ampliados. **Sin** `'unsafe-inline'`. Detalle y riesgo residual en `AUDITORIA.md`
+    ("Cambio deliberado en la CSP", 2026-08-27).
+  - `App\Helpers\Analytics`: `ga4Id()` / `metaPixelId()` validan el formato al leer
+    (`/^G-[A-Z0-9]{4,20}$/`, `/^[0-9]{6,20}$/`) — un valor con comillas o `<>` se descarta y
+    nunca llega al `<script>`. `habilitado()`.
+  - `app/Views/partials/analytics.php` (incluido en `<head>` desde `layouts/public.php`):
+    emite el loader de `gtag.js` + bootstrap nonce'd, y el snippet de `fbevents.js` + `<img>`
+    `<noscript>`. No emite nada si no hay IDs configurados. Solo en el layout público (el
+    panel usa `layouts/admin.php` / `blank.php`, sin analítica).
+  - Eventos de conversión (inline nonce'd): `generate_lead` + `Lead` en
+    `public/cotizador/gracias.php`; `purchase` + `Purchase` (con `transaction_id` = código,
+    **sin valor monetario** para no exponer importes por código adivinable) en
+    `public/reservar/gracias.php` solo cuando el back_url de Mercado Pago trae
+    `status=approved` (`ReservaPublicaController::gracias()` pasa `$esAprobado`).
+  - Config: `GA4_MEASUREMENT_ID` / `META_PIXEL_ID` en **`.env`** (`.env.example` documentado).
+    `App\Helpers\Analytics` los lee de `$_ENV` y los valida por formato. Vacío = desactivado.
+    Se eligió `.env` sobre `configuracion_sitio` a pedido del usuario: se cambia una sola vez
+    y queda junto a las otras credenciales de integración (`MP_*`, `SMTP_*`).
+  - De paso se agregó `dias_recordatorio_saldo` a `ConfiguracionController` / la vista de
+    `/admin/configuracion`, que la ronda #2 daba por editable pero no estaba en la lista.
+
+  **Probado en vivo** (`php -S` + MariaDB real): con IDs vacíos, la home no trae ninguna
+  referencia a gtm/facebook y la CSP igual incluye el nonce y los hosts; al configurar
+  `G-TEST12345` / `1234567890123456` aparecen el loader de GA4, `fbq('init', ...)` y el
+  bootstrap con `nonce="..."` **idéntico** al `nonce-...` de la cabecera CSP de la *misma*
+  respuesta; con IDs de formato inválido no se emite nada; `cotizador/gracias` dispara
+  `generate_lead`/`Lead`; `reservar/gracias?status=approved` dispara `purchase`/`Purchase` y
+  sin `status` no; `/admin/login` nunca carga analítica. Smoke test 200 en todo. Suite:
+  **50 tests** (+14 de `AnalyticsTest`, incluyen casos de inyección en los IDs). Config
+  restaurada a vacío y datos de prueba borrados.
+
+### 3-ter. Banner de consentimiento + Aviso de Privacidad
+
+- Estado: **hecho** (2026-08-27). Cierra el follow-up no técnico de 3-bis.
+
+  **Piezas nuevas:**
+  - `app/Views/partials/analytics.php` reescrito: ya **no carga** gtag.js ni fbevents.js al
+    renderizar. Define `window.dreamgoAnalitica` (IDs) y `window.dreamgoCargarAnalitica()`
+    (inyector). Solo carga de una vez si `localStorage['dreamgo_consentimiento'] === 'granted'`
+    de una visita anterior. Se quitó el `<noscript><img>` del pixel (sin JS no se puede
+    consentir).
+  - Banner en `layouts/public.php` (solo si `Analytics::habilitado()`), estilos
+    `.banner-consentimiento` en `site.css`, lógica `initConsentimiento()` en `site.js`:
+    muestra el banner si no hay decisión guardada; "Aceptar" → guarda `granted` + llama al
+    inyector; "Rechazar" → guarda `denied`. La decisión persiste en `localStorage`; para
+    cambiarla, borrar los datos del sitio.
+  - Los eventos `purchase` / `generate_lead` de las páginas de "gracias" ya estaban
+    guardados con `if (typeof gtag/fbq...)`, así que sin consentimiento simplemente no se
+    disparan.
+  - `App\Controllers\Public\LegalController` + `GET /aviso-de-privacidad` + vista
+    `public/legal/aviso-privacidad.php`: **plantilla genérica LFPDPPP** (responsable, datos
+    recabados, finalidades primarias/secundarias, transferencias —incluidas Google/Meta—,
+    cookies, derechos ARCO, conservación, cambios, aceptación). Toma dirección/correo/teléfono
+    de `configuracion_sitio`; el resto son marcadores `[CORCHETES]`. Enlazada desde el footer
+    y desde el banner. Agregada a `SitemapService::urlsEstaticas` (priority 0.2). `sw.js` →
+    `dreamgo-v7`.
+
+  **IMPORTANTE antes de producción:** la vista `aviso-privacidad.php` es una plantilla. Hay
+  que (1) reemplazar todos los `[CORCHETES]` con los datos reales de la empresa (razón social,
+  RFC, domicilio fiscal, correo del departamento de datos, fecha) y (2) que un abogado la
+  revise contra la operación real. Comentario recordatorio al inicio del archivo de la vista.
+
+  **Probado en vivo:** con IDs vacíos no hay banner ni partial; con IDs configurados el
+  partial NO emite ninguna petición a Google/Meta hasta pulsar "Aceptar" (verificado con una
+  simulación en Node del flujo `partial + initConsentimiento + click`: 0 scripts inyectados
+  al cargar, 2 tras aceptar, `localStorage=granted`, banner oculto). `/aviso-de-privacidad`
+  200, en el footer y en el sitemap (tras regenerar). Suite: 50 tests. Config restaurada.
+
+  **Pendiente para la UE (si aplica algún día):** el banner es aceptar/rechazar simple; para
+  RGPD haría falta Google Consent Mode v2 y granularidad por finalidad.
+
 ## Pendiente de la segunda ronda (para otra sesión)
 
 Ítems detectados en el análisis del 2026-08-26 y todavía sin implementar. Orden sugerido:
-#3 → #4 → #5. Cada uno es autocontenido; conviene abordar uno por sesión, probando y
+#4 → #5. Cada uno es autocontenido; conviene abordar uno por sesión, probando y
 revisando antes de seguir. Antes de arrancar cualquiera, verificar que los archivos/tablas
 citados sigan como se describen aquí.
-
-### 3. UTM / origen de lead
-
-- **Problema:** `cotizaciones` guarda `ip_origen` pero no de dónde viene el lead. Sin
-  `utm_source/medium/campaign` ni `referrer` no se puede medir qué canal convierte, así que
-  no hay con qué priorizar el resto del backlog.
-- **Alcance:** columnas `utm_source`, `utm_medium`, `utm_campaign`, `referrer` (todas
-  `VARCHAR NULL`) en `cotizaciones` y en `reservas` (o en `clientes`, a decidir — la reserva
-  es el punto de conversión real). Capturarlas en los `POST` de
-  `App\Controllers\Public\CotizadorController::enviar()` y
-  `ReservaPublicaController::crear()` leyendo los `utm_*` de la query (que el front debe
-  arrastrar desde el landing hasta el form — un `<input hidden>` poblado por JS en
-  `site.js`, o `sessionStorage`) y `$_SERVER['HTTP_REFERER']` como respaldo.
-- **Panel:** mostrar/filtrar por `utm_source` en `/admin/cotizaciones` y sumarlo al export
-  CSV (`CotizacionAdminController::exportarCsv`, `Cotizacion::todasAdmin`). Opcional:
-  desglose por canal en el dashboard (`DashboardController`, junto a la tasa de conversión).
-- **Decisión pendiente con el usuario:** ¿registramos también `gclid`/`fbclid`? ¿y GA4 /
-  Meta Pixel con eventos `generate_lead`/`purchase`? (esto último obliga a abrir una
-  excepción en la CSP `script-src` con nonce — ver `AUDITORIA.md` punto 7).
-- Migración nueva + reflejo en `schema.sql`. Sin dependencias externas.
 
 ### 4. CRM ligero de cotizaciones + bitácora de acciones admin
 

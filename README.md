@@ -45,7 +45,9 @@ public/         Document root real (front controller, assets, uploads)
 logica pura mas sensibles: verificacion de firma del webhook de Mercado Pago
 (`MercadoPagoService::verificarFirmaWebhook`), el guard de rango de `ReservaService::crear`,
 el parser de `external_reference` (`ReservaService::parseReferenciaExterna`), la generacion
-del comprobante PDF (`ComprobanteReservaService`) y `Validator`. No requiere base de datos.
+del comprobante PDF (`ComprobanteReservaService`), el saneo de atribucion de leads
+(`App\Helpers\Atribucion`), la validacion de los IDs de analitica (`App\Helpers\Analytics`)
+y `Validator`. No requiere base de datos.
 
 El comprobante PDF de reserva se genera con `dompdf/dompdf` (dependencia de produccion, en
 `require`). Solo usa la fuente DejaVu que viene incluida en el paquete, asi que no necesita

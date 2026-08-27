@@ -533,6 +533,43 @@ input[type="radio"]:focus-visible,
   color: var(--color-texto-oscuro);
 }
 
+/* --- Banner de consentimiento de cookies --- */
+.banner-consentimiento {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-texto-oscuro);
+  color: var(--color-fondo-alterno);
+  box-shadow: var(--sombra);
+  z-index: 50;
+}
+
+.banner-consentimiento__contenido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  padding: 1rem;
+  flex-wrap: wrap;
+}
+
+.banner-consentimiento__texto {
+  margin: 0;
+  font-size: 0.9rem;
+  max-width: 62ch;
+}
+
+.banner-consentimiento__texto a {
+  color: var(--color-primario);
+}
+
+.banner-consentimiento__acciones {
+  display: flex;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
 /* --- Footer --- */
 .footer {
   background: var(--color-texto-oscuro);

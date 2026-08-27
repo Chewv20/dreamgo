@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Public;
 
+use App\Helpers\Atribucion;
 use App\Helpers\Flash;
 use App\Helpers\RateLimiter;
 use App\Helpers\Validator;
@@ -107,6 +108,10 @@ class ReservaPublicaController extends Controller
                 'telefono' => $datos['telefono'],
                 'num_personas' => (int) $datos['num_personas'],
                 'codigo_descuento' => $datos['codigo_descuento'] ?: null,
+                'atribucion' => Atribucion::desdeFormulario(
+                    $this->request->only(Atribucion::campos()),
+                    $_SERVER['HTTP_REFERER'] ?? null
+                ),
             ]);
         } catch (PDOException $e) {
             // PDOException extiende RuntimeException en PHP 8: se captura aparte para nunca
@@ -179,6 +184,7 @@ class ReservaPublicaController extends Controller
         $this->view('public/reservar/gracias', [
             'codigo' => $codigo,
             'mensaje' => $mensajes[$status] ?? null,
+            'esAprobado' => $status === 'approved',
         ], ['title' => 'Reserva ' . $codigo . ' | Dream Go Operadora Turistica']);
     }
 

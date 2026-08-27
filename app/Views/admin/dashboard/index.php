@@ -61,6 +61,29 @@
   <?php endif; ?>
 </div>
 
+<?php if (isset($cotizacionesPorOrigen)): ?>
+<div class="admin-panel">
+  <h2 style="margin-top:0;">Cotizaciones por origen (periodo)</h2>
+  <?php if ($cotizacionesPorOrigen === []): ?>
+    <p style="opacity:0.7;">No hay cotizaciones en el periodo seleccionado.</p>
+  <?php else: ?>
+  <div class="admin-tabla-wrap">
+    <table class="admin-tabla">
+      <thead><tr><th>Origen</th><th>Cotizaciones</th></tr></thead>
+      <tbody>
+        <?php foreach ($cotizacionesPorOrigen as $fila): ?>
+          <tr>
+            <td><?= htmlspecialchars($fila['origen'], ENT_QUOTES, 'UTF-8') ?></td>
+            <td><?= (int) $fila['total'] ?></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+  <?php endif; ?>
+</div>
+<?php endif; ?>
+
 <?php if (isset($proximasSalidas)): ?>
 <div class="admin-panel">
   <h2 style="margin-top:0;">Ocupacion de proximas salidas</h2>

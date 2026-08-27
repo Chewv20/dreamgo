@@ -215,6 +215,13 @@ CREATE TABLE IF NOT EXISTS reservas (
   metodo_pago VARCHAR(30) NULL,
   referencia_pago VARCHAR(100) NULL,
   monto_pagado DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  utm_source VARCHAR(100) NULL,
+  utm_medium VARCHAR(100) NULL,
+  utm_campaign VARCHAR(100) NULL,
+  utm_term VARCHAR(100) NULL,
+  utm_content VARCHAR(100) NULL,
+  referrer VARCHAR(255) NULL,
+  landing_page VARCHAR(255) NULL,
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_reserva_salida FOREIGN KEY (salida_id) REFERENCES salidas(id) ON DELETE RESTRICT,
@@ -259,11 +266,19 @@ CREATE TABLE IF NOT EXISTS cotizaciones (
   mensaje TEXT NULL,
   estado ENUM('nueva','contactada','convertida','descartada') NOT NULL DEFAULT 'nueva',
   ip_origen VARCHAR(45) NULL,
+  utm_source VARCHAR(100) NULL,
+  utm_medium VARCHAR(100) NULL,
+  utm_campaign VARCHAR(100) NULL,
+  utm_term VARCHAR(100) NULL,
+  utm_content VARCHAR(100) NULL,
+  referrer VARCHAR(255) NULL,
+  landing_page VARCHAR(255) NULL,
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_cotizacion_paquete FOREIGN KEY (paquete_id) REFERENCES paquetes(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE INDEX idx_cotizaciones_estado ON cotizaciones(estado);
 CREATE INDEX idx_cotizaciones_creado ON cotizaciones(creado_en);
+CREATE INDEX idx_cotizaciones_utm_source ON cotizaciones(utm_source);
 
 -- ==========================================================
 -- RESENAS (moderadas, ligadas a una reserva confirmada)

@@ -568,3 +568,35 @@ arriba; acá el resumen de qué se hizo y cómo se probó.
 No queda pendiente ningún hallazgo Alto o Medio salvo BD-01 (documentado arriba). Detalle
 completo de cada hallazgo con archivo:línea y escenario de explotación en el informe
 interactivo enlazado al principio de esta sección.
+
+## Cambio deliberado en la CSP — GA4 / Meta Pixel (2026-08-27)
+
+Al implementar la analítica (`MEJORAS.md`, segunda ronda), la CSP del punto 7 se relajó **a
+propósito**, con el trade-off explícito:
+
+- `script-src` pasó de `'self'` puro a `'self' 'nonce-<aleatorio-por-petición>'
+  https://www.googletagmanager.com https://connect.facebook.net`. El nonce se genera en
+  `config/config.php` (`CSP_NONCE`, `random_bytes(16)`) y lo usan los pocos `<script>` inline
+  propios (bootstrap de GA4/Pixel en `app/Views/partials/analytics.php` y los eventos de
+  conversión en las páginas de "gracias"). **No** se agregó `'unsafe-inline'`.
+- Nuevas entradas en `img-src` (`googletagmanager`, `*.google-analytics.com`, `facebook.com`)
+  y una directiva `connect-src` explícita (antes heredaba `default-src 'self'`).
+- Los hosts de terceros están en la CSP siempre, pero los `<script>` solo se emiten si están
+  configuradas las variables de entorno `GA4_MEASUREMENT_ID` / `META_PIXEL_ID` en `.env`
+  (validadas por formato en `App\Helpers\Analytics`; un valor con comillas o `<>` se
+  descarta y no llega al HTML) **y** el visitante acepta en el banner de cookies.
+
+**Riesgo residual asumido:** un nonce por petición es más débil que `'self'` puro — si un
+atacante lograra inyectar HTML en la *misma* respuesta podría copiar el nonce y ejecutar
+script. Sigue siendo bastante más fuerte que `'unsafe-inline'`, y el proyecto no tiene hoy
+ningún punto de inyección de HTML conocido (todas las salidas pasan por
+`htmlspecialchars`).
+
+**Consentimiento (agregado el mismo día):** GA4 y Meta Pixel ya **no se cargan** hasta que
+el visitante pulsa "Aceptar" en un banner de cookies (`layouts/public.php` +
+`initConsentimiento()` en `site.js`); la decisión se guarda en `localStorage`. El
+`app/Views/partials/analytics.php` solo expone un inyector y lo llama si hay consentimiento
+previo. Hay una página `/aviso-de-privacidad` (plantilla LFPDPPP con marcadores
+`[CORCHETES]`) enlazada desde el footer y el banner. **Pendiente antes de producción:**
+completar los `[CORCHETES]` del aviso con los datos reales de la empresa y que lo revise un
+abogado (ver `MEJORAS.md`, ítem 3-ter).

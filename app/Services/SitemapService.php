@@ -37,10 +37,14 @@ final class SitemapService
 
     private function urlsEstaticas(string $baseUrl): array
     {
-        $paginas = ['', '/destinos', '/paquetes', '/nosotros', '/contacto', '/cotizador'];
+        $paginas = ['', '/destinos', '/paquetes', '/nosotros', '/contacto', '/cotizador', '/aviso-de-privacidad'];
         $hoy = date('Y-m-d');
 
-        return array_map(fn ($p) => ['loc' => $baseUrl . $p, 'lastmod' => $hoy, 'priority' => $p === '' ? '1.0' : '0.7'], $paginas);
+        return array_map(static function ($p) use ($baseUrl, $hoy): array {
+            $priority = $p === '' ? '1.0' : ($p === '/aviso-de-privacidad' ? '0.2' : '0.7');
+
+            return ['loc' => $baseUrl . $p, 'lastmod' => $hoy, 'priority' => $priority];
+        }, $paginas);
     }
 
     private function paquetesPublicados(): array

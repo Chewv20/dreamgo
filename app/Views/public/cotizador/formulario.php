@@ -14,7 +14,7 @@ $valores ??= [];
     </p>
   <?php endif; ?>
 
-  <form method="post" action="/cotizador">
+  <form method="post" action="/cotizador" data-atribucion>
     <?= \App\Helpers\Csrf::field() ?>
     <input type="hidden" name="paquete_slug" value="<?= htmlspecialchars($paquete['slug'] ?? ($valores['paquete_slug'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
 

@@ -32,7 +32,10 @@ final class ReservaService
     }
 
     /**
-     * @param array{salida_id:int, nombre:string, email:string, telefono:string, num_personas:int} $datos
+     * @param array{salida_id:int, nombre:string, email:string, telefono:string, num_personas:int,
+     *              codigo_descuento?:?string, atribucion?:array<string, string|null>} $datos
+     *              'atribucion' (opcional): UTM + referrer + landing_page ya saneados
+     *              (App\Helpers\Atribucion). Ausente en reservas creadas desde el panel.
      * @return int id de la reserva creada
      */
     public function crear(array $datos): int
@@ -83,9 +86,15 @@ final class ReservaService
             );
             $stmtUpdate->execute(['personas' => $datos['num_personas'], 'id' => $salida['id']]);
 
+            $atr = $datos['atribucion'] ?? [];
+
             $stmtInsert = $this->db->prepare(
-                'INSERT INTO reservas (codigo_reserva, token_publico, salida_id, cliente_id, num_personas, codigo_descuento_id, precio_total, estado, expira_en)
-                 VALUES (:codigo, :token, :salida_id, :cliente_id, :num_personas, :descuento_id, :precio_total, "pendiente", DATE_ADD(NOW(), INTERVAL :horas HOUR))'
+                'INSERT INTO reservas
+                    (codigo_reserva, token_publico, salida_id, cliente_id, num_personas, codigo_descuento_id, precio_total, estado, expira_en,
+                     utm_source, utm_medium, utm_campaign, utm_term, utm_content, referrer, landing_page)
+                 VALUES
+                    (:codigo, :token, :salida_id, :cliente_id, :num_personas, :descuento_id, :precio_total, "pendiente", DATE_ADD(NOW(), INTERVAL :horas HOUR),
+                     :utm_source, :utm_medium, :utm_campaign, :utm_term, :utm_content, :referrer, :landing_page)'
             );
             $stmtInsert->execute([
                 'codigo' => 'TEMP',
@@ -96,6 +105,13 @@ final class ReservaService
                 'descuento_id' => $descuentoId,
                 'precio_total' => $precioTotal,
                 'horas' => $horasExpiracion,
+                'utm_source' => $atr['utm_source'] ?? null,
+                'utm_medium' => $atr['utm_medium'] ?? null,
+                'utm_campaign' => $atr['utm_campaign'] ?? null,
+                'utm_term' => $atr['utm_term'] ?? null,
+                'utm_content' => $atr['utm_content'] ?? null,
+                'referrer' => $atr['referrer'] ?? null,
+                'landing_page' => $atr['landing_page'] ?? null,
             ]);
 
             $reservaId = (int) $this->db->lastInsertId();

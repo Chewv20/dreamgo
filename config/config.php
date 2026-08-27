@@ -6,6 +6,14 @@ if (!defined('BASE_PATH')) {
     define('BASE_PATH', dirname(__DIR__));
 }
 
+// Nonce por peticion para los <script> inline propios (bootstrap de GA4 / Meta Pixel y los
+// eventos de conversion en las paginas de "gracias"). Va en la CSP mas abajo. Se define
+// siempre (tambien en CLI, donde es inofensivo) para que las vistas puedan referenciarlo
+// sin comprobar defined().
+if (!defined('CSP_NONCE')) {
+    define('CSP_NONCE', bin2hex(random_bytes(16)));
+}
+
 if (!defined('BASE_URL_PATH')) {
     $scriptDir = PHP_SAPI !== 'cli' && isset($_SERVER['SCRIPT_NAME'])
         ? str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']))
@@ -47,14 +55,19 @@ if (PHP_SAPI !== 'cli') {
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
     // style-src necesita 'unsafe-inline' porque las vistas usan style="" inline en varios
-    // lugares (ver AUDITORIA.md); script-src NO lo tiene, todo el JS ya vive en
-    // public/assets/js/. No hay CDNs externos (fuentes, JS, CSS son todos same-origin).
+    // lugares (ver AUDITORIA.md). script-src usa 'self' + un nonce por peticion para los
+    // pocos <script> inline propios (bootstrap de analitica y eventos de conversion); NO
+    // lleva 'unsafe-inline'. Los hosts de googletagmanager/facebook estan permitidos para
+    // GA4 / Meta Pixel; solo se cargan realmente si estan las vars GA4_MEASUREMENT_ID /
+    // META_PIXEL_ID en .env y el visitante acepta el banner de cookies (ver
+    // App\Helpers\Analytics y AUDITORIA.md, seguimiento 2026-08-27).
     header(
         "Content-Security-Policy: default-src 'self'; "
-        . "script-src 'self'; "
+        . "script-src 'self' 'nonce-" . CSP_NONCE . "' https://www.googletagmanager.com https://connect.facebook.net; "
         . "style-src 'self' 'unsafe-inline'; "
-        . "img-src 'self' data:; "
+        . "img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://www.facebook.com; "
         . "font-src 'self'; "
+        . "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://connect.facebook.net https://www.facebook.com; "
         . "object-src 'none'; "
         . "base-uri 'self'; "
         . "form-action 'self'; "

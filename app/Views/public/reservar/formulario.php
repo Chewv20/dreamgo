@@ -29,7 +29,7 @@ $anticipoEstimado = round($totalEstimado * $porcentajeAnticipo / 100, 2);
     <p style="color:var(--color-error);"><?= htmlspecialchars($errores['general'], ENT_QUOTES, 'UTF-8') ?></p>
   <?php endif; ?>
 
-  <form method="post" action="/reservar">
+  <form method="post" action="/reservar" data-atribucion>
     <?= \App\Helpers\Csrf::field() ?>
     <input type="hidden" name="salida_id" value="<?= (int) $salida['id'] ?>">
 

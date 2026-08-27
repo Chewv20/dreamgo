@@ -158,6 +158,92 @@
     refrescarBarra();
   }
 
+  function initAtribucion() {
+    var KEY = 'dreamgo_atribucion';
+    var CAMPOS_UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+
+    function leerGuardado() {
+      try {
+        var datos = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+        return datos && typeof datos === 'object' ? datos : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Primer toque de la sesion: si la URL trae algun utm_* y todavia no guardamos nada,
+    // fijamos el origen (utm + referrer externo + pagina de aterrizaje) para todo lo que
+    // reste de la sesion, aunque el visitante navegue a otras paginas antes de enviar un form.
+    function capturar() {
+      if (leerGuardado()) return;
+
+      var params = new URLSearchParams(window.location.search);
+      var trajoUtm = CAMPOS_UTM.some(function (c) { return params.get(c); });
+      if (!trajoUtm) return;
+
+      var datos = {};
+      CAMPOS_UTM.forEach(function (c) {
+        if (params.get(c)) datos[c] = params.get(c).slice(0, 100);
+      });
+
+      var ref = document.referrer || '';
+      if (ref && ref.indexOf(window.location.origin) !== 0) {
+        datos.referrer = ref.slice(0, 255);
+      }
+      datos.landing_page = (window.location.pathname + window.location.search).slice(0, 255);
+
+      try {
+        sessionStorage.setItem(KEY, JSON.stringify(datos));
+      } catch (e) {
+        // sessionStorage no disponible: la atribucion simplemente no se arrastra entre paginas.
+      }
+    }
+
+    function inyectarEnFormularios() {
+      var datos = leerGuardado();
+      if (!datos) return;
+
+      document.querySelectorAll('form[data-atribucion]').forEach(function (form) {
+        Object.keys(datos).forEach(function (nombre) {
+          if (form.querySelector('[name="' + nombre + '"]')) return;
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = nombre;
+          input.value = datos[nombre];
+          form.appendChild(input);
+        });
+      });
+    }
+
+    capturar();
+    inyectarEnFormularios();
+  }
+
+  function initConsentimiento() {
+    var CLAVE = 'dreamgo_consentimiento';
+    var banner = document.querySelector('[data-consentimiento]');
+    if (!banner || !window.dreamgoAnalitica) return;
+
+    var elegido = null;
+    try { elegido = localStorage.getItem(CLAVE); } catch (e) {}
+    if (elegido === 'granted' || elegido === 'denied') return;
+
+    banner.hidden = false;
+
+    function decidir(valor) {
+      try { localStorage.setItem(CLAVE, valor); } catch (e) {}
+      banner.hidden = true;
+      if (valor === 'granted' && typeof window.dreamgoCargarAnalitica === 'function') {
+        window.dreamgoCargarAnalitica();
+      }
+    }
+
+    var aceptar = banner.querySelector('[data-consentimiento-aceptar]');
+    var rechazar = banner.querySelector('[data-consentimiento-rechazar]');
+    if (aceptar) aceptar.addEventListener('click', function () { decidir('granted'); });
+    if (rechazar) rechazar.addEventListener('click', function () { decidir('denied'); });
+  }
+
   function baseHref() {
     var link = document.querySelector('link[rel="manifest"]');
     if (!link) return '/';
@@ -198,6 +284,8 @@
     initMenu();
     initScrollReveal();
     initComparador();
+    initAtribucion();
+    initConsentimiento();
   });
 
   initServiceWorker();
