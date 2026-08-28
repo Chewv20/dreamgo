@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 /** @var Core\Router $router */
 
+use App\Controllers\Admin\ArticuloAdminController;
 use App\Controllers\Admin\AuthController;
 use App\Controllers\Admin\BitacoraController;
 use App\Controllers\Admin\ConfiguracionController;
@@ -19,6 +20,7 @@ use App\Controllers\Admin\SalidaAdminController;
 use App\Controllers\Admin\SuscriptorAdminController;
 use App\Controllers\Admin\UsuarioAdminController;
 use App\Controllers\Public\ComprobanteReservaController;
+use App\Controllers\Public\BlogController;
 use App\Controllers\Public\ContactoController;
 use App\Controllers\Public\CotizadorController;
 use App\Controllers\Public\DestinoController;
@@ -51,6 +53,9 @@ $router->post('/cotizador', [CotizadorController::class, 'enviar']);
 $router->get('/nosotros', [NosotrosController::class, 'index']);
 $router->get('/contacto', [ContactoController::class, 'index']);
 $router->get('/aviso-de-privacidad', [LegalController::class, 'avisoPrivacidad']);
+
+$router->get('/blog', [BlogController::class, 'index']);
+$router->get('/blog/{slug}', [BlogController::class, 'articulo']);
 
 $router->get('/mi-reserva', [ReservaConsultaController::class, 'mostrar']);
 $router->post('/mi-reserva', [ReservaConsultaController::class, 'buscar']);
@@ -91,6 +96,13 @@ $router->post('/admin/paquetes', [PaqueteAdminController::class, 'crear'], ['aut
 $router->get('/admin/paquetes/{id}/editar', [PaqueteAdminController::class, 'editarForm'], ['auth' => true, 'permiso' => 'paquetes.editar']);
 $router->post('/admin/paquetes/{id}/editar', [PaqueteAdminController::class, 'editar'], ['auth' => true, 'permiso' => 'paquetes.editar']);
 $router->post('/admin/paquetes/{id}/archivar', [PaqueteAdminController::class, 'archivar'], ['auth' => true, 'permiso' => 'paquetes.eliminar']);
+
+$router->get('/admin/articulos', [ArticuloAdminController::class, 'index'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
+$router->get('/admin/articulos/crear', [ArticuloAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
+$router->post('/admin/articulos', [ArticuloAdminController::class, 'crear'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
+$router->get('/admin/articulos/{id}/editar', [ArticuloAdminController::class, 'editarForm'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
+$router->post('/admin/articulos/{id}/editar', [ArticuloAdminController::class, 'editar'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
+$router->post('/admin/articulos/{id}/archivar', [ArticuloAdminController::class, 'archivar'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
 
 $router->get('/admin/paquetes/{paqueteId}/salidas', [SalidaAdminController::class, 'index'], ['auth' => true, 'permiso' => 'salidas.gestionar']);
 $router->get('/admin/paquetes/{paqueteId}/salidas/crear', [SalidaAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'salidas.gestionar']);

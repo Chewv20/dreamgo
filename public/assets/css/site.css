@@ -533,6 +533,25 @@ input[type="radio"]:focus-visible,
   color: var(--color-texto-oscuro);
 }
 
+/* --- Contenido de articulo del blog --- */
+.contenido-articulo {
+  line-height: 1.75;
+}
+
+.contenido-articulo > * + * {
+  margin-top: 1.1rem;
+}
+
+.contenido-articulo h3,
+.contenido-articulo h4 {
+  margin-top: 2rem;
+}
+
+.contenido-articulo ul,
+.contenido-articulo ol {
+  padding-left: 1.4rem;
+}
+
 /* --- Banner de consentimiento de cookies --- */
 .banner-consentimiento {
   position: fixed;

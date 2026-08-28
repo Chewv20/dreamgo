@@ -48,8 +48,9 @@ el parser de `external_reference` (`ReservaService::parseReferenciaExterna`), la
 del comprobante PDF (`ComprobanteReservaService`), el saneo de atribucion de leads
 (`App\Helpers\Atribucion`), la validacion de los IDs de analitica (`App\Helpers\Analytics`),
 el manejo de errores de la bitacora (`App\Helpers\Auditoria`), el armado de filtros del
-listado de cotizaciones (`Cotizacion::clausulaFiltros`), el JSON-LD de la ficha de paquete
-(`App\Helpers\PaqueteJsonLd`) y `Validator`. No requiere base de datos.
+listado de cotizaciones (`Cotizacion::clausulaFiltros`), el JSON-LD de la ficha de paquete y del articulo de blog
+(`App\Helpers\PaqueteJsonLd`, `App\Helpers\ArticuloJsonLd`) y `Validator`. No requiere base
+de datos.
 
 El comprobante PDF de reserva se genera con `dompdf/dompdf` (dependencia de produccion, en
 `require`). Solo usa la fuente DejaVu que viene incluida en el paquete, asi que no necesita

@@ -48,6 +48,7 @@ foreach ($coloresClaves as $claveColor) {
       <a href="/">Inicio</a>
       <a href="/destinos">Destinos</a>
       <a href="/paquetes">Paquetes</a>
+      <a href="/blog">Blog</a>
       <a href="/nosotros">Nosotros</a>
       <a href="/cotizador" class="btn btn-primario">Cotizar</a>
       <a href="/contacto">Contacto</a>
@@ -134,6 +135,7 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
       <ul class="footer__lista footer__lista--enlaces">
         <li><a href="/paquetes">Paquetes</a></li>
         <li><a href="/destinos">Destinos</a></li>
+        <li><a href="/blog">Blog</a></li>
         <li><a href="/cotizador">Cotizar</a></li>
         <li><a href="/nosotros">Nosotros</a></li>
         <li><a href="/mi-reserva">Mi reserva</a></li>

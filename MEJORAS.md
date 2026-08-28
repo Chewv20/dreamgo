@@ -309,9 +309,10 @@ SEO/contenido (reseñas agregadas + schema.org, blog de destinos).
 
 **Hechos en esta ronda:** #1 Comprobante PDF, #2 Cobro del saldo pendiente (2026-08-26),
 #3 Atribución de leads / UTM, #3-bis GA4 + Meta Pixel, #3-ter banner de consentimiento +
-Aviso de Privacidad, #4-a Bitácora de acciones admin, #4-b CRM ligero de cotizaciones y
-#5-a Reseñas agregadas + schema.org (2026-08-27).
-**Pendientes:** #5-b Blog de destinos (única mejora que queda de la segunda ronda).
+Aviso de Privacidad, #4-a Bitácora de acciones admin, #4-b CRM ligero de cotizaciones,
+#5-a Reseñas agregadas + schema.org y #5-b Blog de destinos (2026-08-27).
+**La segunda ronda está completa.** Próximos cambios funcionales requieren un análisis nuevo
+del estado del proyecto.
 — detallados en la sección "Pendiente de la segunda ronda" más abajo.
 
 ### 1. Comprobante / voucher PDF de la reserva
@@ -667,22 +668,46 @@ Aviso de Privacidad, #4-a Bitácora de acciones admin, #4-b CRM ligero de cotiza
   **No se tocó** Open Graph / Twitter cards (el `og:image` por paquete ya sale bien vía
   `meta['ogImage']`; no hacía falta más).
 
-## Pendiente de la segunda ronda (para otra sesión)
-
 ### 5-b. Blog de destinos
 
-- **Problema:** no hay contenido editorial, que es la vía más barata de tráfico orgánico.
-- **Alcance:** tabla `articulos` (`slug` único, `titulo`, `resumen`, `contenido` HTML
-  sanitizado con `HtmlSanitizer`, `imagen`, `estado` borrador/publicado, `publicado_en`, SEO
-  meta). CRUD admin reusando el patrón de `PaqueteAdminController` (+`ImageUploadService`,
-  +slug con `Slugify`, permiso nuevo `articulos.gestionar`; auditar con `Auditoria`). Rutas
-  públicas `/blog` y `/blog/{slug}`. Sumar las URLs a `SitemapService`. JSON-LD `Article` +
-  `BreadcrumbList` en cada nota. Enlazar artículos ↔ paquetes/categorías para cross-linking.
-- **Decisión pendiente:** ¿los artículos se editan como HTML libre (como `bloques_pagina`) o
-  con un editor más estructurado?
-- Migración nueva + `schema.sql` + `seed_demo.sql` (permiso al rol Administrador).
+- Estado: **hecho** (2026-08-27). Segunda mitad de #5 y **último ítem de la segunda ronda**.
 
-### Otros candidatos (del análisis, menor prioridad)
+  **Piezas nuevas:**
+  - Tabla `articulos` (migración `0021` + `schema.sql`): `titulo`, `slug` único, `resumen`,
+    `contenido LONGTEXT`, `imagen`, `categoria_id` (FK `categorias` `ON DELETE SET NULL`,
+    para el cross-link con un destino), `estado` borrador/publicado/archivado, `meta_title`/
+    `meta_description`, `publicado_en`, `creado_por`. Permiso `articulos.gestionar` (migración
+    `INSERT IGNORE` + rol Administrador; también en `seed_demo.sql`).
+  - `App\Models\Articulo` (`publicadosPaginados`, `contarPublicados`, `porSlugPublicado`,
+    `publicadosDeCategoria`, `adminListado`, `contarTotal`). El orden público es por
+    `COALESCE(publicado_en, creado_en)`.
+  - `App\Helpers\ArticuloJsonLd::construir()` — nodos `Article` + `BreadcrumbList`
+    (Inicio > Blog > título). 3 tests.
+  - `App\Controllers\Public\BlogController` — `GET /blog` (listado paginado, 9/pág) y
+    `GET /blog/{slug}` (404 si no publicado; JSON-LD; meta desde `meta_*` o fallback;
+    artículos relacionados de la misma categoría).
+  - `App\Controllers\Admin\ArticuloAdminController` — CRUD calcado de `PaqueteAdminController`
+    (contenido saneado con `HtmlSanitizer`, slug con `Slugify` + desambiguación, imagen
+    opcional vía `ImageUploadService`, `SitemapService::regenerar()` tras guardar, auditoría
+    `articulo.crear|editar|archivar`). `publicado_en` se fija **la primera vez** que pasa a
+    `publicado` y no se vuelve a tocar. Editar como **HTML libre** (mismo criterio que
+    paquetes; el proyecto no tiene editor WYSIWYG).
+  - `SitemapService` agrega `/blog` + cada artículo publicado.
+  - Enlaces "Blog" en el header y footer públicos y en el sidebar admin. `destinos/mostrar.php`
+    lista los artículos publicados de esa categoría ("Artículos sobre …"); la ficha del
+    artículo enlaza de vuelta a `/destinos/{slug}` de su categoría.
+  - `.contenido-articulo` en `site.css` (interlínea/espaciado de la prosa); `sw.js` → `dreamgo-v8`.
+
+  **Probado en vivo** (BD real): tabla + permiso OK; artículo creado como `borrador` con
+  `publicado_en` NULL, `HtmlSanitizer` descarta el `<script>` y conserva p/strong/h3/ul/li;
+  al pasar a `publicado` se fija `publicado_en`; `/blog` lista, `/blog/{slug}` renderiza el
+  HTML y emite `Article` + `BreadcrumbList` válidos, `/blog/inexistente` → 404; el sitemap
+  incluye la URL; la página del destino muestra el cross-link; `/admin/articulos` y
+  `/admin/articulos/crear` → 302 login sin sesión (y `crear` no lo captura la ruta
+  `{id}/editar`). Smoke 200 en todo. Suite: **68 tests** (+3 `ArticuloJsonLdTest`). Datos de
+  prueba borrados; sitemap/robots restaurados.
+
+## Candidatos para una tercera ronda (del análisis, sin priorizar)
 
 - Registrar pago offline del saldo desde el panel (follow-up del #2 de esta ronda).
 - CI (GitHub Actions corriendo `composer test`), observabilidad (Sentry), caché del

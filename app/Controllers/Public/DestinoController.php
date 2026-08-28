@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Public;
 
+use App\Models\Articulo;
 use App\Models\BloquePagina;
 use App\Models\Categoria;
 use App\Models\Paquete;
@@ -37,6 +38,7 @@ class DestinoController extends Controller
             'categoria' => $categoria,
             'paquetes' => $paquetes,
             'resumenes' => Resena::resumenPorPaquetes(array_column($paquetes, 'id')),
+            'articulos' => Articulo::publicadosDeCategoria((int) $categoria['id']),
         ], [
             'title' => $categoria['nombre'] . ' | Dream Go Operadora Turistica',
             'description' => $categoria['descripcion'] ?? ('Paquetes y excursiones en ' . $categoria['nombre']),

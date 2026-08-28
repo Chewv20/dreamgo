@@ -31,6 +31,16 @@ final class SitemapService
             ];
         }
 
+        $urls[] = ['loc' => $baseUrl . '/blog', 'lastmod' => date('Y-m-d'), 'priority' => '0.6'];
+
+        foreach ($this->articulosPublicados() as $articulo) {
+            $urls[] = [
+                'loc' => $baseUrl . '/blog/' . $articulo['slug'],
+                'lastmod' => date('Y-m-d', strtotime($articulo['actualizado_en'])),
+                'priority' => '0.6',
+            ];
+        }
+
         $this->escribirXml($urls);
         $this->escribirRobotsTxt($baseUrl);
     }
@@ -57,6 +67,13 @@ final class SitemapService
     private function categoriasActivas(): array
     {
         $stmt = $this->db->query('SELECT slug FROM categorias WHERE activo = 1');
+
+        return $stmt->fetchAll();
+    }
+
+    private function articulosPublicados(): array
+    {
+        $stmt = $this->db->query("SELECT slug, actualizado_en FROM articulos WHERE estado = 'publicado'");
 
         return $stmt->fetchAll();
     }
