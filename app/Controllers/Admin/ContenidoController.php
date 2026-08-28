@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Helpers\Flash;
+use App\Helpers\Url;
 use App\Models\BloquePagina;
 use App\Models\ConfiguracionSitio;
 
@@ -177,13 +178,13 @@ class ContenidoController extends AdminController
         return match (true) {
             $clave === 'hero' => [
                 'cta_primario_texto' => (string) $this->request->input('cta_primario_texto', ''),
-                'cta_primario_link' => (string) $this->request->input('cta_primario_link', ''),
+                'cta_primario_link' => Url::segura($this->request->input('cta_primario_link', '')),
                 'cta_secundario_texto' => (string) $this->request->input('cta_secundario_texto', ''),
-                'cta_secundario_link' => (string) $this->request->input('cta_secundario_link', ''),
+                'cta_secundario_link' => Url::segura($this->request->input('cta_secundario_link', '')),
             ],
             $clave === 'cta_final' => [
                 'boton_texto' => (string) $this->request->input('boton_texto', ''),
-                'boton_link' => (string) $this->request->input('boton_link', ''),
+                'boton_link' => Url::segura($this->request->input('boton_link', '')),
             ],
             $clave === 'ventajas' => [
                 'items' => array_map(

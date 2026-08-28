@@ -179,6 +179,11 @@ final class Auth
         return $_SESSION[self::SESSION_KEY] ?? null;
     }
 
+    public static function rolId(): ?int
+    {
+        return $_SESSION[self::SESSION_ROL] ?? null;
+    }
+
     public static function nombre(): ?string
     {
         return $_SESSION[self::SESSION_NOMBRE] ?? null;

@@ -4,10 +4,14 @@ namespace App\Controllers\Admin;
 
 use App\Helpers\Auditoria;
 use App\Helpers\Flash;
+use App\Helpers\Url;
 use App\Models\ConfiguracionSitio;
 
 class ConfiguracionController extends AdminController
 {
+    /** Claves cuyo valor se renderiza como href en el footer: se validan con Url::segura. */
+    private const CLAVES_URL = ['facebook_url', 'instagram_url', 'tiktok_url', 'youtube_url'];
+
     private const CLAVES_EDITABLES = [
         'direccion',
         'telefono_contacto',
@@ -45,6 +49,9 @@ class ConfiguracionController extends AdminController
         $cambiadas = [];
         foreach (self::CLAVES_EDITABLES as $clave) {
             $valor = (string) $this->request->input($clave, '');
+            if (in_array($clave, self::CLAVES_URL, true)) {
+                $valor = Url::segura($valor);
+            }
             if ($valor !== (string) ConfiguracionSitio::get($clave, '')) {
                 $cambiadas[] = $clave;
             }

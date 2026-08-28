@@ -42,12 +42,33 @@ final class Response
 
         $out = fopen('php://output', 'w');
         // Escape explicito: PHP 8.4+ marca como deprecated el default implicito de $escape.
-        fputcsv($out, $encabezados, ',', '"', '\\');
+        fputcsv($out, array_map([self::class, 'sanearCeldaCsv'], $encabezados), ',', '"', '\\');
         foreach ($filas as $fila) {
-            fputcsv($out, $fila, ',', '"', '\\');
+            fputcsv($out, array_map([self::class, 'sanearCeldaCsv'], $fila), ',', '"', '\\');
         }
         fclose($out);
         exit;
+    }
+
+    /**
+     * Defensa contra inyeccion de formulas (CSV injection): Excel/LibreOffice/Sheets ejecutan
+     * el contenido de una celda que empieza con = + @ o un caracter de control. Como los
+     * listados exportados incluyen texto que viene de formularios publicos anonimos (nombre,
+     * mensaje, referrer, utm_*), se antepone un apostrofo a esas celdas para forzarlas a
+     * texto. El '-' solo se neutraliza si no es un numero negativo legitimo, para no convertir
+     * montos como -100 en texto.
+     */
+    private static function sanearCeldaCsv(mixed $valor): mixed
+    {
+        if (!is_string($valor) || $valor === '') {
+            return $valor;
+        }
+
+        $primero = $valor[0];
+        $esFormula = in_array($primero, ['=', '+', '@', "\t", "\r", "\n"], true)
+            || ($primero === '-' && !is_numeric($valor));
+
+        return $esFormula ? "'" . $valor : $valor;
     }
 
     /**

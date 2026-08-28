@@ -50,6 +50,11 @@ class UsuarioAdminController extends AdminController
             $this->redirect('/admin/usuarios/crear');
         }
 
+        if (Usuario::esRolDeSistema((int) $datos['rol_id']) && !Usuario::esRolDeSistema((int) Auth::rolId())) {
+            Flash::set('error', 'Solo un Administrador puede asignar el rol de Administrador.');
+            $this->redirect('/admin/usuarios/crear');
+        }
+
         $usuarioId = Usuario::insert([
             'nombre' => $datos['nombre'],
             'email' => $datos['email'],
@@ -102,6 +107,24 @@ class UsuarioAdminController extends AdminController
 
         if ((int) $usuario['id'] === Auth::id() && $datos['activo'] === 0) {
             Flash::set('error', 'No puedes desactivar tu propia cuenta.');
+            $this->redirect("/admin/usuarios/{$id}/editar");
+        }
+
+        $nuevoRolEsSistema = Usuario::esRolDeSistema($datos['rol_id']);
+        $usuarioEraSistema = Usuario::esRolDeSistema((int) $usuario['rol_id']);
+
+        // Auto-promocion: un usuario con usuarios.gestionar pero sin rol de sistema no puede
+        // otorgar el rol Administrador a nadie (ni a si mismo).
+        if ($nuevoRolEsSistema && !$usuarioEraSistema && !Usuario::esRolDeSistema((int) Auth::rolId())) {
+            Flash::set('error', 'Solo un Administrador puede asignar el rol de Administrador.');
+            $this->redirect("/admin/usuarios/{$id}/editar");
+        }
+
+        // Bloqueo del panel: no dejar 0 Administradores activos por quitarle el rol de sistema
+        // al ultimo o por desactivarlo.
+        $pierdeAcceso = $usuarioEraSistema && (!$nuevoRolEsSistema || $datos['activo'] === 0);
+        if ($pierdeAcceso && Usuario::contarAdminsSistemaActivos((int) $usuario['id']) === 0) {
+            Flash::set('error', 'No puedes quitar el rol ni desactivar al ultimo Administrador activo.');
             $this->redirect("/admin/usuarios/{$id}/editar");
         }
 

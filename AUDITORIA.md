@@ -600,3 +600,123 @@ previo. Hay una página `/aviso-de-privacidad` (plantilla LFPDPPP con marcadores
 `[CORCHETES]`) enlazada desde el footer y el banner. **Pendiente antes de producción:**
 completar los `[CORCHETES]` del aviso con los datos reales de la empresa y que lo revise un
 abogado (ver `MEJORAS.md`, ítem 3-ter).
+
+## Auditoría 2026-08-27 — código nuevo (Bitácora, CRM, Reseñas, Blog, Estadísticas)
+
+Tercera auditoría completa, sobre el estado del repositorio tras `e31dbb6` (estadísticas /
+meta / aviso de privacidad), `680ad78` (bitácora), `27469cd` (CRM de cotizaciones),
+`9c11886` (reseñas) y `0a4530c` (blog). Revisión de seguridad, base de datos,
+configuración/infraestructura y calidad de código, contrastada contra las dos auditorías
+anteriores — nada de lo corregido ahí se reabrió con el código nuevo.
+
+Estado general bueno: PDO preparado en toda consulta, CSRF en toda mutación, rate-limiting
+en todos los POST públicos, bcrypt + rotación forzada + throttling de login, headers de
+seguridad con CSP basada en nonce, RBAC con verificación de sellado de sesión, acceso
+público a reservas por token de 32 hex, verificación de firma del webhook de Mercado Pago +
+validación server-side del monto, dompdf endurecido (`isRemoteEnabled`/`isPhpEnabled` en
+`false`) y escape de salida consistente en las vistas.
+
+Hallazgos: **0 críticos/altos, 3 medios, 6 bajos, ~8 informativos/calidad.**
+
+### Corregido
+
+1. **M-01 — Inyección de fórmulas (CSV injection) en las exportaciones del panel.**
+   `Core\Response::csv()` escribía cada celda con `fputcsv` sin neutralizar las que empiezan
+   con `= + - @` o tab/CR. Las exportaciones de cotizaciones, reservas y suscriptores
+   incluyen campos que vienen de formularios públicos anónimos (`nombre`, `mensaje`,
+   `referrer`, `landing_page`, `utm_*`): un `nombre` = `=HYPERLINK(...)` o `=cmd|'/c calc'!A1`
+   enviado por el cotizador se ejecutaba cuando un asesor abría el CSV en Excel/LibreOffice/
+   Sheets.
+
+   Arreglado en un solo punto (`core/Response.php`): `Response::csv()` antepone un apóstrofo
+   a cualquier celda cuyo primer carácter sea `= + - @`, tab, CR o LF, antes de pasarla a
+   `fputcsv`. Cubre las tres exportaciones (`CotizacionAdminController::exportarCsv`,
+   `ReservaAdminController::exportarCsv`, `SuscriptorAdminController::exportarCsv`) sin
+   tocarlas.
+
+2. **M-02 — XSS almacenado vía campos de URL editables por un rol no-admin.**
+   `ContenidoController` (CTA `cta_primario_link` / `cta_secundario_link` / `boton_link`) y
+   `ConfiguracionController::guardar()` (`facebook_url` / `instagram_url` / `tiktok_url` /
+   `youtube_url`) guardaban esos valores **sin validación**. Se renderizan en
+   `href="<?= htmlspecialchars($url) ?>"` en la home, "nosotros" y el footer, y
+   `htmlspecialchars` NO neutraliza el esquema `javascript:`. Un usuario con solo
+   `contenido.gestionar` o `configuracion.gestionar` (editor de contenido, no admin del
+   sistema) podía plantar `javascript:...` y ejecutar JS en el navegador de todos los
+   visitantes y de los demás administradores.
+
+   Arreglado: nuevo helper `App\Helpers\Url::segura()` (misma lista blanca que
+   `HtmlSanitizer::normalizarHref`: solo `http(s)://`, ruta relativa que empiece con `/` y no
+   con `//`, `mailto:`, `tel:`, `#`; cualquier otra cosa → `''`). Se aplica en
+   `ContenidoController::construirContenido()` a los 3 links de CTA y en
+   `ConfiguracionController::guardar()` a las 4 URLs de redes. Un valor inválido se descarta
+   (queda vacío) en vez de guardarse.
+
+3. **M-03 — Sin protección contra bloqueo/escalada de administradores.**
+   `UsuarioAdminController::editar()` solo impedía que un usuario se desactivara a sí mismo.
+   No impedía: (a) que un usuario con solo `usuarios.gestionar` se asignara el rol
+   `es_sistema` (Administrador) y se auto-promoviera a admin total; (b) desactivar o degradar
+   al último Administrador activo, dejando el panel sin acceso.
+
+   Arreglado en `UsuarioAdminController` (`crear()` y `editar()`), apoyado en dos helpers
+   nuevos de `Usuario` (`esRolDeSistema(int)`, `contarAdminsSistemaActivos(?int $excluyendo)`)
+   y en `Auth::rolId()`:
+   - No se puede asignar un rol `es_sistema = 1` a alguien que no lo tenía ya, salvo que el
+     usuario que hace la acción tenga a su vez un rol de sistema. En la práctica: solo un
+     Administrador puede crear/promover a otro Administrador; un editor de contenido con
+     `usuarios.gestionar` no puede auto-promoverse.
+   - No se puede quitar el rol de sistema ni desactivar a un usuario si eso dejaría 0
+     Administradores (`es_sistema`) activos (`contarAdminsSistemaActivos()` excluye al usuario
+     que se está editando para responder "¿queda alguno más?").
+
+   Probado: `Url::segura()` con 14 casos (`javascript:` / ` javascript:` / `JavaScript:` /
+   `data:` / `//host` / `vbscript:` → `''`; `http(s)://` / `/ruta` / `mailto:` / `tel:` / `#`
+   → intactos) y el saneo de celda CSV con 8 casos (`=` `+` `@` `\t` y `-` no numérico →
+   prefijados con `'`; `-100`, `-100.50` y texto normal → intactos). `composer test` en verde
+   (68 tests).
+
+### Pendiente (bajo)
+
+- **B-01 — `HtmlSanitizer` es un punto único de fallo sin tests.** El `contenido` del blog y
+  `itinerario`/`incluye`/`no_incluye`/`descripcion_larga` de paquetes se imprimen sin
+  escapar, confiando 100% en `HtmlSanitizer::limpiar()`. El sanitizador está bien diseñado
+  (lista blanca de etiquetas, borra todos los atributos, normaliza `href`) y la CSP
+  (`script-src` sin `'unsafe-inline'`) es un backstop real. Pero `tests/Unit/Helpers/` no lo
+  cubre. Falta una batería de payloads XSS conocidos.
+- **B-02 — `HtmlSanitizer` deja estado global de libxml alterado.** `libxml_use_internal_errors(true)`
+  sin restaurar el valor previo.
+- **B-03 — `HtmlSanitizer::normalizarHref` permite URLs protocolo-relativas** (`//host`). No
+  es XSS; permite enlaces externos que parecen internos en el contenido del blog.
+- **B-04 — Webhook de Mercado Pago sin control de frescura del `ts`.** La firma incluye `ts`
+  en el manifiesto pero no se valida su antigüedad → una notificación válida es reproducible.
+  Impacto acotado: el procesamiento es idempotente (`FOR UPDATE` + revalidación de estado).
+- **B-05 — `ImageUploadService` sin `is_uploaded_file()` ni límite anti-bomba** de
+  descompresión antes de `imagecreatefrom*()`. Endpoints solo-admin; DoS local a lo sumo.
+- **B-06 — `CotizadorController::enviar` no valida `fecha_tentativa`** (formato) ni acota
+  `num_personas` con `enRango()` (acepta negativos y valores enormes). Integridad de datos,
+  no seguridad.
+
+### Informativo / calidad
+
+- RBAC inconsistente: `articulos.gestionar` es un permiso único para ver/crear/editar/
+  archivar, mientras `paquetes.*` está dividido en `ver/crear/editar/eliminar`.
+- Las imágenes del blog se guardan en `public/uploads/paquetes/` (rutas hardcodeadas en
+  `ImageUploadService`); comparten carpeta con los paquetes. El `.htaccess` de la carpeta
+  protege igual.
+- `DashboardController` usa `Database::connection()` directo en vez del `$this->db`
+  heredado, a diferencia del resto de controladores.
+- `Router::add()` no hace `preg_quote` de los segmentos estáticos antes de armar el regex.
+  Hoy inofensivo (ninguna ruta tiene metacaracteres).
+- CSP sigue con `style-src 'unsafe-inline'` (ya documentado y aceptado arriba).
+- Dependencias al día: dompdf `v3.1.6`, phpmailer `v6.12.0`, phpdotenv `v5.6.4`.
+- Enumeración de usuarios por timing en login: `password_verify` solo corre si la cuenta
+  existe y está activa. Oráculo menor; se mitiga con un `password_verify` dummy en la rama
+  de "no existe".
+
+### Verificado sin cambios necesarios
+
+CSRF y escape en vistas de Bitácora, CRM y Reseñas · JSON-LD del blog
+(`JSON_HEX_TAG|JSON_HEX_AMP|...`) · comprobante PDF (todo con `htmlspecialchars`, dompdf sin
+remoto ni PHP) · filtros SQL de `Cotizacion`/`Paquete`/`Bitacora` (parametrizados, `LIKE`
+con `ESCAPE`) · rate-limiting de `resena`/`reserva_consulta`/`pagar_saldo` · consentimiento
+de cookies previo a GA4/Pixel · rangos de fecha del dashboard validados por regex antes de
+las consultas.
