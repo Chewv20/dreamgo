@@ -84,6 +84,30 @@ final class ValidatorTest extends TestCase
         $this->assertFalse($texto->pasa());
     }
 
+    public function testFechaAceptaISOValidaYRechazaFormatoOFechaImposible(): void
+    {
+        $ok = new Validator(['f' => '2026-08-27']);
+        $ok->fecha('f', 'La fecha');
+        $this->assertTrue($ok->pasa());
+
+        foreach (['27/08/2026', '2026-13-01', '2026-02-30', 'ayer', '2026-8-7'] as $malo) {
+            $v = new Validator(['f' => $malo]);
+            $v->fecha('f', 'La fecha');
+            $this->assertFalse($v->pasa(), "fecha='{$malo}' deberia fallar");
+        }
+    }
+
+    public function testFechaIgnoraCampoVacioOAusente(): void
+    {
+        $v = new Validator(['f' => '']);
+        $v->fecha('f', 'La fecha');
+        $this->assertTrue($v->pasa());
+
+        $v2 = new Validator([]);
+        $v2->fecha('f', 'La fecha');
+        $this->assertTrue($v2->pasa());
+    }
+
     public function testMaxLengthCuentaCaracteresMultibyte(): void
     {
         $v = new Validator(['nombre' => str_repeat('ñ', 151)]);

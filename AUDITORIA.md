@@ -671,29 +671,53 @@ Hallazgos: **0 críticos/altos, 3 medios, 6 bajos, ~8 informativos/calidad.**
    Probado: `Url::segura()` con 14 casos (`javascript:` / ` javascript:` / `JavaScript:` /
    `data:` / `//host` / `vbscript:` → `''`; `http(s)://` / `/ruta` / `mailto:` / `tel:` / `#`
    → intactos) y el saneo de celda CSV con 8 casos (`=` `+` `@` `\t` y `-` no numérico →
-   prefijados con `'`; `-100`, `-100.50` y texto normal → intactos). `composer test` en verde
-   (68 tests).
+   prefijados con `'`; `-100`, `-100.50` y texto normal → intactos).
 
-### Pendiente (bajo)
+Tras los medios y los bajos, `composer test` queda en **83 tests en verde** (68 previos + 13
+de `HtmlSanitizerTest` + 2 de `Validator::fecha`).
 
-- **B-01 — `HtmlSanitizer` es un punto único de fallo sin tests.** El `contenido` del blog y
-  `itinerario`/`incluye`/`no_incluye`/`descripcion_larga` de paquetes se imprimen sin
-  escapar, confiando 100% en `HtmlSanitizer::limpiar()`. El sanitizador está bien diseñado
-  (lista blanca de etiquetas, borra todos los atributos, normaliza `href`) y la CSP
-  (`script-src` sin `'unsafe-inline'`) es un backstop real. Pero `tests/Unit/Helpers/` no lo
-  cubre. Falta una batería de payloads XSS conocidos.
-- **B-02 — `HtmlSanitizer` deja estado global de libxml alterado.** `libxml_use_internal_errors(true)`
-  sin restaurar el valor previo.
-- **B-03 — `HtmlSanitizer::normalizarHref` permite URLs protocolo-relativas** (`//host`). No
-  es XSS; permite enlaces externos que parecen internos en el contenido del blog.
+### Bajos corregidos
+
+4. **B-01 — `HtmlSanitizer` es un punto único de fallo sin tests.** El `contenido` del blog y
+   `itinerario`/`incluye`/`no_incluye`/`descripcion_larga` de paquetes se imprimen sin
+   escapar, confiando 100% en `HtmlSanitizer::limpiar()`.
+
+   Añadido `tests/Unit/Helpers/HtmlSanitizerTest.php` (13 casos): eliminación de
+   `<script>`/`<style>` con su contenido, stripping de `onclick`/`style`/`class`,
+   `<img onerror>` eliminado, `<div>`/`<table>` desenvueltos conservando el texto,
+   conservación de `<strong>`/`<em>`/`<ul>`/`<li>`, `javascript:` / `data:` / `vbscript:` /
+   ` javascript:` / `//host` en `href` → `#`, y conservación de `https://` / `/ruta` /
+   `mailto:`. También cubre B-02 y B-03.
+
+5. **B-02 — `HtmlSanitizer` dejaba estado global de libxml alterado.**
+   `libxml_use_internal_errors(true)` sin restaurar. Arreglado: se guarda el valor devuelto
+   y se restaura con `libxml_use_internal_errors($erroresPrevios)` tras `loadHTML`.
+
+6. **B-03 — `HtmlSanitizer::normalizarHref` permitía URLs protocolo-relativas** (`//host`).
+   Arreglado reemplazando su lista blanca ad-hoc por `Url::segura()` (el helper de M-02), que
+   ya rechaza `//host`. Un solo criterio de "href seguro" en todo el proyecto.
+
+7. **B-05 — `ImageUploadService` sin `is_uploaded_file()` ni límite anti-bomba.** Arreglado:
+   `procesar()` ahora exige `is_uploaded_file($tmp_name)` y, antes de decodificar con GD,
+   llama a `getimagesize()` y rechaza imágenes cuyo `ancho × alto` supere 40 MP
+   (`PIXELES_MAX`) — frena un PNG de pocos KB que declare 30000×30000 y reviente la memoria.
+
+8. **B-06 — `CotizadorController::enviar` no validaba `fecha_tentativa` ni acotaba
+   `num_personas`.** Arreglado: nuevo `Validator::fecha()` (usa
+   `DateTime::createFromFormat('!Y-m-d', …)` + comparación de ida y vuelta — rechaza formatos
+   distintos, no acolchados y fechas imposibles como `2026-02-30` que `strtotime` aceptaría
+   desbordando) aplicado a `fecha_tentativa`, y `enRango('num_personas', 1, 60)` para no
+   insertar negativos ni valores absurdos. `tests/Unit/Helpers/ValidatorTest.php` +2 casos.
+
+### No corregido (a propósito)
+
 - **B-04 — Webhook de Mercado Pago sin control de frescura del `ts`.** La firma incluye `ts`
-  en el manifiesto pero no se valida su antigüedad → una notificación válida es reproducible.
-  Impacto acotado: el procesamiento es idempotente (`FOR UPDATE` + revalidación de estado).
-- **B-05 — `ImageUploadService` sin `is_uploaded_file()` ni límite anti-bomba** de
-  descompresión antes de `imagecreatefrom*()`. Endpoints solo-admin; DoS local a lo sumo.
-- **B-06 — `CotizadorController::enviar` no valida `fecha_tentativa`** (formato) ni acota
-  `num_personas` con `enRango()` (acepta negativos y valores enormes). Integridad de datos,
-  no seguridad.
+  en el manifiesto pero no se valida su antigüedad. Revisado: el replay ya está neutralizado
+  por `UNIQUE(referencia_pago)` + `INSERT IGNORE` + `SELECT … FOR UPDATE` en
+  `ReservaService::registrarPagoAprobado()` — una notificación repetida devuelve
+  `PAGO_DUPLICADO` y no toca nada. Agregar una ventana de `ts` no aporta sobre esa dedup y sí
+  arriesga rechazar los reintentos de entrega legítimos de Mercado Pago (que reintenta una
+  notificación fallida con backoff durante horas). Se deja como está.
 
 ### Informativo / calidad
 

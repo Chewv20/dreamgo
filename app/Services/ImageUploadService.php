@@ -12,6 +12,13 @@ final class ImageUploadService
     private const CALIDAD_JPEG = 82;
 
     /**
+     * Tope de pixeles totales (ancho x alto) aceptados antes de decodificar. Frena las "bombas
+     * de descompresion": un PNG de pocos KB puede declarar 30000x30000 y reventar la memoria
+     * en imagecreatefrompng(). 40 MP cubre de sobra cualquier foto real (~7000x5700).
+     */
+    private const PIXELES_MAX = 40_000_000;
+
+    /**
      * Procesa un archivo subido ($_FILES[campo]) y devuelve las rutas publicas
      * (relativas, listas para guardarse en BD) de la imagen original redimensionada y su miniatura.
      *
@@ -23,12 +30,25 @@ final class ImageUploadService
             throw new RuntimeException('No se pudo subir el archivo.');
         }
 
-        $mime = mime_content_type($archivo['tmp_name']);
+        $rutaTemporal = (string) ($archivo['tmp_name'] ?? '');
+        if ($rutaTemporal === '' || !is_uploaded_file($rutaTemporal)) {
+            throw new RuntimeException('El archivo no es una subida valida.');
+        }
+
+        $mime = mime_content_type($rutaTemporal);
         if (!in_array($mime, self::MIME_PERMITIDOS, true)) {
             throw new RuntimeException('Formato de imagen no permitido. Usa JPG, PNG o WEBP.');
         }
 
-        $origen = $this->crearImagenDesdeArchivo($archivo['tmp_name'], $mime);
+        $dimensiones = @getimagesize($rutaTemporal);
+        if ($dimensiones === false) {
+            throw new RuntimeException('No se pudo leer la imagen.');
+        }
+        if ((int) $dimensiones[0] * (int) $dimensiones[1] > self::PIXELES_MAX) {
+            throw new RuntimeException('La imagen tiene dimensiones excesivas.');
+        }
+
+        $origen = $this->crearImagenDesdeArchivo($rutaTemporal, $mime);
         $nombreArchivo = $this->nombreUnico($slugBase);
 
         $rutaOriginal = 'uploads/paquetes/original/' . $nombreArchivo;

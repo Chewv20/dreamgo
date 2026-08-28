@@ -22,9 +22,12 @@ final class HtmlSanitizer
         }
 
         $documento = new \DOMDocument();
-        libxml_use_internal_errors(true);
+        // Se guarda y restaura el estado previo: activarlo de forma permanente afectaria a
+        // cualquier otro codigo del request que dependa de los errores de libxml.
+        $erroresPrevios = libxml_use_internal_errors(true);
         $documento->loadHTML('<?xml encoding="utf-8" ?><div>' . $html . '</div>', LIBXML_NOERROR | LIBXML_NOWARNING);
         libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
 
         $raiz = $documento->getElementsByTagName('div')->item(0);
         if ($raiz === null) {
@@ -91,8 +94,8 @@ final class HtmlSanitizer
 
     private static function normalizarHref(string $href): string
     {
-        $href = trim($href);
-
-        return preg_match('/^(https?:\/\/|mailto:|tel:|\/|#)/i', $href) === 1 ? $href : '#';
+        // Misma lista blanca que App\Helpers\Url::segura (http(s), ruta relativa con una sola
+        // barra, mailto:, tel:, ancla). Un href que no pasa se neutraliza a '#'.
+        return Url::segura($href) ?: '#';
     }
 }

@@ -59,6 +59,24 @@ final class Validator
         return $this;
     }
 
+    public function fecha(string $campo, string $etiqueta): self
+    {
+        $valor = (string) ($this->datos[$campo] ?? '');
+        if ($valor === '') {
+            return $this;
+        }
+
+        // createFromFormat + comparacion de ida y vuelta: rechaza formatos distintos
+        // (27/08/2026), no acolchados (2026-8-7) y fechas imposibles que strtotime aceptaria
+        // desbordando (2026-02-30 -> 2 de marzo).
+        $fecha = \DateTime::createFromFormat('!Y-m-d', $valor);
+        if ($fecha === false || $fecha->format('Y-m-d') !== $valor) {
+            $this->errores[$campo] = "{$etiqueta} no es una fecha valida.";
+        }
+
+        return $this;
+    }
+
     public function enRango(string $campo, int $min, int $max, string $etiqueta): self
     {
         $valor = $this->datos[$campo] ?? '';
