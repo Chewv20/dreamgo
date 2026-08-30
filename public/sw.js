@@ -3,7 +3,7 @@
 // CACHE_VERSION: sube este numero cada vez que cambie SHELL_ASSETS o la logica
 // de este archivo, para que los navegadores con una version vieja instalada
 // descarten su cache automaticamente.
-const CACHE_VERSION = 'dreamgo-v8';
+const CACHE_VERSION = 'dreamgo-v9';
 const SHELL_CACHE = CACHE_VERSION + '-shell';
 const PAGES_CACHE = CACHE_VERSION + '-pages';
 
@@ -59,6 +59,21 @@ function esRutaAdmin(url) {
   return url.pathname.indexOf(BASE + 'admin') === 0;
 }
 
+// Auditoria 2026-08-29, hallazgo M4-05: /reserva/{codigo}/comprobante (PDF con nombre,
+// itinerario y precio del cliente) y /reserva/{codigo}/pagar-saldo estan gateadas solo por
+// un token en la URL; no deben quedar en Cache Storage del dispositivo. Cualquier URL con
+// parametro ?t= (token de reserva) se trata igual.
+function esRutaPrivadaConToken(url) {
+  return url.pathname.indexOf(BASE + 'reserva/') === 0 || url.searchParams.has('t');
+}
+
+// Solo se cachea una respuesta propia (same-origin, sin redireccion) y con estado 2xx: sin
+// esto se guardaban tambien 404, paginas de error y redirecciones, que luego se servian
+// offline como si fueran validas.
+function esCacheable(response) {
+  return response && response.ok && response.type === 'basic';
+}
+
 self.addEventListener('fetch', function (event) {
   const request = event.request;
   if (request.method !== 'GET') return;
@@ -79,11 +94,11 @@ self.addEventListener('fetch', function (event) {
     return;
   }
 
-  if (esRutaAdmin(url)) {
-    // Network-only, sin cache.put: nunca debe quedar una copia de una pagina del panel en
-    // Cache Storage. Si la red falla, se deja fallar la peticion tal cual en vez de mostrar
-    // una version cacheada (no deberia haber ninguna) u offline.html (que confundiria mas
-    // que ayudar dentro del panel).
+  if (esRutaAdmin(url) || esRutaPrivadaConToken(url)) {
+    // Network-only, sin cache.put: nunca debe quedar una copia de una pagina del panel ni de
+    // un documento privado (comprobante, pago de saldo) en Cache Storage. Si la red falla, se
+    // deja fallar la peticion tal cual en vez de mostrar una version cacheada (no deberia
+    // haber ninguna) u offline.html.
     event.respondWith(fetch(request));
     return;
   }
@@ -91,8 +106,10 @@ self.addEventListener('fetch', function (event) {
   event.respondWith(
     fetch(request)
       .then(function (response) {
-        const clone = response.clone();
-        caches.open(PAGES_CACHE).then(function (cache) { cache.put(request, clone); });
+        if (esCacheable(response)) {
+          const clone = response.clone();
+          caches.open(PAGES_CACHE).then(function (cache) { cache.put(request, clone); });
+        }
         return response;
       })
       .catch(function () {

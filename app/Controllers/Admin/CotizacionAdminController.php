@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Helpers\Auditoria;
 use App\Helpers\Flash;
+use App\Helpers\Validator;
 use App\Models\Cotizacion;
 use App\Models\CotizacionNota;
 use App\Models\Usuario;
@@ -135,7 +136,11 @@ class CotizacionAdminController extends AdminController
 
         $valor = trim((string) $this->request->input('seguimiento_en', ''));
 
-        if ($valor !== '' && (preg_match('/^\d{4}-\d{2}-\d{2}$/', $valor) !== 1 || strtotime($valor) === false)) {
+        // Validator::fecha() rechaza formatos distintos y fechas imposibles que strtotime()
+        // aceptaria desbordando (2026-02-30 -> 2 de marzo). Valor vacio = limpiar la fecha.
+        $validador = new Validator(['seguimiento_en' => $valor]);
+        $validador->fecha('seguimiento_en', 'La fecha de seguimiento');
+        if (!$validador->pasa()) {
             Flash::set('error', 'La fecha de seguimiento no es valida.');
             $this->redirect('/admin/cotizaciones/' . $id);
         }

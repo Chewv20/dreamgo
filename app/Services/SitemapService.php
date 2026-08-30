@@ -10,9 +10,17 @@ final class SitemapService
     {
     }
 
+    /**
+     * Dominio de produccion. Se usa solo como respaldo si APP_URL no esta en el .env: sin
+     * esto, un sitemap.xml regenerado en un entorno mal configurado quedaria lleno de <loc>
+     * apuntando al dominio de desarrollo. Coincide con el Sitemap: hardcodeado en
+     * public/robots.txt (auditoria 2026-08-23, hallazgo #16).
+     */
+    private const DOMINIO_PRODUCCION = 'https://dreamgooperadoraturistica.com';
+
     public function regenerar(): void
     {
-        $baseUrl = rtrim($_ENV['APP_URL'] ?? 'http://dreamgo.local', '/');
+        $baseUrl = rtrim($_ENV['APP_URL'] ?? self::DOMINIO_PRODUCCION, '/');
         $urls = $this->urlsEstaticas($baseUrl);
 
         foreach ($this->paquetesPublicados() as $paquete) {
@@ -42,7 +50,6 @@ final class SitemapService
         }
 
         $this->escribirXml($urls);
-        $this->escribirRobotsTxt($baseUrl);
     }
 
     private function urlsEstaticas(string $baseUrl): array
@@ -100,9 +107,9 @@ final class SitemapService
         file_put_contents(BASE_PATH . '/public/sitemap.xml', $xml->outputMemory());
     }
 
-    private function escribirRobotsTxt(string $baseUrl): void
-    {
-        $contenido = "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /uploads/\n\nSitemap: {$baseUrl}/sitemap.xml\n";
-        file_put_contents(BASE_PATH . '/public/robots.txt', $contenido);
-    }
+    // public/robots.txt NO se regenera desde aca a proposito: es un archivo estatico y
+    // estable (Apache lo sirve directo, nunca pasa por PHP). La version del repo ya omite
+    // "Disallow: /admin/" (auditoria 2026-08-23, hallazgo #16: no publicar la ruta del
+    // panel; la no-indexacion real la da el <meta robots noindex> del layout admin).
+    // Reescribirlo en cada edicion de contenido reintroducia esa linea.
 }
