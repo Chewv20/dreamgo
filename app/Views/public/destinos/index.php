@@ -8,6 +8,9 @@
   <div class="grid-tarjetas">
     <?php foreach ($categorias as $categoria): ?>
       <a href="/destinos/<?= htmlspecialchars($categoria['slug'], ENT_QUOTES, 'UTF-8') ?>" class="tarjeta tarjeta-contacto animar-entrada">
+        <?php if (!empty($categoria['imagen_portada'])): ?>
+          <img class="destino-portada" src="<?= htmlspecialchars($categoria['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($categoria['nombre'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy" width="480" height="270">
+        <?php endif; ?>
         <p class="etiqueta-categoria">
           <?= $categoria['tipo'] === 'internacional' ? 'Internacional' : 'Nacional' ?>
         </p>

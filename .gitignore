@@ -12,6 +12,10 @@
 /public/uploads/articulos/thumbs/*
 !/public/uploads/articulos/original/.gitkeep
 !/public/uploads/articulos/thumbs/.gitkeep
+/public/uploads/destinos/original/*
+/public/uploads/destinos/thumbs/*
+!/public/uploads/destinos/original/.gitkeep
+!/public/uploads/destinos/thumbs/.gitkeep
 .DS_Store
 Thumbs.db
 /.phpunit.cache/

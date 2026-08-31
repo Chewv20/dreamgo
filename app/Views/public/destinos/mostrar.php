@@ -17,6 +17,9 @@ $articulos ??= [];
     <?= $categoria['tipo'] === 'internacional' ? 'Internacional' : 'Nacional' ?>
   </p>
   <h1><?= htmlspecialchars($categoria['nombre'], ENT_QUOTES, 'UTF-8') ?></h1>
+  <?php if (!empty($categoria['imagen_portada'])): ?>
+    <img class="destino-portada" src="<?= htmlspecialchars($categoria['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($categoria['nombre'], ENT_QUOTES, 'UTF-8') ?>" width="1200" height="675">
+  <?php endif; ?>
   <p class="bloque-medio"><?= htmlspecialchars($categoria['descripcion'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
 
   <?php if (empty($paquetes)): ?>

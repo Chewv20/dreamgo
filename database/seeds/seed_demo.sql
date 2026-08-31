@@ -17,6 +17,7 @@ INSERT INTO permisos (clave, modulo, descripcion) VALUES
   ('paquetes.editar', 'paquetes', 'Editar paquetes existentes'),
   ('paquetes.eliminar', 'paquetes', 'Archivar o eliminar paquetes'),
   ('salidas.gestionar', 'salidas', 'Gestionar fechas de salida y cupos'),
+  ('destinos.gestionar', 'destinos', 'Crear, editar y ordenar los destinos del sitio'),
   ('reservas.ver', 'reservas', 'Ver el listado y calendario de reservas'),
   ('reservas.crear', 'reservas', 'Crear reservas manuales desde el panel'),
   ('reservas.confirmar', 'reservas', 'Confirmar reservas pendientes'),

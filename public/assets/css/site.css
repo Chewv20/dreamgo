@@ -388,6 +388,17 @@ summary:focus-visible {
   opacity: 0.8;
 }
 
+/* Imagen de portada de un destino (tarjetas de /destinos, bloque de Inicio y ficha del destino).
+   Se administra desde /admin/destinos; si el destino no tiene imagen no se renderiza nada. */
+.destino-portada {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radio);
+  margin-bottom: 1rem;
+}
+
 /* --- Testimonios (home) --- */
 .tarjeta-testimonio {
   background: var(--color-blanco);

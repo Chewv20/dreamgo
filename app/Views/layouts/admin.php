@@ -23,6 +23,7 @@
     <nav class="admin-nav">
       <a href="/admin">Panel</a>
       <?php if (Auth::hasPermission('paquetes.ver')): ?><a href="/admin/paquetes">Paquetes</a><?php endif; ?>
+      <?php if (Auth::hasPermission('destinos.gestionar')): ?><a href="/admin/destinos">Destinos</a><?php endif; ?>
       <?php if (Auth::hasPermission('reservas.ver')): ?><a href="/admin/reservas">Reservas</a><?php endif; ?>
       <?php if (Auth::hasPermission('cotizaciones.ver')): ?><a href="/admin/cotizaciones">Cotizaciones</a><?php endif; ?>
       <?php if (Auth::hasPermission('resenas.ver')): ?><a href="/admin/resenas">Resenas</a><?php endif; ?>
