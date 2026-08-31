@@ -3,7 +3,7 @@
 // CACHE_VERSION: sube este numero cada vez que cambie SHELL_ASSETS o la logica
 // de este archivo, para que los navegadores con una version vieja instalada
 // descarten su cache automaticamente.
-const CACHE_VERSION = 'dreamgo-v10';
+const CACHE_VERSION = 'dreamgo-v11';
 const SHELL_CACHE = CACHE_VERSION + '-shell';
 const PAGES_CACHE = CACHE_VERSION + '-pages';
 

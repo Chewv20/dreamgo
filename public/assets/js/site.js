@@ -12,6 +12,23 @@
     });
   }
 
+  function initGaleria() {
+    var galeria = document.querySelector('[data-galeria]');
+    if (!galeria) return;
+    var principal = galeria.querySelector('[data-galeria-principal]');
+    var tiras = galeria.querySelectorAll('[data-galeria-tira]');
+    if (!principal || !tiras.length) return;
+
+    tiras.forEach(function (tira) {
+      tira.addEventListener('click', function () {
+        principal.src = tira.getAttribute('data-full');
+        principal.alt = tira.getAttribute('data-alt') || '';
+        tiras.forEach(function (t) { t.classList.remove('is-activa'); });
+        tira.classList.add('is-activa');
+      });
+    });
+  }
+
   function initAutoSubmit() {
     document.querySelectorAll('[data-autosubmit]').forEach(function (control) {
       control.addEventListener('change', function () {
@@ -290,6 +307,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initMenu();
+    initGaleria();
     initAutoSubmit();
     initScrollReveal();
     initComparador();

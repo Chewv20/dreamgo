@@ -29,6 +29,20 @@ final class Response
         http_response_code($status);
     }
 
+    public static function xml(string $body, int $status = 200): never
+    {
+        // Se descartan los buffers pendientes (el rewrite de rutas de public/index.php opera
+        // sobre HTML y podria tocar un <loc>/<link> del XML).
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        http_response_code($status);
+        header('Content-Type: application/xml; charset=utf-8');
+        echo $body;
+        exit;
+    }
+
     /**
      * @param list<string> $encabezados
      * @param list<list<scalar|null>> $filas

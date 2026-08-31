@@ -49,12 +49,33 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
 
 <section class="seccion contenedor paquete-detalle">
   <div>
-    <?php if (!empty($imagenes) && count($imagenes) > 1): ?>
-      <div class="galeria-mini">
-        <?php foreach ($imagenes as $img): ?>
-          <img src="<?= htmlspecialchars($img['ruta_thumb'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($img['alt_text'] ?? $paquete['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
-        <?php endforeach; ?>
-      </div>
+    <?php if (!empty($imagenes)): ?>
+      <?php $imgPrincipal = $imagenes[0]; ?>
+      <figure class="galeria" data-galeria>
+        <img
+          class="galeria__principal"
+          data-galeria-principal
+          src="<?= htmlspecialchars($imgPrincipal['ruta_original'], ENT_QUOTES, 'UTF-8') ?>"
+          alt="<?= htmlspecialchars($imgPrincipal['alt_text'] ?? $paquete['titulo'], ENT_QUOTES, 'UTF-8') ?>"
+          loading="lazy"
+        >
+        <?php if (count($imagenes) > 1): ?>
+          <div class="galeria__tiras">
+            <?php foreach ($imagenes as $i => $img): ?>
+              <button
+                type="button"
+                class="galeria__tira<?= $i === 0 ? ' is-activa' : '' ?>"
+                data-galeria-tira
+                data-full="<?= htmlspecialchars($img['ruta_original'], ENT_QUOTES, 'UTF-8') ?>"
+                data-alt="<?= htmlspecialchars($img['alt_text'] ?? $paquete['titulo'], ENT_QUOTES, 'UTF-8') ?>"
+                aria-label="Ver imagen <?= $i + 1 ?>"
+              >
+                <img src="<?= htmlspecialchars($img['ruta_thumb'], ENT_QUOTES, 'UTF-8') ?>" alt="" loading="lazy">
+              </button>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+      </figure>
     <?php endif; ?>
 
     <h2>Itinerario</h2>

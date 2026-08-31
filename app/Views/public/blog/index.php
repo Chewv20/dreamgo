@@ -41,4 +41,11 @@ $fecha = static fn (?string $v): string => \App\Helpers\Fecha::corta($v);
 
     <?php $rutaBase = '/blog'; require __DIR__ . '/../../partials/paginacion.php'; ?>
   <?php endif; ?>
+
+  <p class="blog-rss">
+    <a href="/blog/feed">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9h2A11 11 0 0 0 4 9v2Zm0 4a5 5 0 0 1 5 5h2a7 7 0 0 0-7-7v2Zm1.5 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/></svg>
+      Suscribete por RSS
+    </a>
+  </p>
 </section>

@@ -910,6 +910,51 @@ input[type="radio"]:focus-visible,
 .hero__rating { margin-top: 0.5rem; }
 
 /* Ficha de paquete: galeria, aside, salidas */
+.galeria {
+  margin: 0 0 2rem;
+}
+
+.galeria__principal {
+  width: 100%;
+  border-radius: var(--radio);
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.galeria__tiras {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.galeria__tira {
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.galeria__tira img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.galeria__tira.is-activa {
+  border-color: var(--color-primario-oscuro);
+}
+
+.galeria__tira:focus-visible {
+  outline: none;
+  border-color: var(--color-primario-oscuro);
+  box-shadow: 0 0 0 3px rgba(168, 95, 77, 0.25);
+}
+
+/* Galeria vieja (sin JS o layouts que aun la usen) */
 .galeria-mini {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -1079,6 +1124,18 @@ input[type="radio"]:focus-visible,
 }
 
 .breadcrumbs [aria-current="page"] { opacity: 0.7; }
+
+/* Enlace al feed RSS del blog */
+.blog-rss {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+}
+
+.blog-rss a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
 
 /* Errores de campo en formularios */
 .campo__error {

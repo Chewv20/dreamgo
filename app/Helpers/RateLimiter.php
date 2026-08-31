@@ -24,9 +24,9 @@ final class RateLimiter
      *   quien insiste contra el email de una victima como a quien rota emails desde una IP.
      * - 'suscribir': identificador null; el abuso tipico es bombardear direcciones de terceros
      *   distintas en cada intento, asi que limitar por email objetivo no ayuda.
-     * - 'cotizador': identificador null (el email lo pone el propio formulario). Cada envio
-     *   inserta una fila en cotizaciones y dispara un correo al equipo, asi que el limite es
-     *   mas estricto que el resto de acciones publicas.
+     * - 'cotizador' y 'contacto': identificador null (el email lo pone el propio formulario).
+     *   Cada envio inserta una fila en cotizaciones y dispara un correo al equipo, asi que el
+     *   limite es mas estricto que el resto de acciones publicas.
      */
     private const LIMITES = [
         'reservar' => [null, 20, 30],
@@ -35,6 +35,7 @@ final class RateLimiter
         'suscribir' => [null, 15, 30],
         'pagar_saldo' => [null, 20, 30],
         'cotizador' => [null, 10, 30],
+        'contacto' => [null, 10, 30],
     ];
 
     public static function demasiados(string $accion, ?string $identificador, string $ip): bool

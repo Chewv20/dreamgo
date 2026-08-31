@@ -48,6 +48,11 @@ abstract class Controller
         Response::json($data, $status);
     }
 
+    protected function xml(string $body, int $status = 200): never
+    {
+        Response::xml($body, $status);
+    }
+
     protected function abort(int $status, string $message = ''): never
     {
         Response::status($status);

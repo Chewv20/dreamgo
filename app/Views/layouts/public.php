@@ -10,6 +10,9 @@
 <meta property="og:image" content="<?= htmlspecialchars($meta['ogImage'], ENT_QUOTES, 'UTF-8') ?>">
 <meta property="og:type" content="website">
 <link rel="canonical" href="<?= htmlspecialchars(($_ENV['APP_URL'] ?? '') . $_SERVER['REQUEST_URI'], ENT_QUOTES, 'UTF-8') ?>">
+<?php if (!empty($meta['feed'])): ?>
+<link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($meta['feed']['titulo'], ENT_QUOTES, 'UTF-8') ?>" href="<?= htmlspecialchars($meta['feed']['url'], ENT_QUOTES, 'UTF-8') ?>">
+<?php endif; ?>
 
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#d99e8e">

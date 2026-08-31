@@ -52,9 +52,11 @@ $router->post('/cotizador', [CotizadorController::class, 'enviar']);
 
 $router->get('/nosotros', [NosotrosController::class, 'index']);
 $router->get('/contacto', [ContactoController::class, 'index']);
+$router->post('/contacto', [ContactoController::class, 'enviar']);
 $router->get('/aviso-de-privacidad', [LegalController::class, 'avisoPrivacidad']);
 
 $router->get('/blog', [BlogController::class, 'index']);
+$router->get('/blog/feed', [BlogController::class, 'feed']);
 $router->get('/blog/{slug}', [BlogController::class, 'articulo']);
 
 $router->get('/mi-reserva', [ReservaConsultaController::class, 'mostrar']);
