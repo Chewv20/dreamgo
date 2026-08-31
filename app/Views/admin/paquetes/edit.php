@@ -7,8 +7,8 @@
 
 <?php if (!empty($paquete['imagen_portada'])): ?>
 <div class="admin-panel">
-  <h2 style="margin-top:0;">Portada actual</h2>
-  <img src="<?= htmlspecialchars($paquete['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="" style="max-width:320px;border-radius:var(--radio);">
+  <h2 class="mt-0">Portada actual</h2>
+  <img src="<?= htmlspecialchars($paquete['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="" class="img-preview">
 </div>
 <?php endif; ?>
 

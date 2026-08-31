@@ -1,5 +1,5 @@
 <?php /** @var array $suscriptores */ ?>
-<div class="admin-acciones" style="margin-bottom:1.25rem;">
+<div class="admin-acciones mb-md">
   <a href="/admin/suscriptores/exportar" class="btn btn-secundario">Exportar CSV</a>
 </div>
 

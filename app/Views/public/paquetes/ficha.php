@@ -36,7 +36,7 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
   </div>
 </section>
 
-<div class="contenedor" style="margin-top:1rem;">
+<div class="contenedor mt-1">
   <?php
   $migas = [
       ['texto' => 'Inicio', 'url' => '/'],
@@ -154,7 +154,7 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
 <?php endif; ?>
 
 <?php if (!empty($relacionados)): ?>
-<section class="seccion contenedor seccion--panel" style="background:var(--color-fondo-alterno);">
+<section class="seccion contenedor seccion--panel">
   <div class="seccion__encabezado">
     <h2>Tambien te puede interesar</h2>
     <p>Otros paquetes de <?= htmlspecialchars($paquete['categoria_nombre'], ENT_QUOTES, 'UTF-8') ?>.</p>

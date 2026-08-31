@@ -1,10 +1,10 @@
 <div class="admin-panel">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+  <div class="cal-nav">
     <button type="button" class="btn btn-secundario" id="cal-prev">&larr; Anterior</button>
-    <h2 id="cal-titulo" style="margin:0;"></h2>
+    <h2 id="cal-titulo" class="m-0"></h2>
     <button type="button" class="btn btn-secundario" id="cal-next">Siguiente &rarr;</button>
   </div>
-  <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.5rem;"></div>
+  <div id="cal-grid" class="cal-grid"></div>
 </div>
 
 <script src="<?= htmlspecialchars(\App\Helpers\Asset::url('/assets/js/admin-calendario.js'), ENT_QUOTES, 'UTF-8') ?>" defer></script>

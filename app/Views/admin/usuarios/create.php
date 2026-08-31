@@ -1,5 +1,5 @@
 <?php /** @var array $roles */ ?>
-<div class="admin-panel" style="max-width:520px;">
+<div class="admin-panel ancho-520">
   <form method="post" action="/admin/usuarios" class="admin-form-grid">
     <?= \App\Helpers\Csrf::field() ?>
     <div class="campo">

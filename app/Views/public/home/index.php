@@ -16,7 +16,23 @@ $iconosSvg = [
 
 $bloquesPorClave = array_column($bloques, null, 'clave');
 $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']['visible'] === 1;
+
+// Colores de fondo por bloque: el admin los edita (validados como hex en ContenidoController),
+// pero un style="" inline lo bloquea la CSP. Se emiten en un <style nonce> (mismo nonce por
+// peticion que ya usa script-src). Fallback al token via .seccion--panel si no hay color.
+$bloquesColor = array_filter(
+    $bloques,
+    static fn ($b) => (int) $b['visible'] === 1 && !empty($b['color_fondo'])
+        && preg_match('/^#[0-9a-f]{6}$/i', (string) $b['color_fondo']) === 1
+);
 ?>
+<?php if ($bloquesColor !== []): ?>
+<style nonce="<?= CSP_NONCE ?>">
+<?php foreach ($bloquesColor as $b): ?>
+[data-bloque="<?= htmlspecialchars($b['clave'], ENT_QUOTES, 'UTF-8') ?>"]{background:<?= $b['color_fondo'] ?>}
+<?php endforeach; ?>
+</style>
+<?php endif; ?>
 <?php if (!$heroVisible): ?>
   <section class="seccion contenedor">
     <h1>Dream Go Operadora Turistica</h1>
@@ -45,7 +61,7 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
     </section>
 
   <?php elseif ($bloque['clave'] === 'ventajas'): ?>
-    <section class="seccion contenedor<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';"' : '' ?>>
+    <section class="seccion contenedor<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" data-bloque="<?= htmlspecialchars($bloque['clave'], ENT_QUOTES, 'UTF-8') ?>">
       <div class="seccion__encabezado">
         <h2><?= htmlspecialchars($bloque['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?></h2>
         <?php if (!empty($bloque['subtitulo'])): ?><p><?= htmlspecialchars($bloque['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
@@ -62,7 +78,7 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
     </section>
 
   <?php elseif ($bloque['clave'] === 'destinos' && !empty($categorias)): ?>
-    <section class="seccion contenedor<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';"' : '' ?>>
+    <section class="seccion contenedor<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" data-bloque="<?= htmlspecialchars($bloque['clave'], ENT_QUOTES, 'UTF-8') ?>">
       <div class="seccion__encabezado">
         <h2><?= htmlspecialchars($bloque['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?></h2>
         <?php if (!empty($bloque['subtitulo'])): ?><p><?= htmlspecialchars($bloque['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
@@ -81,7 +97,7 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
     </section>
 
   <?php elseif ($bloque['clave'] === 'paquetes_destacados' && !empty($destacados)): ?>
-    <section class="seccion contenedor seccion--panel" style="background:<?= htmlspecialchars($bloque['color_fondo'] ?: 'var(--color-fondo-alterno)', ENT_QUOTES, 'UTF-8') ?>;">
+    <section class="seccion contenedor seccion--panel" data-bloque="paquetes_destacados">
       <div class="seccion__encabezado">
         <h2><?= htmlspecialchars($bloque['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?></h2>
         <?php if (!empty($bloque['subtitulo'])): ?><p><?= htmlspecialchars($bloque['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
@@ -91,13 +107,13 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
           <?php require __DIR__ . '/../paquetes/_tarjeta.php'; ?>
         <?php endforeach; ?>
       </div>
-      <div class="centrado" style="margin-top:2rem;">
+      <div class="centrado mt-2">
         <a href="/paquetes" class="btn btn-secundario">Ver todos los paquetes</a>
       </div>
     </section>
 
   <?php elseif ($bloque['clave'] === 'testimonios'): ?>
-    <section class="seccion contenedor<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';"' : '' ?>>
+    <section class="seccion contenedor<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" data-bloque="<?= htmlspecialchars($bloque['clave'], ENT_QUOTES, 'UTF-8') ?>">
       <div class="seccion__encabezado">
         <h2><?= htmlspecialchars($bloque['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?></h2>
         <?php if (!empty($bloque['subtitulo'])): ?><p><?= htmlspecialchars($bloque['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
@@ -114,7 +130,7 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
     </section>
 
   <?php elseif ($bloque['clave'] === 'cta_final'): ?>
-    <section class="seccion contenedor cta-final animar-entrada<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';"' : '' ?>>
+    <section class="seccion contenedor cta-final animar-entrada<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" data-bloque="cta_final">
       <h2><?= htmlspecialchars($bloque['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?></h2>
       <?php if (!empty($bloque['subtitulo'])): ?><p><?= htmlspecialchars($bloque['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
       <?php if (!empty($contenido['boton_texto'])): ?>

@@ -40,7 +40,7 @@ $articulo ??= [];
 
 <div class="campo">
   <label for="contenido">Contenido (HTML basico: parrafos, negritas, listas, subtitulos h3/h4, enlaces)</label>
-  <textarea id="contenido" name="contenido" style="min-height:280px;"><?= htmlspecialchars($articulo['contenido'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+  <textarea id="contenido" name="contenido" class="textarea-lg"><?= htmlspecialchars($articulo['contenido'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
 </div>
 
 <div class="admin-form-grid admin-form-grid--2">
@@ -58,7 +58,7 @@ $articulo ??= [];
   <label for="imagen">Imagen de portada (JPG, PNG o WEBP)</label>
   <input type="file" id="imagen" name="imagen" accept="image/jpeg,image/png,image/webp">
   <?php if (!empty($articulo['imagen'])): ?>
-    <small style="opacity:0.7;">Actual: <?= htmlspecialchars($articulo['imagen'], ENT_QUOTES, 'UTF-8') ?> — sube una nueva para reemplazarla.</small>
+    <small class="op-70">Actual: <?= htmlspecialchars($articulo['imagen'], ENT_QUOTES, 'UTF-8') ?> — sube una nueva para reemplazarla.</small>
   <?php endif; ?>
 </div>
 

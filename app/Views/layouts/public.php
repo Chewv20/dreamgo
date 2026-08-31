@@ -31,7 +31,7 @@ foreach ($coloresClaves as $claveColor) {
 }
 ?>
 <?php if (!empty($coloresPersonalizados)): ?>
-<style>:root{<?= implode(';', $coloresPersonalizados) ?>}</style>
+<style nonce="<?= CSP_NONCE ?>">:root{<?= implode(';', $coloresPersonalizados) ?>}</style>
 <?php endif; ?>
 <?php if (!empty($meta['jsonLd'])): ?>
 <script type="application/ld+json"><?= $meta['jsonLd'] ?></script>
@@ -146,7 +146,7 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
       </ul>
 
       <?php if ($footerTieneRedes): ?>
-        <h3 style="margin-top:1.5rem;">Siguenos</h3>
+        <h3 class="mt-15">Siguenos</h3>
         <div class="footer__social">
           <?php foreach ($footerRedes as $nombre => $url): ?>
             <?php if ($url !== ''): ?>

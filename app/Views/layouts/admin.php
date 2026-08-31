@@ -36,7 +36,7 @@
     </nav>
     <form method="post" action="/admin/logout" class="admin-sidebar__logout">
       <?= \App\Helpers\Csrf::field() ?>
-      <button type="submit" class="btn btn-secundario" style="width:100%;">Cerrar sesion</button>
+      <button type="submit" class="btn btn-secundario w-100">Cerrar sesion</button>
     </form>
   </aside>
 

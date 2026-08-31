@@ -1,5 +1,5 @@
 <?php /** @var array $reservas */ ?>
-<div class="admin-acciones" style="margin-bottom:1.25rem;">
+<div class="admin-acciones mb-md">
   <a href="/admin/reservas/calendario" class="btn btn-secundario">Ver calendario</a>
   <a href="/admin/reservas/exportar" class="btn btn-secundario">Exportar CSV</a>
 </div>

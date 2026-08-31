@@ -6,9 +6,9 @@ $acciones ??= [];
 $accionActiva ??= null;
 $queryExtra = $accionActiva !== null ? ['accion' => $accionActiva] : [];
 ?>
-<div class="admin-acciones" style="margin-bottom:1.25rem;display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
-  <form method="get" action="/admin/bitacora" style="display:flex;gap:0.4rem;align-items:center;">
-    <label for="filtro-accion" style="font-size:0.9rem;">Accion:</label>
+<div class="admin-filtros">
+  <form method="get" action="/admin/bitacora" class="inline-form">
+    <label for="filtro-accion" class="label-sm">Accion:</label>
     <select id="filtro-accion" name="accion" data-autosubmit>
       <option value="">Todas</option>
       <?php foreach ($acciones as $a): ?>

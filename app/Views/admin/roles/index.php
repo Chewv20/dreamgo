@@ -4,7 +4,7 @@
 /** @var array $permisosPorRol */
 ?>
 <div class="admin-panel">
-  <h2 style="margin-top:0;">Nuevo rol</h2>
+  <h2 class="mt-0">Nuevo rol</h2>
   <form method="post" action="/admin/roles" class="admin-form-grid admin-form-grid--2">
     <?= \App\Helpers\Csrf::field() ?>
     <div class="campo">
@@ -22,7 +22,7 @@
 </div>
 
 <div class="admin-panel">
-  <h2 style="margin-top:0;">Roles existentes</h2>
+  <h2 class="mt-0">Roles existentes</h2>
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
       <thead><tr><th>Rol</th><th>Descripcion</th><th>Usuarios</th><th>Acciones</th></tr></thead>
@@ -36,7 +36,7 @@
               <?php if ((int) $rol['es_sistema'] !== 1): ?>
                 <form method="post" action="/admin/roles/<?= (int) $rol['id'] ?>/eliminar" data-confirm="¿Eliminar este rol?">
                   <?= \App\Helpers\Csrf::field() ?>
-                  <button type="submit" class="btn btn-secundario" style="padding:0.4rem 0.8rem;font-size:0.85rem;">Eliminar</button>
+                  <button type="submit" class="btn btn-secundario btn--xs">Eliminar</button>
                 </form>
               <?php endif; ?>
             </td>
@@ -48,8 +48,8 @@
 </div>
 
 <div class="admin-panel">
-  <h2 style="margin-top:0;">Matriz de permisos</h2>
-  <p style="opacity:0.75;">Marca los permisos que tendra cada rol. El rol Administrador siempre tiene acceso total.</p>
+  <h2 class="mt-0">Matriz de permisos</h2>
+  <p class="op-75">Marca los permisos que tendra cada rol. El rol Administrador siempre tiene acceso total.</p>
   <form method="post" action="/admin/roles/matriz">
     <?= \App\Helpers\Csrf::field() ?>
     <div class="admin-matriz-wrap">
@@ -64,7 +64,7 @@
         </thead>
         <tbody>
           <?php foreach ($permisosPorModulo as $modulo => $permisos): ?>
-            <tr><td colspan="<?= count($roles) + 1 ?>" style="background:var(--color-fondo-alterno);font-weight:700;text-transform:capitalize;text-align:left;"><?= htmlspecialchars($modulo, ENT_QUOTES, 'UTF-8') ?></td></tr>
+            <tr><td colspan="<?= count($roles) + 1 ?>" class="matriz-grupo"><?= htmlspecialchars($modulo, ENT_QUOTES, 'UTF-8') ?></td></tr>
             <?php foreach ($permisos as $permiso): ?>
               <tr>
                 <td><?= htmlspecialchars($permiso['descripcion'] ?? $permiso['clave'], ENT_QUOTES, 'UTF-8') ?></td>
@@ -86,6 +86,6 @@
         </tbody>
       </table>
     </div>
-    <button type="submit" class="btn btn-primario" style="margin-top:1.25rem;">Guardar permisos</button>
+    <button type="submit" class="btn btn-primario mt-1">Guardar permisos</button>
   </form>
 </div>

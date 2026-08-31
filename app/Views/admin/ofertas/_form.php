@@ -8,7 +8,7 @@ $oferta ??= [];
 <div class="admin-form-grid admin-form-grid--2">
   <div class="campo">
     <label for="codigo">Codigo</label>
-    <input type="text" id="codigo" name="codigo" required maxlength="40" style="text-transform:uppercase;" value="<?= htmlspecialchars($oferta['codigo'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+    <input type="text" id="codigo" name="codigo" required maxlength="40" class="tt-upper" value="<?= htmlspecialchars($oferta['codigo'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
   </div>
   <div class="campo">
     <label for="tipo">Tipo de descuento</label>
@@ -49,7 +49,7 @@ $oferta ??= [];
       <option value="paquete" <?= ($oferta['alcance'] ?? '') === 'paquete' ? 'selected' : '' ?>>Un paquete especifico</option>
     </select>
   </div>
-  <div class="campo" id="campo-paquete" style="display:<?= ($oferta['alcance'] ?? '') === 'paquete' ? 'block' : 'none' ?>;">
+  <div class="campo<?= ($oferta['alcance'] ?? '') === 'paquete' ? '' : ' oculto' ?>" id="campo-paquete">
     <label for="paquete_id">Paquete</label>
     <select id="paquete_id" name="paquete_id">
       <?php foreach ($paquetes as $paquete): ?>
@@ -61,9 +61,9 @@ $oferta ??= [];
   </div>
 </div>
 
-<div class="campo" style="display:flex;align-items:center;gap:0.6rem;">
-  <input type="checkbox" id="activo" name="activo" value="1" style="width:1.2rem;height:1.2rem;" <?= (int) ($oferta['activo'] ?? 1) === 1 ? 'checked' : '' ?>>
-  <label for="activo" style="margin:0;">Activo</label>
+<div class="campo campo--check">
+  <input type="checkbox" id="activo" name="activo" value="1" <?= (int) ($oferta['activo'] ?? 1) === 1 ? 'checked' : '' ?>>
+  <label for="activo" class="m-0">Activo</label>
 </div>
 
 <button type="submit" class="btn btn-primario">Guardar codigo</button>

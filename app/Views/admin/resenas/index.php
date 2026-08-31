@@ -10,13 +10,13 @@
             <td><?= htmlspecialchars($r['cliente_nombre'], ENT_QUOTES, 'UTF-8') ?></td>
             <td><?= htmlspecialchars($r['paquete_titulo'], ENT_QUOTES, 'UTF-8') ?></td>
             <td><?= str_repeat('★', (int) $r['calificacion']) . str_repeat('☆', 5 - (int) $r['calificacion']) ?></td>
-            <td style="max-width:320px;"><?= htmlspecialchars(mb_strimwidth($r['comentario'], 0, 140, '...'), ENT_QUOTES, 'UTF-8') ?></td>
+            <td class="ancho-320"><?= htmlspecialchars(mb_strimwidth($r['comentario'], 0, 140, '...'), ENT_QUOTES, 'UTF-8') ?></td>
             <td>
               <?php $badge = ['pendiente' => 'ambar', 'aprobada' => 'verde', 'rechazada' => 'rojo'][$r['estado']]; ?>
               <span class="admin-badge admin-badge--<?= $badge ?>"><?= ucfirst($r['estado']) ?></span>
             </td>
             <td>
-              <form method="post" action="/admin/resenas/<?= (int) $r['id'] ?>/estado" style="display:flex;gap:0.4rem;">
+              <form method="post" action="/admin/resenas/<?= (int) $r['id'] ?>/estado" class="inline-form">
                 <?= \App\Helpers\Csrf::field() ?>
                 <select name="estado" data-autosubmit>
                   <?php foreach (['pendiente', 'aprobada', 'rechazada'] as $estado): ?>

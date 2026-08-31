@@ -16,11 +16,11 @@ $queryExtra = array_filter([
 ], static fn ($v) => $v !== null && $v !== '');
 $hoy = date('Y-m-d');
 ?>
-<div class="admin-acciones" style="margin-bottom:1.25rem;display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+<div class="admin-filtros">
   <a href="/admin/cotizaciones/exportar" class="btn btn-secundario">Exportar CSV</a>
 
-  <form method="get" action="/admin/cotizaciones" style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-    <label style="font-size:0.9rem;">Origen:
+  <form method="get" action="/admin/cotizaciones">
+    <label class="label-sm">Origen:
       <select name="origen" data-autosubmit>
         <option value="">Todos</option>
         <option value="<?= htmlspecialchars(\App\Models\Cotizacion::ORIGEN_DIRECTO, ENT_QUOTES, 'UTF-8') ?>" <?= $origenActivo === \App\Models\Cotizacion::ORIGEN_DIRECTO ? 'selected' : '' ?>>Directo / sin UTM</option>
@@ -29,7 +29,7 @@ $hoy = date('Y-m-d');
         <?php endforeach; ?>
       </select>
     </label>
-    <label style="font-size:0.9rem;">Asesor:
+    <label class="label-sm">Asesor:
       <select name="asignado" data-autosubmit>
         <option value="">Todos</option>
         <option value="<?= htmlspecialchars(\App\Models\Cotizacion::SIN_ASIGNAR, ENT_QUOTES, 'UTF-8') ?>" <?= $asignadoActivo === \App\Models\Cotizacion::SIN_ASIGNAR ? 'selected' : '' ?>>Sin asignar</option>
@@ -38,7 +38,7 @@ $hoy = date('Y-m-d');
         <?php endforeach; ?>
       </select>
     </label>
-    <label style="font-size:0.9rem;display:inline-flex;align-items:center;gap:0.3rem;">
+    <label class="label-sm label-check">
       <input type="checkbox" name="seguimiento" value="vencidos" data-autosubmit <?= $seguimientoActivo === 'vencidos' ? 'checked' : '' ?>>
       Solo seguimientos vencidos
     </label>
@@ -62,11 +62,11 @@ $hoy = date('Y-m-d');
               <?php if (!empty($c['utm_source'])): ?>
                 <?= htmlspecialchars($c['utm_source'], ENT_QUOTES, 'UTF-8') ?>
               <?php else: ?>
-                <small style="color:#888;">Directo</small>
+                <small class="txt-mute">Directo</small>
               <?php endif; ?>
             </td>
             <td>
-              <?= htmlspecialchars($c['asignado_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?: '<small style="color:#888;">&mdash;</small>' ?>
+              <?= htmlspecialchars($c['asignado_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?: '<small class="txt-mute">&mdash;</small>' ?>
               <?php if ($vencida): ?>
                 <br><span class="admin-badge admin-badge--rojo">Seguimiento vencido</span>
               <?php endif; ?>

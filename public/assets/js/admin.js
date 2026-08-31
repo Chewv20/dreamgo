@@ -43,7 +43,7 @@
       if (!target) return;
 
       el.addEventListener('change', function () {
-        target.style.display = el.value === valorEsperado ? 'block' : 'none';
+        target.classList.toggle('oculto', el.value !== valorEsperado);
       });
     });
   }

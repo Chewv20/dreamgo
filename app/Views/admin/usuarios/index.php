@@ -1,5 +1,5 @@
 <?php /** @var array $usuarios */ ?>
-<div class="admin-acciones" style="margin-bottom:1.25rem;">
+<div class="admin-acciones mb-md">
   <a href="/admin/usuarios/crear" class="btn btn-primario">Nuevo usuario</a>
 </div>
 

@@ -2,7 +2,7 @@
 /** @var array $articulos */
 /** @var \Core\Paginator $paginador */
 ?>
-<div class="admin-acciones" style="margin-bottom:1.25rem;">
+<div class="admin-acciones mb-md">
   <a href="/admin/articulos/crear" class="btn btn-primario">Nuevo articulo</a>
 </div>
 
@@ -14,7 +14,7 @@
         <?php foreach ($articulos as $a): ?>
           <tr>
             <td><?= htmlspecialchars($a['titulo'], ENT_QUOTES, 'UTF-8') ?></td>
-            <td><?= htmlspecialchars($a['categoria_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?: '<small style="color:#888;">&mdash;</small>' ?></td>
+            <td><?= htmlspecialchars($a['categoria_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?: '<small class="txt-mute">&mdash;</small>' ?></td>
             <td>
               <?php $badge = ['publicado' => 'verde', 'borrador' => 'ambar', 'archivado' => 'gris'][$a['estado']]; ?>
               <span class="admin-badge admin-badge--<?= $badge ?>"><?= ucfirst($a['estado']) ?></span>

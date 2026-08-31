@@ -1,5 +1,5 @@
 <?php /** @var array $usuario */ /** @var array $roles */ ?>
-<div class="admin-panel" style="max-width:520px;">
+<div class="admin-panel ancho-520">
   <form method="post" action="/admin/usuarios/<?= (int) $usuario['id'] ?>/editar" class="admin-form-grid">
     <?= \App\Helpers\Csrf::field() ?>
     <div class="campo">
@@ -22,9 +22,9 @@
         <?php endforeach; ?>
       </select>
     </div>
-    <div class="campo" style="display:flex;align-items:center;gap:0.6rem;">
-      <input type="checkbox" name="activo" id="activo" value="1" style="width:1.2rem;height:1.2rem;" <?= (int) $usuario['activo'] === 1 ? 'checked' : '' ?>>
-      <label for="activo" style="margin:0;">Usuario activo</label>
+    <div class="campo campo--check">
+      <input type="checkbox" name="activo" id="activo" value="1" <?= (int) $usuario['activo'] === 1 ? 'checked' : '' ?>>
+      <label for="activo" class="m-0">Usuario activo</label>
     </div>
     <button type="submit" class="btn btn-primario">Guardar cambios</button>
   </form>

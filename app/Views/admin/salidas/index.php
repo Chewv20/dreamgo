@@ -1,5 +1,5 @@
 <?php /** @var array $paquete */ /** @var array $salidas */ ?>
-<div class="admin-acciones" style="margin-bottom:1.25rem;">
+<div class="admin-acciones mb-md">
   <a href="/admin/paquetes/<?= (int) $paquete['id'] ?>/salidas/crear" class="btn btn-primario">Nueva fecha</a>
   <a href="/admin/paquetes/<?= (int) $paquete['id'] ?>/editar" class="btn btn-secundario">Volver al paquete</a>
 </div>

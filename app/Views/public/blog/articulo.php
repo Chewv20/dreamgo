@@ -44,7 +44,7 @@ $fechaPub = $a['publicado_en'] ?? $a['creado_en'];
     </p>
   <?php endif; ?>
 
-  <p style="margin-top:1.5rem;"><a href="/blog">&laquo; Volver al blog</a></p>
+  <p class="mt-15"><a href="/blog">&laquo; Volver al blog</a></p>
 </article>
 
 <?php if (!empty($relacionados)): ?>

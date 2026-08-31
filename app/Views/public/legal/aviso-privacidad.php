@@ -12,7 +12,7 @@ $direccion = $contacto['direccion'] !== '' ? $e($contacto['direccion']) : '[DOMI
 $email = $contacto['email'] !== '' ? $e($contacto['email']) : '[CORREO DE CONTACTO]';
 $telefono = $contacto['telefono'] !== '' ? $e($contacto['telefono']) : '[TELEFONO DE CONTACTO]';
 ?>
-<section class="seccion contenedor" style="max-width:820px;">
+<section class="seccion contenedor ancho-820">
   <h1>Aviso de Privacidad</h1>
   <p><em>Ultima actualizacion: [FECHA DE ULTIMA ACTUALIZACION].</em></p>
 

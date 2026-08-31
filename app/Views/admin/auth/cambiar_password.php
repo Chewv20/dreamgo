@@ -1,7 +1,7 @@
 <div class="admin-login">
   <div class="admin-login__card">
     <img src="/assets/img/logo.avif" alt="Dream Go">
-    <h1 style="font-size:1.4rem;">Cambia tu contrasena</h1>
+    <h1 class="titulo-sm">Cambia tu contrasena</h1>
     <p>Por seguridad debes establecer una contrasena nueva antes de continuar.</p>
 
     <?php foreach (\App\Helpers\Flash::pull() as $flash): ?>
@@ -22,7 +22,7 @@
         <label for="password_confirmacion">Confirmar nueva contrasena</label>
         <input type="password" id="password_confirmacion" name="password_confirmacion" required minlength="8">
       </div>
-      <button type="submit" class="btn btn-primario" style="width:100%;">Guardar y continuar</button>
+      <button type="submit" class="btn btn-primario w-100">Guardar y continuar</button>
     </form>
   </div>
 </div>

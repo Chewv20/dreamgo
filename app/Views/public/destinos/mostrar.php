@@ -22,7 +22,7 @@ $articulos ??= [];
   <?php if (empty($paquetes)): ?>
     <p>Aun no hay paquetes publicados en este destino. Vuelve pronto.</p>
   <?php else: ?>
-    <div class="grid-tarjetas" style="margin-top:2rem;">
+    <div class="grid-tarjetas mt-2">
       <?php foreach ($paquetes as $paquete): ?>
         <?php require __DIR__ . '/../paquetes/_tarjeta.php'; ?>
       <?php endforeach; ?>

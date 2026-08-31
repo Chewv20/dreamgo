@@ -38,7 +38,7 @@ $etiquetasEstado = [
   <?php if ($buscado): ?>
     <?php if ($reserva): ?>
       <div class="panel-resultado">
-        <h2 style="margin-top:0;"><?= htmlspecialchars($reserva['paquete_titulo'], ENT_QUOTES, 'UTF-8') ?></h2>
+        <h2 class="mt-0"><?= htmlspecialchars($reserva['paquete_titulo'], ENT_QUOTES, 'UTF-8') ?></h2>
         <p><strong>Codigo:</strong> <?= htmlspecialchars($reserva['codigo_reserva'], ENT_QUOTES, 'UTF-8') ?></p>
         <p><strong>Estado:</strong> <?= htmlspecialchars($etiquetasEstado[$reserva['estado']] ?? ucfirst($reserva['estado']), ENT_QUOTES, 'UTF-8') ?></p>
         <p><strong>Fecha de salida:</strong> <?= htmlspecialchars(\App\Helpers\Fecha::corta($reserva['fecha_salida']), ENT_QUOTES, 'UTF-8') ?></p>
@@ -65,7 +65,7 @@ $etiquetasEstado = [
         <p>Si tienes dudas sobre tu reserva, contactanos por <a href="/contacto">nuestra pagina de contacto</a>.</p>
       </div>
     <?php else: ?>
-      <p class="campo__error" style="margin-top:2rem;">No encontramos ninguna reserva con ese codigo y correo. Verifica los datos e intenta de nuevo.</p>
+      <p class="campo__error mt-2">No encontramos ninguna reserva con ese codigo y correo. Verifica los datos e intenta de nuevo.</p>
     <?php endif; ?>
   <?php endif; ?>
 </section>

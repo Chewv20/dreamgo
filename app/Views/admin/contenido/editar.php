@@ -12,15 +12,15 @@ $iconos = [
     'estrella' => 'Estrella / calidad',
 ];
 ?>
-<div class="admin-acciones" style="margin-bottom:1.25rem;">
+<div class="admin-acciones mb-md">
   <a href="/admin/contenido/home" class="btn btn-secundario">&larr; Volver a secciones</a>
 </div>
 
 <form method="post" action="/admin/contenido/<?= (int) $bloque['id'] ?>/editar">
   <?= \App\Helpers\Csrf::field() ?>
 
-  <div class="admin-panel" style="max-width:760px;">
-    <h2 style="margin-top:0;"><?= $v($etiqueta) ?></h2>
+  <div class="admin-panel ancho-760">
+    <h2 class="mt-0"><?= $v($etiqueta) ?></h2>
 
     <div class="campo">
       <label for="titulo">Titulo de la seccion</label>
@@ -33,7 +33,7 @@ $iconos = [
     </div>
 
     <?php if ($bloque['clave'] !== 'hero'): ?>
-      <div class="campo" style="max-width:220px;">
+      <div class="campo mw-220">
         <label for="color_fondo">Color de fondo de la seccion</label>
         <input type="color" id="color_fondo" name="color_fondo" value="<?= $v($bloque['color_fondo'] ?: '#ffffff') ?>">
       </div>
@@ -41,8 +41,8 @@ $iconos = [
   </div>
 
   <?php if ($bloque['clave'] === 'hero'): ?>
-    <div class="admin-panel" style="max-width:760px;">
-      <h2 style="margin-top:0;">Botones</h2>
+    <div class="admin-panel ancho-760">
+      <h2 class="mt-0">Botones</h2>
       <div class="admin-form-grid admin-form-grid--2">
         <div class="campo">
           <label for="cta_primario_texto">Texto del boton principal</label>
@@ -65,8 +65,8 @@ $iconos = [
   <?php endif; ?>
 
   <?php if ($bloque['clave'] === 'cta_final'): ?>
-    <div class="admin-panel" style="max-width:760px;">
-      <h2 style="margin-top:0;">Boton</h2>
+    <div class="admin-panel ancho-760">
+      <h2 class="mt-0">Boton</h2>
       <div class="admin-form-grid admin-form-grid--2">
         <div class="campo">
           <label for="boton_texto">Texto del boton</label>
@@ -82,9 +82,9 @@ $iconos = [
 
   <?php if ($bloque['clave'] === 'ventajas'): ?>
     <?php foreach (($contenido['items'] ?? []) as $i => $item): ?>
-      <div class="admin-panel" style="max-width:760px;">
-        <h2 style="margin-top:0;">Tarjeta <?= $i + 1 ?></h2>
-        <div class="campo" style="max-width:280px;">
+      <div class="admin-panel ancho-760">
+        <h2 class="mt-0">Tarjeta <?= $i + 1 ?></h2>
+        <div class="campo mw-280">
           <label for="item_<?= $i ?>_icono">Icono</label>
           <select id="item_<?= $i ?>_icono" name="item_<?= $i ?>_icono">
             <?php foreach ($iconos as $clave => $etiquetaIcono): ?>
@@ -105,8 +105,8 @@ $iconos = [
   <?php endif; ?>
 
   <?php if ($bloque['clave'] === 'intro' && $bloque['pagina'] === 'nosotros'): ?>
-    <div class="admin-panel" style="max-width:760px;">
-      <h2 style="margin-top:0;">Segundo parrafo</h2>
+    <div class="admin-panel ancho-760">
+      <h2 class="mt-0">Segundo parrafo</h2>
       <div class="campo">
         <label for="parrafo_2">Texto</label>
         <textarea id="parrafo_2" name="parrafo_2"><?= $v($contenido['parrafo_2'] ?? '') ?></textarea>
@@ -116,8 +116,8 @@ $iconos = [
 
   <?php if ($bloque['clave'] === 'estadisticas'): ?>
     <?php foreach (($contenido['items'] ?? []) as $i => $item): ?>
-      <div class="admin-panel" style="max-width:760px;">
-        <h2 style="margin-top:0;">Cifra <?= $i + 1 ?></h2>
+      <div class="admin-panel ancho-760">
+        <h2 class="mt-0">Cifra <?= $i + 1 ?></h2>
         <div class="admin-form-grid admin-form-grid--2">
           <div class="campo">
             <label for="item_<?= $i ?>_numero">Numero</label>
@@ -134,9 +134,9 @@ $iconos = [
 
   <?php if ($bloque['clave'] === 'testimonios'): ?>
     <?php foreach (($contenido['items'] ?? []) as $i => $item): ?>
-      <div class="admin-panel" style="max-width:760px;">
-        <h2 style="margin-top:0;">Testimonio <?= $i + 1 ?></h2>
-        <div class="campo" style="max-width:120px;">
+      <div class="admin-panel ancho-760">
+        <h2 class="mt-0">Testimonio <?= $i + 1 ?></h2>
+        <div class="campo mw-120">
           <label for="item_<?= $i ?>_inicial">Inicial (avatar)</label>
           <input type="text" id="item_<?= $i ?>_inicial" name="item_<?= $i ?>_inicial" maxlength="2" value="<?= $v($item['inicial'] ?? '') ?>">
         </div>

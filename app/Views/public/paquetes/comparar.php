@@ -23,10 +23,9 @@ $aplanarTexto = static function (?string $html, int $largo = 240): string {
                 <img
                   src="<?= htmlspecialchars($p['imagen_portada'] ?? '/assets/img/logo.avif', ENT_QUOTES, 'UTF-8') ?>"
                   alt="<?= htmlspecialchars($p['titulo'], ENT_QUOTES, 'UTF-8') ?>"
-                  loading="lazy"
-                  style="width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:var(--radio);"
+                  loading="lazy" class="img-comparar"
                 >
-                <a href="/paquetes/<?= htmlspecialchars($p['slug'], ENT_QUOTES, 'UTF-8') ?>" style="display:block;margin-top:0.5rem;"><?= htmlspecialchars($p['titulo'], ENT_QUOTES, 'UTF-8') ?></a>
+                <a href="/paquetes/<?= htmlspecialchars($p['slug'], ENT_QUOTES, 'UTF-8') ?>" class="d-block mt-05"><?= htmlspecialchars($p['titulo'], ENT_QUOTES, 'UTF-8') ?></a>
               </th>
             <?php endforeach; ?>
           </tr>

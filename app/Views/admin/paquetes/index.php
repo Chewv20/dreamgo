@@ -1,5 +1,5 @@
 <?php /** @var array $paquetes */ ?>
-<div class="admin-acciones" style="margin-bottom:1.25rem;">
+<div class="admin-acciones mb-md">
   <a href="/admin/paquetes/crear" class="btn btn-primario">Nuevo paquete</a>
 </div>
 

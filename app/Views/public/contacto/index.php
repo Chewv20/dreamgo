@@ -46,18 +46,18 @@ $introVisible = $intro && (int) $intro['visible'] === 1;
     <button type="submit" class="btn btn-primario btn--bloque">Enviar mensaje</button>
   </form>
 
-  <div class="grid-tarjetas" style="margin-top:2.5rem;">
+  <div class="grid-tarjetas mt-25">
     <a href="<?= htmlspecialchars($whatsapp, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener" class="tarjeta tarjeta-contacto animar-entrada">
       <h3>WhatsApp</h3>
-      <p style="margin:0;">Respuesta rapida para dudas y cotizaciones.</p>
+      <p class="m-0">Respuesta rapida para dudas y cotizaciones.</p>
     </a>
     <a href="mailto:<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>" class="tarjeta tarjeta-contacto animar-entrada">
       <h3>Correo</h3>
-      <p style="margin:0;word-break:break-word;"><?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?></p>
+      <p class="m-0 wrap-anywhere"><?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?></p>
     </a>
     <a href="/cotizador" class="tarjeta tarjeta-contacto animar-entrada">
       <h3>Cotizador</h3>
-      <p style="margin:0;">Cuentanos los detalles de tu viaje ideal.</p>
+      <p class="m-0">Cuentanos los detalles de tu viaje ideal.</p>
     </a>
   </div>
 </section>

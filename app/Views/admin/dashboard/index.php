@@ -7,7 +7,7 @@
  */
 ?>
 <div class="admin-panel">
-  <form method="get" action="/admin" class="admin-form-grid admin-form-grid--2" style="align-items:end;">
+  <form method="get" action="/admin" class="admin-form-grid admin-form-grid--2 admin-form-grid--end">
     <div>
       <label for="desde">Desde</label>
       <input type="date" id="desde" name="desde" value="<?= htmlspecialchars($periodoDesde) ?>">
@@ -25,56 +25,56 @@
 
 <div class="grid-tarjetas">
   <div class="admin-panel">
-    <p style="margin:0;opacity:0.7;">Paquetes totales</p>
-    <p style="font-family:var(--fuente-titulos);font-size:2rem;margin:0.25rem 0 0;"><?= $totalPaquetes ?></p>
+    <p class="stat-label">Paquetes totales</p>
+    <p class="stat-num"><?= $totalPaquetes ?></p>
   </div>
   <div class="admin-panel">
-    <p style="margin:0;opacity:0.7;">Paquetes publicados</p>
-    <p style="font-family:var(--fuente-titulos);font-size:2rem;margin:0.25rem 0 0;"><?= $totalPaquetesPublicados ?></p>
+    <p class="stat-label">Paquetes publicados</p>
+    <p class="stat-num"><?= $totalPaquetesPublicados ?></p>
   </div>
   <?php if (isset($totalCotizacionesNuevas)): ?>
   <div class="admin-panel">
-    <p style="margin:0;opacity:0.7;">Cotizaciones nuevas</p>
-    <p style="font-family:var(--fuente-titulos);font-size:2rem;margin:0.25rem 0 0;"><?= $totalCotizacionesNuevas ?></p>
+    <p class="stat-label">Cotizaciones nuevas</p>
+    <p class="stat-num"><?= $totalCotizacionesNuevas ?></p>
   </div>
   <?php endif; ?>
   <?php if (isset($seguimientosVencidos)): ?>
   <div class="admin-panel">
-    <p style="margin:0;opacity:0.7;">Seguimientos vencidos</p>
-    <p style="font-family:var(--fuente-titulos);font-size:2rem;margin:0.25rem 0 0;"><?= (int) $seguimientosVencidos ?></p>
+    <p class="stat-label">Seguimientos vencidos</p>
+    <p class="stat-num"><?= (int) $seguimientosVencidos ?></p>
     <?php if ((int) $seguimientosVencidos > 0): ?>
-      <p style="margin:0.25rem 0 0;font-size:0.85rem;"><a href="/admin/cotizaciones?seguimiento=vencidos">Ver cotizaciones</a></p>
+      <p class="stat-sub"><a href="/admin/cotizaciones?seguimiento=vencidos">Ver cotizaciones</a></p>
     <?php endif; ?>
   </div>
   <?php endif; ?>
   <?php if (isset($conversion)): ?>
   <div class="admin-panel">
-    <p style="margin:0;opacity:0.7;">Tasa de conversion (periodo)</p>
-    <p style="font-family:var(--fuente-titulos);font-size:2rem;margin:0.25rem 0 0;"><?= number_format($conversion['tasa'], 1) ?>%</p>
-    <p style="margin:0.25rem 0 0;opacity:0.6;font-size:0.85rem;"><?= $conversion['convertidas'] ?> de <?= $conversion['total'] ?> cotizaciones</p>
+    <p class="stat-label">Tasa de conversion (periodo)</p>
+    <p class="stat-num"><?= number_format($conversion['tasa'], 1) ?>%</p>
+    <p class="stat-sub"><?= $conversion['convertidas'] ?> de <?= $conversion['total'] ?> cotizaciones</p>
   </div>
   <?php endif; ?>
   <?php if (isset($totalReservasPendientes)): ?>
   <div class="admin-panel">
-    <p style="margin:0;opacity:0.7;">Reservas pendientes</p>
-    <p style="font-family:var(--fuente-titulos);font-size:2rem;margin:0.25rem 0 0;"><?= $totalReservasPendientes ?></p>
+    <p class="stat-label">Reservas pendientes</p>
+    <p class="stat-num"><?= $totalReservasPendientes ?></p>
   </div>
   <div class="admin-panel">
-    <p style="margin:0;opacity:0.7;">Reservas confirmadas</p>
-    <p style="font-family:var(--fuente-titulos);font-size:2rem;margin:0.25rem 0 0;"><?= $totalReservasConfirmadas ?></p>
+    <p class="stat-label">Reservas confirmadas</p>
+    <p class="stat-num"><?= $totalReservasConfirmadas ?></p>
   </div>
   <div class="admin-panel">
-    <p style="margin:0;opacity:0.7;">Ingresos del periodo</p>
-    <p style="font-family:var(--fuente-titulos);font-size:2rem;margin:0.25rem 0 0;">$<?= number_format($ingresosPeriodo, 2) ?></p>
+    <p class="stat-label">Ingresos del periodo</p>
+    <p class="stat-num">$<?= number_format($ingresosPeriodo, 2) ?></p>
   </div>
   <?php endif; ?>
 </div>
 
 <?php if (isset($cotizacionesPorOrigen)): ?>
 <div class="admin-panel">
-  <h2 style="margin-top:0;">Cotizaciones por origen (periodo)</h2>
+  <h2 class="mt-0">Cotizaciones por origen (periodo)</h2>
   <?php if ($cotizacionesPorOrigen === []): ?>
-    <p style="opacity:0.7;">No hay cotizaciones en el periodo seleccionado.</p>
+    <p class="op-70">No hay cotizaciones en el periodo seleccionado.</p>
   <?php else: ?>
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
@@ -95,9 +95,9 @@
 
 <?php if (isset($proximasSalidas)): ?>
 <div class="admin-panel">
-  <h2 style="margin-top:0;">Ocupacion de proximas salidas</h2>
+  <h2 class="mt-0">Ocupacion de proximas salidas</h2>
   <?php if ($proximasSalidas === []): ?>
-    <p style="opacity:0.7;">No hay salidas futuras registradas.</p>
+    <p class="op-70">No hay salidas futuras registradas.</p>
   <?php else: ?>
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
@@ -138,7 +138,7 @@
 <?php endif; ?>
 
 <div class="admin-panel">
-  <h2 style="margin-top:0;">Accesos rapidos</h2>
+  <h2 class="mt-0">Accesos rapidos</h2>
   <div class="admin-acciones">
     <a href="/admin/paquetes/crear" class="btn btn-primario">Nuevo paquete</a>
     <a href="/admin/paquetes" class="btn btn-secundario">Ver paquetes</a>

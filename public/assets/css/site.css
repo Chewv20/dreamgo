@@ -739,6 +739,19 @@ input[type="radio"]:focus-visible,
   }
 }
 
+/* --- Nosotros: bloque de estadisticas --- */
+.estadistica {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.estadistica__num {
+  font-family: var(--fuente-titulos);
+  font-size: 2.5rem;
+  color: var(--color-primario-oscuro);
+  margin-bottom: 0.25rem;
+}
+
 /* --- Nosotros: intro a dos columnas --- */
 .nosotros-intro {
   display: grid;
@@ -814,6 +827,42 @@ input[type="radio"]:focus-visible,
 .texto-suave { opacity: 0.8; }
 .bloque-medio { max-width: 640px; }
 .centrado { text-align: center; }
+
+/* Utilidades para reemplazar style="" inline (CSP style-src 'self', sin 'unsafe-inline') */
+.m-0 { margin: 0; }
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: 1rem; }
+.mt-15 { margin-top: 1.5rem; }
+.mt-2 { margin-top: 2rem; }
+.mt-25 { margin-top: 2.5rem; }
+.mb-0 { margin-bottom: 0; }
+.mb-md { margin-bottom: 1.25rem; }
+.mt-neg { margin-top: -0.5rem; }
+.mt-05 { margin-top: 0.5rem; }
+.my-2 { margin: 2rem 0; }
+.txt-error { color: var(--color-error); }
+.txt-mute { color: #888; }
+.d-block { display: block; }
+.d-inline { display: inline; }
+.oculto { display: none; }
+.fs-lg { font-size: 1.15rem; }
+.tt-upper { text-transform: uppercase; }
+.nota-form { margin-top: 1rem; font-size: 0.9rem; color: #6b6b6b; }
+.img-comparar { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: var(--radio); }
+.fw-bold { font-weight: 700; }
+.w-100 { width: 100%; }
+.pre-wrap { white-space: pre-wrap; }
+.op-70 { opacity: 0.7; }
+.op-75 { opacity: 0.75; }
+.op-80 { opacity: 0.8; }
+.wrap-anywhere { word-break: break-word; }
+.ancho-320 { max-width: 320px; }
+.ancho-420 { max-width: 420px; }
+.ancho-520 { max-width: 520px; }
+.ancho-560 { max-width: 560px; }
+.ancho-720 { max-width: 720px; }
+.ancho-760 { max-width: 760px; }
+.ancho-820 { max-width: 820px; }
 
 .btn--bloque { width: 100%; }
 .btn--chico { padding: 0.35rem 0.85rem; font-size: 0.85rem; }
@@ -1156,8 +1205,11 @@ input[type="radio"]:focus-visible,
 
 .newsletter-form input[type="email"] { flex: 1; min-width: 200px; }
 
-/* Seccion con fondo de panel (home) */
-.seccion--panel { border-radius: var(--radio); }
+/* Seccion con fondo de panel (home, ficha) */
+.seccion--panel {
+  border-radius: var(--radio);
+  background: var(--color-fondo-alterno);
+}
 
 /* Cuerpo del articulo del blog */
 .articulo-cuerpo { max-width: 760px; }

@@ -1,5 +1,5 @@
 <?php /** @var array $ofertas */ ?>
-<div class="admin-acciones" style="margin-bottom:1.25rem;">
+<div class="admin-acciones mb-md">
   <a href="/admin/ofertas/crear" class="btn btn-primario">Nuevo codigo</a>
 </div>
 

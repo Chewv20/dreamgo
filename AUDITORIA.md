@@ -321,11 +321,15 @@ te la pasen por un canal aparte.
 
 ### Medio
 - ~~Sin cabeceras de seguridad HTTP~~ — corregido, punto 7 arriba.
-- **Nuevo, de baja prioridad:** la CSP quedó con `style-src 'self' 'unsafe-inline'` en vez de
-  bloquear también los estilos inline, porque hay `style=""` inline en 46 archivos de vistas.
-  Si se quiere cerrar del todo, hay que mover esos estilos a clases CSS (en `admin.css` /
-  `site.css`) o usar un nonce por request para `style-src`; no se tocó porque es un refactor
-  grande sin relación directa con "agregar cabeceras".
+- ~~la CSP quedó con `style-src 'self' 'unsafe-inline'`~~ — **cerrado (2026, bloque 3b de la
+  revisión del sitio).** Se eliminó todo `style=""` atributo inline de las vistas bajo la CSP
+  (público + admin + errores; NO emails ni el PDF de comprobante, que no comparten la CSP):
+  ~200 ocurrencias movidas a utilidades/componentes en `site.css`/`admin.css`. Los 3 `<style>`
+  inline propios que quedan (colores del sitio en `layouts/public.php`, colores de bloque en
+  `home`/`nosotros`) llevan `nonce="<?= CSP_NONCE ?>"`. La CSP ahora es
+  `style-src 'self' 'nonce-<aleatorio-por-petición>'`, sin `'unsafe-inline'`. Verificado
+  renderizando las 39 rutas (14 públicas + 25 del panel): 200 y cero `style=` inline en el
+  HTML resultante; el nonce del header coincide con el de cada `<style>` de la misma respuesta.
 - ~~Cron jobs sin try/catch~~ — corregido, punto 9 arriba.
 - ~~Duplicación de CRUD/paginación entre controladores admin~~ — corregido (solo la parte de
   paginación, ver por qué en el punto 12 arriba).

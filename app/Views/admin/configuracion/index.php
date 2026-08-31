@@ -2,9 +2,9 @@
 <form method="post" action="/admin/configuracion">
   <?= \App\Helpers\Csrf::field() ?>
 
-  <div class="admin-panel" style="max-width:760px;">
-    <h2 style="margin-top:0;">Contacto</h2>
-    <p style="opacity:0.75;margin-top:-0.5rem;">Estos datos se muestran en el pie de pagina del sitio.</p>
+  <div class="admin-panel ancho-760">
+    <h2 class="mt-0">Contacto</h2>
+    <p class="op-75 mt-neg">Estos datos se muestran en el pie de pagina del sitio.</p>
 
     <div class="campo">
       <label for="direccion">Direccion (opcional)</label>
@@ -28,9 +28,9 @@
     </div>
   </div>
 
-  <div class="admin-panel" style="max-width:760px;">
-    <h2 style="margin-top:0;">Redes sociales</h2>
-    <p style="opacity:0.75;margin-top:-0.5rem;">Deja en blanco las que no apliquen: su icono no se mostrara en el sitio.</p>
+  <div class="admin-panel ancho-760">
+    <h2 class="mt-0">Redes sociales</h2>
+    <p class="op-75 mt-neg">Deja en blanco las que no apliquen: su icono no se mostrara en el sitio.</p>
 
     <div class="admin-form-grid admin-form-grid--2">
       <div class="campo">
@@ -52,8 +52,8 @@
     </div>
   </div>
 
-  <div class="admin-panel" style="max-width:760px;">
-    <h2 style="margin-top:0;">Reservas y recordatorios</h2>
+  <div class="admin-panel ancho-760">
+    <h2 class="mt-0">Reservas y recordatorios</h2>
 
     <div class="admin-form-grid admin-form-grid--2">
       <div class="campo">
@@ -80,8 +80,8 @@
     </div>
   </div>
 
-  <div class="admin-panel" style="max-width:760px;">
-    <h2 style="margin-top:0;">SEO</h2>
+  <div class="admin-panel ancho-760">
+    <h2 class="mt-0">SEO</h2>
 
     <div class="campo">
       <label for="meta_title_default">Titulo SEO por defecto</label>

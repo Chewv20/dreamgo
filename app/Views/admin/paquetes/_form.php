@@ -39,7 +39,7 @@ $paquete ??= [];
     <?php if (!empty($monedaBloqueada)): ?>
       <input type="text" value="<?= htmlspecialchars($paquete['moneda'] ?? 'MXN', ENT_QUOTES, 'UTF-8') ?>" disabled>
       <input type="hidden" name="moneda" value="<?= htmlspecialchars($paquete['moneda'] ?? 'MXN', ENT_QUOTES, 'UTF-8') ?>">
-      <small style="opacity:0.7;">No se puede cambiar: este paquete ya tiene reservas.</small>
+      <small class="op-70">No se puede cambiar: este paquete ya tiene reservas.</small>
     <?php else: ?>
       <select id="moneda" name="moneda" required>
         <?php foreach ($monedas as $codigo => $etiqueta): ?>
@@ -70,19 +70,19 @@ $paquete ??= [];
   </div>
 </div>
 
-<div class="campo" style="display:flex;align-items:center;gap:0.6rem;">
-  <input type="checkbox" id="destacado" name="destacado" value="1" style="width:1.2rem;height:1.2rem;" <?= (int) ($paquete['destacado'] ?? 0) === 1 ? 'checked' : '' ?>>
-  <label for="destacado" style="margin:0;">Mostrar como destacado en Inicio</label>
+<div class="campo campo--check">
+  <input type="checkbox" id="destacado" name="destacado" value="1" <?= (int) ($paquete['destacado'] ?? 0) === 1 ? 'checked' : '' ?>>
+  <label for="destacado" class="m-0">Mostrar como destacado en Inicio</label>
 </div>
 
 <div class="campo">
   <label for="descripcion_larga">Descripcion (HTML basico: negritas, listas, parrafos)</label>
-  <textarea id="descripcion_larga" name="descripcion_larga" style="min-height:140px;"><?= htmlspecialchars($paquete['descripcion_larga'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+  <textarea id="descripcion_larga" name="descripcion_larga" class="textarea-md"><?= htmlspecialchars($paquete['descripcion_larga'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
 </div>
 
 <div class="campo">
   <label for="itinerario">Itinerario (HTML basico)</label>
-  <textarea id="itinerario" name="itinerario" style="min-height:140px;"><?= htmlspecialchars($paquete['itinerario'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+  <textarea id="itinerario" name="itinerario" class="textarea-md"><?= htmlspecialchars($paquete['itinerario'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
 </div>
 
 <div class="admin-form-grid admin-form-grid--2">

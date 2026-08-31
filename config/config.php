@@ -54,17 +54,17 @@ if (PHP_SAPI !== 'cli') {
     header('X-Frame-Options: SAMEORIGIN');
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
-    // style-src necesita 'unsafe-inline' porque las vistas usan style="" inline en varios
-    // lugares (ver AUDITORIA.md). script-src usa 'self' + un nonce por peticion para los
-    // pocos <script> inline propios (bootstrap de analitica y eventos de conversion); NO
-    // lleva 'unsafe-inline'. Los hosts de googletagmanager/facebook estan permitidos para
-    // GA4 / Meta Pixel; solo se cargan realmente si estan las vars GA4_MEASUREMENT_ID /
-    // META_PIXEL_ID en .env y el visitante acepta el banner de cookies (ver
-    // App\Helpers\Analytics y AUDITORIA.md, seguimiento 2026-08-27).
+    // script-src y style-src: 'self' + un nonce por peticion (CSP_NONCE) para los pocos
+    // <style>/<script> inline propios (colores del sitio y colores de bloque en las vistas
+    // publicas; bootstrap de analitica y eventos de conversion). NINGUNO lleva 'unsafe-inline':
+    // no queda ningun style="" atributo inline en las vistas (bloque 3b, 2026). Los hosts de
+    // googletagmanager/facebook estan permitidos para GA4 / Meta Pixel; solo se cargan si estan
+    // las vars GA4_MEASUREMENT_ID / META_PIXEL_ID en .env y el visitante acepta el banner de
+    // cookies (ver App\Helpers\Analytics y AUDITORIA.md, seguimiento 2026-08-27).
     header(
         "Content-Security-Policy: default-src 'self'; "
         . "script-src 'self' 'nonce-" . CSP_NONCE . "' https://www.googletagmanager.com https://connect.facebook.net; "
-        . "style-src 'self' 'unsafe-inline'; "
+        . "style-src 'self' 'nonce-" . CSP_NONCE . "'; "
         . "img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://www.facebook.com; "
         . "font-src 'self'; "
         . "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://connect.facebook.net https://www.facebook.com; "

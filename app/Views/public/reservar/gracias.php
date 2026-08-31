@@ -4,7 +4,7 @@
 /** @var bool $esAprobado */
 $esAprobado ??= false;
 ?>
-<section class="seccion contenedor" style="max-width:640px;text-align:center;">
+<section class="seccion contenedor bloque-medio centrado">
   <h1>Gracias por tu reserva</h1>
   <p>Codigo de reserva: <strong><?= htmlspecialchars($codigo, ENT_QUOTES, 'UTF-8') ?></strong></p>
 
