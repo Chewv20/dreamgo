@@ -20,7 +20,12 @@ $articulos ??= [];
   <p class="bloque-medio"><?= htmlspecialchars($categoria['descripcion'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
 
   <?php if (empty($paquetes)): ?>
-    <p>Aun no hay paquetes publicados en este destino. Vuelve pronto.</p>
+    <?php
+    $titulo = 'Proximamente';
+    $texto = 'Aun no hay paquetes publicados en este destino. Vuelve pronto o pide una cotizacion a medida.';
+    $cta = ['url' => '/cotizador', 'texto' => 'Solicitar cotizacion'];
+    require __DIR__ . '/../../partials/_estado_vacio.php';
+    ?>
   <?php else: ?>
     <div class="grid-tarjetas mt-2">
       <?php foreach ($paquetes as $paquete): ?>

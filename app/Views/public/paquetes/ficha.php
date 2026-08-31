@@ -52,13 +52,15 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     <?php if (!empty($imagenes)): ?>
       <?php $imgPrincipal = $imagenes[0]; ?>
       <figure class="galeria" data-galeria>
-        <img
-          class="galeria__principal"
-          data-galeria-principal
-          src="<?= htmlspecialchars($imgPrincipal['ruta_original'], ENT_QUOTES, 'UTF-8') ?>"
-          alt="<?= htmlspecialchars($imgPrincipal['alt_text'] ?? $paquete['titulo'], ENT_QUOTES, 'UTF-8') ?>"
-          loading="lazy"
-        >
+        <button type="button" class="galeria__abrir" data-galeria-abrir aria-label="Ampliar imagen">
+          <img
+            class="galeria__principal"
+            data-galeria-principal
+            src="<?= htmlspecialchars($imgPrincipal['ruta_original'], ENT_QUOTES, 'UTF-8') ?>"
+            alt="<?= htmlspecialchars($imgPrincipal['alt_text'] ?? $paquete['titulo'], ENT_QUOTES, 'UTF-8') ?>"
+            loading="lazy"
+          >
+        </button>
         <?php if (count($imagenes) > 1): ?>
           <div class="galeria__tiras">
             <?php foreach ($imagenes as $i => $img): ?>
@@ -76,6 +78,15 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
           </div>
         <?php endif; ?>
       </figure>
+
+      <div class="lightbox" data-lightbox hidden role="dialog" aria-modal="true" aria-label="Imagen ampliada">
+        <button type="button" class="lightbox__cerrar" data-lightbox-cerrar aria-label="Cerrar">&times;</button>
+        <?php if (count($imagenes) > 1): ?>
+          <button type="button" class="lightbox__nav lightbox__nav--prev" data-lightbox-prev aria-label="Imagen anterior">&#8249;</button>
+          <button type="button" class="lightbox__nav lightbox__nav--next" data-lightbox-next aria-label="Imagen siguiente">&#8250;</button>
+        <?php endif; ?>
+        <img class="lightbox__img" data-lightbox-img src="" alt="">
+      </div>
     <?php endif; ?>
 
     <h2>Itinerario</h2>

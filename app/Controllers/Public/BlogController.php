@@ -16,15 +16,23 @@ class BlogController extends Controller
 
     public function index(): void
     {
+        $categorias = Articulo::categoriasConArticulos();
+        $slugsValidos = array_column($categorias, 'slug');
+
+        $categoriaPedida = (string) $this->request->query('categoria', '');
+        $categoria = in_array($categoriaPedida, $slugsValidos, true) ? $categoriaPedida : null;
+
         $paginador = new Paginator(
             Paginator::paginaDesde($this->request),
             self::POR_PAGINA,
-            Articulo::contarPublicados()
+            Articulo::contarPublicados($categoria)
         );
 
         $this->view('public/blog/index', [
-            'articulos' => Articulo::publicadosPaginados($paginador->porPagina, $paginador->offset()),
+            'articulos' => Articulo::publicadosPaginados($paginador->porPagina, $paginador->offset(), $categoria),
             'paginador' => $paginador,
+            'categorias' => $categorias,
+            'categoriaActiva' => $categoria,
         ], [
             'title' => 'Blog de viajes | Dream Go Operadora Turistica',
             'description' => 'Guias, consejos e inspiracion para tu proximo viaje con Dream Go.',

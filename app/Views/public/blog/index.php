@@ -1,6 +1,8 @@
 <?php
 /** @var array $articulos */
 /** @var \Core\Paginator $paginador */
+/** @var array $categorias */
+/** @var string|null $categoriaActiva */
 $fecha = static fn (?string $v): string => \App\Helpers\Fecha::corta($v);
 ?>
 <section class="hero hero--mini">
@@ -12,8 +14,25 @@ $fecha = static fn (?string $v): string => \App\Helpers\Fecha::corta($v);
 
 <section class="seccion contenedor">
   <?php $migas = [['texto' => 'Inicio', 'url' => '/'], ['texto' => 'Blog']]; require __DIR__ . '/../../partials/_breadcrumbs.php'; ?>
+
+  <?php if (!empty($categorias)): ?>
+    <nav class="blog-categorias" aria-label="Filtrar articulos por categoria">
+      <a href="/blog"<?= $categoriaActiva === null ? ' class="is-activa" aria-current="true"' : '' ?>>Todos</a>
+      <?php foreach ($categorias as $cat): ?>
+        <a href="/blog?categoria=<?= urlencode($cat['slug']) ?>"<?= $categoriaActiva === $cat['slug'] ? ' class="is-activa" aria-current="true"' : '' ?>><?= htmlspecialchars($cat['nombre'], ENT_QUOTES, 'UTF-8') ?></a>
+      <?php endforeach; ?>
+    </nav>
+  <?php endif; ?>
+
   <?php if (empty($articulos)): ?>
-    <p>Todavia no publicamos articulos. Vuelve pronto.</p>
+    <?php
+    $titulo = 'Sin articulos';
+    $texto = $categoriaActiva !== null
+        ? 'Todavia no hay articulos publicados en esta categoria.'
+        : 'Todavia no publicamos articulos. Vuelve pronto.';
+    $cta = $categoriaActiva !== null ? ['url' => '/blog', 'texto' => 'Ver todos los articulos'] : null;
+    require __DIR__ . '/../../partials/_estado_vacio.php';
+    ?>
   <?php else: ?>
     <div class="grid-tarjetas">
       <?php foreach ($articulos as $a): ?>
@@ -39,7 +58,11 @@ $fecha = static fn (?string $v): string => \App\Helpers\Fecha::corta($v);
       <?php endforeach; ?>
     </div>
 
-    <?php $rutaBase = '/blog'; require __DIR__ . '/../../partials/paginacion.php'; ?>
+    <?php
+    $rutaBase = '/blog';
+    $queryExtra = $categoriaActiva !== null ? ['categoria' => $categoriaActiva] : [];
+    require __DIR__ . '/../../partials/paginacion.php';
+    ?>
   <?php endif; ?>
 
   <p class="blog-rss">

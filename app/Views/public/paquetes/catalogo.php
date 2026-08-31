@@ -162,7 +162,14 @@ if (!empty($filtrosActivos['duracion'])) {
   <?php endif; ?>
 
   <?php if (empty($paquetes)): ?>
-    <p>No encontramos paquetes con esos filtros. Intenta con otra combinacion.</p>
+    <?php
+    $titulo = 'Sin resultados';
+    $texto = $chips
+        ? 'No encontramos paquetes con esos filtros. Prueba con otra combinacion.'
+        : 'Todavia no hay paquetes publicados. Vuelve pronto.';
+    $cta = $chips ? ['url' => '/paquetes', 'texto' => 'Limpiar filtros'] : null;
+    require __DIR__ . '/../../partials/_estado_vacio.php';
+    ?>
   <?php else: ?>
     <div class="grid-tarjetas">
       <?php foreach ($paquetes as $paquete): ?>

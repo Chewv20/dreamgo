@@ -11,7 +11,12 @@ $aplanarTexto = static function (?string $html, int $largo = 240): string {
   <h1>Comparar paquetes</h1>
 
   <?php if (count($paquetes) < 2): ?>
-    <p>Selecciona al menos 2 paquetes desde el <a href="/paquetes">catalogo</a> para compararlos.</p>
+    <?php
+    $titulo = 'Nada que comparar todavia';
+    $texto = 'Selecciona al menos 2 paquetes desde el catalogo (marca la casilla "Comparar" en cada tarjeta) para verlos lado a lado.';
+    $cta = ['url' => '/paquetes', 'texto' => 'Ir al catalogo'];
+    require __DIR__ . '/../../partials/_estado_vacio.php';
+    ?>
   <?php else: ?>
     <div class="tabla-comparativa-wrap">
       <table class="tabla-comparativa">
