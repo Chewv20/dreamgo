@@ -1,5 +1,11 @@
 <?php
 
+// Sin declare(strict_types=1) a proposito: los parametros de ruta ({id}, {slug}, ...) salen
+// de preg_match SIEMPRE como string, y aqui se pasan a los metodos de los controladores, que
+// los declaran con su tipo real (int $id, string $slug). El modo debil de PHP adapta cada
+// argumento al tipo que declara el handler; con strict_types un `{id}` numerico reventaria con
+// TypeError. Es el unico punto del proyecto donde esa coercion en la frontera es deseada.
+
 namespace Core;
 
 use Core\Exceptions\NotFoundException;

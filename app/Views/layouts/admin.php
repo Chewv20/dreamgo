@@ -7,9 +7,9 @@
 <title><?= htmlspecialchars($meta['title'] ?? 'Panel administrativo | Dream Go', ENT_QUOTES, 'UTF-8') ?></title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/assets/icons/icon-96.png" type="image/png">
-<link rel="stylesheet" href="/assets/css/site.css">
-<link rel="stylesheet" href="/assets/css/admin.css">
-<script src="/assets/js/admin.js" defer></script>
+<link rel="stylesheet" href="<?= htmlspecialchars(\App\Helpers\Asset::url('/assets/css/site.css'), ENT_QUOTES, 'UTF-8') ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars(\App\Helpers\Asset::url('/assets/css/admin.css'), ENT_QUOTES, 'UTF-8') ?>">
+<script src="<?= htmlspecialchars(\App\Helpers\Asset::url('/assets/js/admin.js'), ENT_QUOTES, 'UTF-8') ?>" defer></script>
 </head>
 <body class="admin-body">
 <div class="admin-layout">
@@ -21,7 +21,7 @@
     </div>
     <nav class="admin-nav">
       <a href="/admin">Panel</a>
-      <a href="/admin/paquetes">Paquetes</a>
+      <?php if (Auth::hasPermission('paquetes.ver')): ?><a href="/admin/paquetes">Paquetes</a><?php endif; ?>
       <?php if (Auth::hasPermission('reservas.ver')): ?><a href="/admin/reservas">Reservas</a><?php endif; ?>
       <?php if (Auth::hasPermission('cotizaciones.ver')): ?><a href="/admin/cotizaciones">Cotizaciones</a><?php endif; ?>
       <?php if (Auth::hasPermission('resenas.ver')): ?><a href="/admin/resenas">Resenas</a><?php endif; ?>

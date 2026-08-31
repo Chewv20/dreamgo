@@ -12,15 +12,16 @@ Require all granted
 # Auditoria 2026-08-25, hallazgo CFG-04: sin esto, cada visita revalidaba CSS/JS/fuentes/
 # imagenes de assets/ sin ningun cache de largo plazo ni compresion.
 #
-# CSS/JS con cache corto (1 dia), no largo: site.css/site.js se referencian por nombre fijo
-# sin query string de version ni hash de contenido (ver app/Views/layouts/*.php), asi que un
-# cache "immutable" de un año dejaria a los visitantes con la version vieja hasta que expirara
-# solos, sin forma de forzar la actualizacion en un deploy. Fuentes e imagenes si son estables
-# entre deploys (no cambian de contenido bajo el mismo nombre), asi que llevan cache largo.
+# CSS/JS: 1 semana. En el HTML se referencian con `?v=<mtime>` (App\Helpers\Asset::url, ver
+# app/Views/layouts/*), asi que un cambio en el archivo cambia la URL y el navegador pide la
+# version nueva de inmediato -- ya no hace falta el cache corto de 1 dia. No se pone `immutable`
+# ni 1 año porque public/sw.js todavia precachea las URLs sin `?v=` (SHELL_ASSETS) y no puede
+# leer el mtime; 1 semana acota cuanto puede quedar desincronizada esa copia tras un deploy.
+# Fuentes e imagenes son estables entre deploys: cache largo.
 <IfModule mod_expires.c>
     ExpiresActive On
     <FilesMatch "\.(css|js)$">
-        ExpiresDefault "access plus 1 day"
+        ExpiresDefault "access plus 1 week"
     </FilesMatch>
     <FilesMatch "\.(woff2?|avif|webp|png|jpe?g|svg|ico)$">
         ExpiresDefault "access plus 1 year"
@@ -28,7 +29,7 @@ Require all granted
 </IfModule>
 <IfModule mod_headers.c>
     <FilesMatch "\.(css|js)$">
-        Header set Cache-Control "public, max-age=86400"
+        Header set Cache-Control "public, max-age=604800"
     </FilesMatch>
     <FilesMatch "\.(woff2?|avif|webp|png|jpe?g|svg|ico)$">
         Header set Cache-Control "public, max-age=31536000"

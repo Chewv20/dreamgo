@@ -14,7 +14,7 @@
             <td><?= htmlspecialchars($r['codigo_reserva'], ENT_QUOTES, 'UTF-8') ?></td>
             <td><?= htmlspecialchars($r['cliente_nombre'], ENT_QUOTES, 'UTF-8') ?></td>
             <td><?= htmlspecialchars($r['paquete_titulo'], ENT_QUOTES, 'UTF-8') ?></td>
-            <td><?= date('d M Y', strtotime($r['fecha_salida'])) ?></td>
+            <td><?= \App\Helpers\Fecha::corta($r['fecha_salida']) ?></td>
             <td><?= (int) $r['num_personas'] ?></td>
             <td>
               <?php $badge = ['pendiente' => 'ambar', 'confirmada' => 'verde', 'cancelada' => 'gris', 'expirada' => 'rojo'][$r['estado']]; ?>

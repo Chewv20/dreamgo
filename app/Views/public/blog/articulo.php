@@ -5,25 +5,33 @@ $a = $articulo;
 $e = static fn (?string $v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 $fechaPub = $a['publicado_en'] ?? $a['creado_en'];
 ?>
-<section class="hero" style="min-height:32vh;">
+<section class="hero hero--mini">
   <div class="contenedor">
     <?php if (!empty($a['categoria_nombre'])): ?>
-      <p style="text-transform:uppercase;letter-spacing:0.04em;font-weight:600;opacity:0.9;">
-        <a href="/destinos/<?= $e($a['categoria_slug']) ?>" style="color:inherit;"><?= $e($a['categoria_nombre']) ?></a>
+      <p class="hero__categoria">
+        <a class="enlace-plano" href="/destinos/<?= $e($a['categoria_slug']) ?>"><?= $e($a['categoria_nombre']) ?></a>
       </p>
     <?php endif; ?>
     <h1><?= $e($a['titulo']) ?></h1>
-    <p style="opacity:0.9;"><?= $e(date('d \d\e F, Y', strtotime((string) $fechaPub))) ?></p>
+    <p class="texto-suave"><?= $e(\App\Helpers\Fecha::larga((string) $fechaPub)) ?></p>
   </div>
 </section>
 
-<article class="seccion contenedor" style="max-width:760px;">
+<article class="seccion contenedor articulo-cuerpo">
+  <?php
+  $migas = [
+      ['texto' => 'Inicio', 'url' => '/'],
+      ['texto' => 'Blog', 'url' => '/blog'],
+      ['texto' => $a['titulo']],
+  ];
+  require __DIR__ . '/../../partials/_breadcrumbs.php';
+  ?>
   <?php if (!empty($a['imagen'])): ?>
-    <img src="<?= $e($a['imagen']) ?>" alt="<?= $e($a['titulo']) ?>" style="width:100%;height:auto;border-radius:var(--radio);margin-bottom:2rem;" loading="lazy">
+    <img class="articulo-cuerpo__portada" src="<?= $e($a['imagen']) ?>" alt="<?= $e($a['titulo']) ?>" loading="lazy">
   <?php endif; ?>
 
   <?php if (!empty($a['resumen'])): ?>
-    <p style="font-size:1.15rem;opacity:0.85;"><?= $e($a['resumen']) ?></p>
+    <p class="articulo-cuerpo__resumen"><?= $e($a['resumen']) ?></p>
   <?php endif; ?>
 
   <div class="contenido-articulo">
@@ -31,7 +39,7 @@ $fechaPub = $a['publicado_en'] ?? $a['creado_en'];
   </div>
 
   <?php if (!empty($a['categoria_nombre'])): ?>
-    <p style="margin-top:2.5rem;">
+    <p class="articulo-cuerpo__cta">
       <a href="/destinos/<?= $e($a['categoria_slug']) ?>" class="btn btn-primario">Ver paquetes de <?= $e($a['categoria_nombre']) ?></a>
     </p>
   <?php endif; ?>
@@ -46,10 +54,10 @@ $fechaPub = $a['publicado_en'] ?? $a['creado_en'];
     <?php foreach ($relacionados as $r): ?>
       <article class="tarjeta animar-entrada">
         <a href="/blog/<?= $e($r['slug']) ?>">
-          <img src="<?= $e($r['imagen'] ?? '/assets/img/logo.avif') ?>" alt="<?= $e($r['titulo']) ?>" loading="lazy" width="480" height="320" style="width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;">
+          <img class="tarjeta__img" src="<?= $e($r['imagen'] ?? '/assets/img/logo.avif') ?>" alt="<?= $e($r['titulo']) ?>" loading="lazy" width="480" height="320">
         </a>
-        <div style="padding:1.25rem;">
-          <h3><a href="/blog/<?= $e($r['slug']) ?>" style="color:inherit;"><?= $e($r['titulo']) ?></a></h3>
+        <div class="tarjeta__cuerpo">
+          <h3><a class="enlace-plano" href="/blog/<?= $e($r['slug']) ?>"><?= $e($r['titulo']) ?></a></h3>
           <p><?= $e($r['resumen'] ?? '') ?></p>
         </div>
       </article>

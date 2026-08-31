@@ -7,4 +7,4 @@
   <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.5rem;"></div>
 </div>
 
-<script src="/assets/js/admin-calendario.js" defer></script>
+<script src="<?= htmlspecialchars(\App\Helpers\Asset::url('/assets/js/admin-calendario.js'), ENT_QUOTES, 'UTF-8') ?>" defer></script>

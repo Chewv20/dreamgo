@@ -19,7 +19,7 @@
               <?php $badge = ['publicado' => 'verde', 'borrador' => 'ambar', 'archivado' => 'gris'][$a['estado']]; ?>
               <span class="admin-badge admin-badge--<?= $badge ?>"><?= ucfirst($a['estado']) ?></span>
             </td>
-            <td><?= $a['publicado_en'] ? date('d M Y', strtotime($a['publicado_en'])) : '&mdash;' ?></td>
+            <td><?= $a['publicado_en'] ? \App\Helpers\Fecha::corta($a['publicado_en']) : '&mdash;' ?></td>
             <td><?= htmlspecialchars($a['autor_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
             <td class="admin-acciones"><a href="/admin/articulos/<?= (int) $a['id'] ?>/editar" class="btn btn-secundario">Editar</a></td>
           </tr>

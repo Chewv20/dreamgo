@@ -12,7 +12,7 @@ $id = (int) $c['id'];
 
 <div class="admin-panel" style="max-width:720px;">
   <table class="admin-tabla" style="min-width:0;">
-    <tr><td style="font-weight:bold;">Recibida</td><td><?= date('d M Y H:i', strtotime($c['creado_en'])) ?></td></tr>
+    <tr><td style="font-weight:bold;">Recibida</td><td><?= \App\Helpers\Fecha::cortaHora($c['creado_en']) ?></td></tr>
     <tr><td style="font-weight:bold;">Nombre</td><td><?= $e($c['nombre']) ?></td></tr>
     <tr><td style="font-weight:bold;">Correo</td><td><a href="mailto:<?= $e($c['email']) ?>"><?= $e($c['email']) ?></a></td></tr>
     <tr><td style="font-weight:bold;">Telefono</td><td><?= $e($c['telefono']) ?></td></tr>
@@ -98,7 +98,7 @@ $id = (int) $c['id'];
           <div style="white-space:pre-wrap;"><?= $e($nota['nota']) ?></div>
           <small style="opacity:0.7;">
             <?= $e($nota['usuario_nombre'] ?? ('#' . ($nota['usuario_id'] ?? '?'))) ?> &middot;
-            <?= date('d M Y H:i', strtotime($nota['creado_en'])) ?>
+            <?= \App\Helpers\Fecha::cortaHora($nota['creado_en']) ?>
           </small>
         </li>
       <?php endforeach; ?>

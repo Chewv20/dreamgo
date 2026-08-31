@@ -1,6 +1,6 @@
 <?php /** @var array $salida */ ?>
 <div class="admin-panel" style="max-width:520px;">
-  <p>Fecha de salida: <strong><?= date('d M Y', strtotime($salida['fecha_salida'])) ?></strong> &mdash; Cupo disponible: <strong><?= (int) $salida['cupo_disponible'] ?></strong></p>
+  <p>Fecha de salida: <strong><?= \App\Helpers\Fecha::corta($salida['fecha_salida']) ?></strong> &mdash; Cupo disponible: <strong><?= (int) $salida['cupo_disponible'] ?></strong></p>
   <form method="post" action="/admin/reservas" class="admin-form-grid">
     <?= \App\Helpers\Csrf::field() ?>
     <input type="hidden" name="salida_id" value="<?= (int) $salida['id'] ?>">

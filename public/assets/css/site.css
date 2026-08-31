@@ -802,3 +802,374 @@ input[type="radio"]:focus-visible,
   font-size: 0.9rem;
   opacity: 0.8;
 }
+
+/* =========================================================
+   Capa de componentes — reemplaza el style="" inline que
+   estaba repetido por las vistas publicas (tarjetas de
+   paquete/articulo, ficha, formularios, rating, alertas).
+   ========================================================= */
+
+/* Utilidades cortas */
+.enlace-plano { color: inherit; }
+.texto-suave { opacity: 0.8; }
+.bloque-medio { max-width: 640px; }
+.centrado { text-align: center; }
+
+.btn--bloque { width: 100%; }
+.btn--chico { padding: 0.35rem 0.85rem; font-size: 0.85rem; }
+
+.acciones-apiladas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Etiqueta "categoria" sobre titulos (tarjetas, ficha, destino, blog) */
+.etiqueta-categoria {
+  color: var(--color-primario-oscuro);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.3rem;
+}
+
+/* Media + cuerpo comun a todas las tarjetas con imagen */
+.tarjeta__img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.tarjeta__cuerpo { padding: 1.25rem; }
+
+.tarjeta__fecha {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin-top: 0.75rem;
+}
+
+/* Tarjeta de paquete (catalogo, home destacados, destino) */
+.tarjeta-paquete__pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.precio {
+  font-family: var(--fuente-titulos);
+  font-size: 1.25rem;
+  color: var(--color-texto-oscuro);
+}
+
+.precio--grande {
+  font-size: 1.75rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.tarjeta-paquete__duracion {
+  font-size: 0.9rem;
+  color: var(--color-texto-oscuro);
+  opacity: 0.7;
+}
+
+/* Rating de reseñas */
+.rating {
+  margin: 0.15rem 0 0.4rem;
+  font-size: 0.9rem;
+  color: var(--color-texto-oscuro);
+}
+
+.rating__estrellas {
+  color: var(--color-primario-oscuro);
+  letter-spacing: 0.08em;
+}
+
+.rating__meta { opacity: 0.9; }
+
+.rating-linea {
+  color: var(--color-primario-oscuro);
+  letter-spacing: 0.1em;
+  margin: 0 0 0.5rem;
+}
+
+/* Hero compacto (ficha de paquete y blog) */
+.hero--compacto { min-height: 36vh; }
+.hero--mini { min-height: 32vh; }
+
+.hero__categoria {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.hero__rating { margin-top: 0.5rem; }
+
+/* Ficha de paquete: galeria, aside, salidas */
+.galeria-mini {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.galeria-mini img {
+  border-radius: var(--radio);
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.paquete-incluye {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.paquete-aside {
+  padding: 1.5rem;
+  align-self: start;
+}
+
+.paquete-aside h3 { font-size: 1.1rem; }
+
+.paquete-aside__sub {
+  opacity: 0.75;
+  margin-bottom: 1.5rem;
+}
+
+.tarjeta__comparar--bloque {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.lista-salidas {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+}
+
+.lista-salidas li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.lista-salidas__cupo {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+/* Recuadro informativo dentro de un formulario (reservar, cotizador) */
+.aviso-caja {
+  background: var(--color-fondo-alterno);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radio);
+}
+
+/* Panel de resultado (Mi reserva) */
+.panel-resultado {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  border-radius: var(--radio);
+  background: var(--color-fondo-alterno);
+}
+
+.acciones-inline {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Filtros del catalogo */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-block: 2rem 1rem;
+}
+
+.filtros .campo { margin-bottom: 0; }
+.filtros__q { flex: 2; min-width: 220px; }
+.filtros__campo { flex: 1; min-width: 200px; }
+.filtros__campo--chico { flex: 1; min-width: 130px; }
+
+/* Barra de resultados: conteo + orden */
+.catalogo-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.catalogo-barra__conteo { margin: 0; }
+
+.catalogo-orden {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.catalogo-orden label {
+  margin-bottom: 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.catalogo-orden select { width: auto; }
+
+/* Chips de filtros activos */
+.chips-filtro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chip-filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--color-fondo-alterno);
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--color-texto-oscuro);
+}
+
+.chip-filtro:hover { border-color: var(--color-primario-oscuro); }
+
+.chip-filtro__x {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--color-primario-oscuro);
+}
+
+/* Migas de pan */
+.breadcrumbs {
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+.breadcrumbs ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.breadcrumbs li + li::before {
+  content: "›";
+  margin-right: 0.35rem;
+  opacity: 0.6;
+}
+
+.breadcrumbs [aria-current="page"] { opacity: 0.7; }
+
+/* Errores de campo en formularios */
+.campo__error {
+  display: block;
+  color: var(--color-error);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* Formulario de newsletter (home) */
+.newsletter-form {
+  max-width: 420px;
+  margin-inline: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.newsletter-form input[type="email"] { flex: 1; min-width: 200px; }
+
+/* Seccion con fondo de panel (home) */
+.seccion--panel { border-radius: var(--radio); }
+
+/* Cuerpo del articulo del blog */
+.articulo-cuerpo { max-width: 760px; }
+
+.articulo-cuerpo__portada {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radio);
+  margin-bottom: 2rem;
+}
+
+.articulo-cuerpo__resumen {
+  font-size: 1.15rem;
+  opacity: 0.85;
+}
+
+.articulo-cuerpo__cta { margin-top: 2.5rem; }
+
+/* Alertas / flash (unifica el flash publico con el patron de admin) */
+.alert {
+  padding: 0.9rem 1.2rem;
+  border-radius: var(--radio);
+  margin-top: 1rem;
+}
+
+.alert--exito {
+  background: #e9f2ea;
+  color: var(--color-exito);
+}
+
+.alert--error {
+  background: #fbe7e5;
+  color: var(--color-error);
+}
+
+/* Tarjetas de contacto (enlaces grandes) */
+.tarjeta-contacto {
+  display: block;
+  padding: 1.5rem;
+  text-decoration: none;
+}
+
+/* Boton flotante de WhatsApp (todas las paginas publicas) */
+.whatsapp-fab {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  background: #25d366;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--sombra);
+  z-index: 45;
+  transition: transform var(--transicion);
+}
+
+.whatsapp-fab:hover { transform: translateY(-2px) scale(1.05); }
+
+/* Si la barra del comparador o el banner de cookies estan visibles,
+   sube el boton para no encimarlo con ellos. */
+.barra-comparador:not([hidden]) ~ .whatsapp-fab,
+.banner-consentimiento:not([hidden]) ~ .whatsapp-fab {
+  bottom: 5.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whatsapp-fab { transition: none; }
+}

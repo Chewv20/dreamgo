@@ -20,7 +20,7 @@
                 <span class="admin-badge admin-badge--rojo">Inactivo</span>
               <?php endif; ?>
             </td>
-            <td><?= $usuario['ultimo_login'] ? date('d M Y H:i', strtotime($usuario['ultimo_login'])) : 'Nunca' ?></td>
+            <td><?= $usuario['ultimo_login'] ? \App\Helpers\Fecha::cortaHora($usuario['ultimo_login']) : 'Nunca' ?></td>
             <td class="admin-acciones">
               <a href="/admin/usuarios/<?= (int) $usuario['id'] ?>/editar" class="btn btn-secundario">Editar</a>
             </td>

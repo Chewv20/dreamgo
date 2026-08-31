@@ -11,8 +11,8 @@
       <tbody>
         <?php foreach ($salidas as $salida): ?>
           <tr>
-            <td><?= date('d M Y', strtotime($salida['fecha_salida'])) ?></td>
-            <td><?= $salida['fecha_regreso'] ? date('d M Y', strtotime($salida['fecha_regreso'])) : '-' ?></td>
+            <td><?= \App\Helpers\Fecha::corta($salida['fecha_salida']) ?></td>
+            <td><?= $salida['fecha_regreso'] ? \App\Helpers\Fecha::corta($salida['fecha_regreso']) : '-' ?></td>
             <td><?= (int) $salida['cupo_disponible'] ?> / <?= (int) $salida['cupo_maximo'] ?></td>
             <td>
               <?php $badge = ['abierta' => 'verde', 'cerrada' => 'ambar', 'cancelada' => 'rojo'][$salida['estado']]; ?>

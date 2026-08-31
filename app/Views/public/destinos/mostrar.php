@@ -5,11 +5,19 @@
 $articulos ??= [];
 ?>
 <section class="seccion contenedor">
-  <p style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--color-primario-oscuro);font-weight:600;">
+  <?php
+  $migas = [
+      ['texto' => 'Inicio', 'url' => '/'],
+      ['texto' => 'Destinos', 'url' => '/destinos'],
+      ['texto' => $categoria['nombre']],
+  ];
+  require __DIR__ . '/../../partials/_breadcrumbs.php';
+  ?>
+  <p class="etiqueta-categoria">
     <?= $categoria['tipo'] === 'internacional' ? 'Internacional' : 'Nacional' ?>
   </p>
   <h1><?= htmlspecialchars($categoria['nombre'], ENT_QUOTES, 'UTF-8') ?></h1>
-  <p style="max-width:640px;"><?= htmlspecialchars($categoria['descripcion'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
+  <p class="bloque-medio"><?= htmlspecialchars($categoria['descripcion'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
 
   <?php if (empty($paquetes)): ?>
     <p>Aun no hay paquetes publicados en este destino. Vuelve pronto.</p>
@@ -29,10 +37,10 @@ $articulos ??= [];
     <?php foreach ($articulos as $a): ?>
       <article class="tarjeta animar-entrada">
         <a href="/blog/<?= htmlspecialchars($a['slug'], ENT_QUOTES, 'UTF-8') ?>">
-          <img src="<?= htmlspecialchars($a['imagen'] ?? '/assets/img/logo.avif', ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($a['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy" width="480" height="320" style="width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;">
+          <img class="tarjeta__img" src="<?= htmlspecialchars($a['imagen'] ?? '/assets/img/logo.avif', ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($a['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy" width="480" height="320">
         </a>
-        <div style="padding:1.25rem;">
-          <h3><a href="/blog/<?= htmlspecialchars($a['slug'], ENT_QUOTES, 'UTF-8') ?>" style="color:inherit;"><?= htmlspecialchars($a['titulo'], ENT_QUOTES, 'UTF-8') ?></a></h3>
+        <div class="tarjeta__cuerpo">
+          <h3><a class="enlace-plano" href="/blog/<?= htmlspecialchars($a['slug'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($a['titulo'], ENT_QUOTES, 'UTF-8') ?></a></h3>
           <p><?= htmlspecialchars($a['resumen'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
         </div>
       </article>

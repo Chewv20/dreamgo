@@ -12,6 +12,14 @@
     });
   }
 
+  function initAutoSubmit() {
+    document.querySelectorAll('[data-autosubmit]').forEach(function (control) {
+      control.addEventListener('change', function () {
+        if (control.form) control.form.submit();
+      });
+    });
+  }
+
   function initScrollReveal() {
     var elementos = document.querySelectorAll('.animar-entrada');
     if (!elementos.length) return;
@@ -282,6 +290,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initMenu();
+    initAutoSubmit();
     initScrollReveal();
     initComparador();
     initAtribucion();

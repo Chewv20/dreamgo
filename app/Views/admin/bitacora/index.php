@@ -26,7 +26,7 @@ $queryExtra = $accionActiva !== null ? ['accion' => $accionActiva] : [];
       <tbody>
         <?php foreach ($registros as $r): ?>
           <tr>
-            <td><?= date('d M Y H:i', strtotime($r['creado_en'])) ?></td>
+            <td><?= \App\Helpers\Fecha::cortaHora($r['creado_en']) ?></td>
             <td><?= htmlspecialchars($r['usuario_nombre'] ?? ('#' . ($r['usuario_id'] ?? '?')), ENT_QUOTES, 'UTF-8') ?></td>
             <td><code><?= htmlspecialchars($r['accion'], ENT_QUOTES, 'UTF-8') ?></code></td>
             <td>

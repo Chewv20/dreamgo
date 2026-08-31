@@ -15,7 +15,7 @@
               <?php $badge = ['pendiente' => 'ambar', 'confirmado' => 'verde', 'baja' => 'gris'][$s['estado']]; ?>
               <span class="admin-badge admin-badge--<?= $badge ?>"><?= ucfirst($s['estado']) ?></span>
             </td>
-            <td><?= date('d M Y', strtotime($s['creado_en'])) ?></td>
+            <td><?= \App\Helpers\Fecha::corta($s['creado_en']) ?></td>
           </tr>
         <?php endforeach; ?>
         <?php if (empty($suscriptores)): ?>

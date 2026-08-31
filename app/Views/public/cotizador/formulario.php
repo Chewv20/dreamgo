@@ -5,11 +5,11 @@
 $errores ??= [];
 $valores ??= [];
 ?>
-<section class="seccion contenedor" style="max-width:640px;">
+<section class="seccion contenedor bloque-medio">
   <h1>Cotiza tu viaje</h1>
   <p>Cuentanos que estas buscando y nuestro equipo te enviara una propuesta personalizada.</p>
   <?php if ($paquete): ?>
-    <p style="background:var(--color-fondo-alterno);padding:0.75rem 1rem;border-radius:var(--radio);">
+    <p class="aviso-caja">
       Estas cotizando: <strong><?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?></strong>
     </p>
   <?php endif; ?>
@@ -20,20 +20,20 @@ $valores ??= [];
 
     <div class="campo">
       <label for="nombre">Nombre completo</label>
-      <input type="text" id="nombre" name="nombre" required value="<?= htmlspecialchars($valores['nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-      <?php if (!empty($errores['nombre'])): ?><small style="color:var(--color-error);"><?= htmlspecialchars($errores['nombre'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+      <input type="text" id="nombre" name="nombre" autocomplete="name" required value="<?= htmlspecialchars($valores['nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+      <?php if (!empty($errores['nombre'])): ?><small class="campo__error"><?= htmlspecialchars($errores['nombre'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     </div>
 
     <div class="campo">
       <label for="email">Correo electronico</label>
-      <input type="email" id="email" name="email" required value="<?= htmlspecialchars($valores['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-      <?php if (!empty($errores['email'])): ?><small style="color:var(--color-error);"><?= htmlspecialchars($errores['email'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+      <input type="email" id="email" name="email" autocomplete="email" required value="<?= htmlspecialchars($valores['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+      <?php if (!empty($errores['email'])): ?><small class="campo__error"><?= htmlspecialchars($errores['email'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     </div>
 
     <div class="campo">
       <label for="telefono">Telefono / WhatsApp</label>
-      <input type="tel" id="telefono" name="telefono" required value="<?= htmlspecialchars($valores['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-      <?php if (!empty($errores['telefono'])): ?><small style="color:var(--color-error);"><?= htmlspecialchars($errores['telefono'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
+      <input type="tel" id="telefono" name="telefono" autocomplete="tel" required value="<?= htmlspecialchars($valores['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+      <?php if (!empty($errores['telefono'])): ?><small class="campo__error"><?= htmlspecialchars($errores['telefono'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     </div>
 
     <div class="campo">
@@ -51,6 +51,6 @@ $valores ??= [];
       <textarea id="mensaje" name="mensaje"><?= htmlspecialchars($valores['mensaje'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
     </div>
 
-    <button type="submit" class="btn btn-primario" style="width:100%;">Enviar solicitud</button>
+    <button type="submit" class="btn btn-primario btn--bloque">Enviar solicitud</button>
   </form>
 </section>

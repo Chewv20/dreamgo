@@ -10,7 +10,7 @@ $conceptos = ['anticipo' => 'Anticipo', 'saldo' => 'Saldo', 'otro' => 'Otro'];
   <p><span class="admin-badge admin-badge--<?= ['pendiente' => 'ambar', 'confirmada' => 'verde', 'cancelada' => 'gris', 'expirada' => 'rojo'][$reserva['estado']] ?>"><?= ucfirst($reserva['estado']) ?></span></p>
   <table class="admin-tabla" style="min-width:0;">
     <tr><td style="font-weight:bold;">Paquete</td><td><?= htmlspecialchars($reserva['paquete_titulo'], ENT_QUOTES, 'UTF-8') ?></td></tr>
-    <tr><td style="font-weight:bold;">Fecha de salida</td><td><?= date('d M Y', strtotime($reserva['fecha_salida'])) ?></td></tr>
+    <tr><td style="font-weight:bold;">Fecha de salida</td><td><?= \App\Helpers\Fecha::corta($reserva['fecha_salida']) ?></td></tr>
     <tr><td style="font-weight:bold;">Cliente</td><td><?= htmlspecialchars($reserva['cliente_nombre'], ENT_QUOTES, 'UTF-8') ?></td></tr>
     <tr><td style="font-weight:bold;">Correo</td><td><?= htmlspecialchars($reserva['cliente_email'], ENT_QUOTES, 'UTF-8') ?></td></tr>
     <tr><td style="font-weight:bold;">Telefono</td><td><?= htmlspecialchars($reserva['cliente_telefono'], ENT_QUOTES, 'UTF-8') ?></td></tr>
@@ -19,7 +19,7 @@ $conceptos = ['anticipo' => 'Anticipo', 'saldo' => 'Saldo', 'otro' => 'Otro'];
     <tr><td style="font-weight:bold;">Pagado</td><td>$<?= number_format((float) $reserva['monto_pagado'], 2) ?> <?= $moneda ?></td></tr>
     <tr><td style="font-weight:bold;">Saldo</td><td>$<?= number_format($saldo, 2) ?> <?= $moneda ?></td></tr>
     <?php if ($reserva['expira_en'] && $reserva['estado'] === 'pendiente'): ?>
-      <tr><td style="font-weight:bold;">Expira</td><td><?= date('d M Y H:i', strtotime($reserva['expira_en'])) ?></td></tr>
+      <tr><td style="font-weight:bold;">Expira</td><td><?= \App\Helpers\Fecha::cortaHora($reserva['expira_en']) ?></td></tr>
     <?php endif; ?>
   </table>
 
@@ -30,7 +30,7 @@ $conceptos = ['anticipo' => 'Anticipo', 'saldo' => 'Saldo', 'otro' => 'Otro'];
       <tbody>
         <?php foreach ($pagos as $pago): ?>
           <tr>
-            <td><?= date('d M Y H:i', strtotime($pago['creado_en'])) ?></td>
+            <td><?= \App\Helpers\Fecha::cortaHora($pago['creado_en']) ?></td>
             <td><?= htmlspecialchars($conceptos[$pago['concepto']] ?? $pago['concepto'], ENT_QUOTES, 'UTF-8') ?></td>
             <td>$<?= number_format((float) $pago['monto'], 2) ?> <?= $moneda ?></td>
             <td><?= htmlspecialchars((string) $pago['referencia_pago'], ENT_QUOTES, 'UTF-8') ?></td>

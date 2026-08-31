@@ -54,7 +54,7 @@ $hoy = date('Y-m-d');
         <?php foreach ($cotizaciones as $c): ?>
           <?php $vencida = !empty($c['seguimiento_en']) && $c['seguimiento_en'] < $hoy && in_array($c['estado'], ['nueva', 'contactada'], true); ?>
           <tr>
-            <td><?= date('d M Y H:i', strtotime($c['creado_en'])) ?></td>
+            <td><?= \App\Helpers\Fecha::cortaHora($c['creado_en']) ?></td>
             <td><?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?></td>
             <td><?= htmlspecialchars($c['email'], ENT_QUOTES, 'UTF-8') ?><br><small><?= htmlspecialchars($c['telefono'], ENT_QUOTES, 'UTF-8') ?></small></td>
             <td><?= htmlspecialchars($c['paquete_titulo'] ?? 'General', ENT_QUOTES, 'UTF-8') ?></td>

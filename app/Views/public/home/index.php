@@ -45,7 +45,7 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
     </section>
 
   <?php elseif ($bloque['clave'] === 'ventajas'): ?>
-    <section class="seccion contenedor" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';border-radius:var(--radio);"' : '' ?>>
+    <section class="seccion contenedor<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';"' : '' ?>>
       <div class="seccion__encabezado">
         <h2><?= htmlspecialchars($bloque['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?></h2>
         <?php if (!empty($bloque['subtitulo'])): ?><p><?= htmlspecialchars($bloque['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
@@ -62,7 +62,7 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
     </section>
 
   <?php elseif ($bloque['clave'] === 'destinos' && !empty($categorias)): ?>
-    <section class="seccion contenedor" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';border-radius:var(--radio);"' : '' ?>>
+    <section class="seccion contenedor<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';"' : '' ?>>
       <div class="seccion__encabezado">
         <h2><?= htmlspecialchars($bloque['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?></h2>
         <?php if (!empty($bloque['subtitulo'])): ?><p><?= htmlspecialchars($bloque['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
@@ -81,7 +81,7 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
     </section>
 
   <?php elseif ($bloque['clave'] === 'paquetes_destacados' && !empty($destacados)): ?>
-    <section class="seccion contenedor" style="background:<?= htmlspecialchars($bloque['color_fondo'] ?: 'var(--color-fondo-alterno)', ENT_QUOTES, 'UTF-8') ?>;border-radius:var(--radio);">
+    <section class="seccion contenedor seccion--panel" style="background:<?= htmlspecialchars($bloque['color_fondo'] ?: 'var(--color-fondo-alterno)', ENT_QUOTES, 'UTF-8') ?>;">
       <div class="seccion__encabezado">
         <h2><?= htmlspecialchars($bloque['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?></h2>
         <?php if (!empty($bloque['subtitulo'])): ?><p><?= htmlspecialchars($bloque['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
@@ -91,13 +91,13 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
           <?php require __DIR__ . '/../paquetes/_tarjeta.php'; ?>
         <?php endforeach; ?>
       </div>
-      <div style="text-align:center;margin-top:2rem;">
+      <div class="centrado" style="margin-top:2rem;">
         <a href="/paquetes" class="btn btn-secundario">Ver todos los paquetes</a>
       </div>
     </section>
 
   <?php elseif ($bloque['clave'] === 'testimonios'): ?>
-    <section class="seccion contenedor" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';border-radius:var(--radio);"' : '' ?>>
+    <section class="seccion contenedor<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';"' : '' ?>>
       <div class="seccion__encabezado">
         <h2><?= htmlspecialchars($bloque['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?></h2>
         <?php if (!empty($bloque['subtitulo'])): ?><p><?= htmlspecialchars($bloque['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
@@ -114,7 +114,7 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
     </section>
 
   <?php elseif ($bloque['clave'] === 'cta_final'): ?>
-    <section class="seccion contenedor cta-final animar-entrada" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';border-radius:var(--radio);"' : '' ?>>
+    <section class="seccion contenedor cta-final animar-entrada<?= $bloque['color_fondo'] ? ' seccion--panel' : '' ?>" <?= $bloque['color_fondo'] ? 'style="background:' . htmlspecialchars($bloque['color_fondo'], ENT_QUOTES, 'UTF-8') . ';"' : '' ?>>
       <h2><?= htmlspecialchars($bloque['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?></h2>
       <?php if (!empty($bloque['subtitulo'])): ?><p><?= htmlspecialchars($bloque['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
       <?php if (!empty($contenido['boton_texto'])): ?>
@@ -129,9 +129,9 @@ $heroVisible = isset($bloquesPorClave['hero']) && (int) $bloquesPorClave['hero']
     <h2>No te pierdas nuestras ofertas</h2>
     <p>Suscribete y enterate primero de descuentos y paquetes nuevos.</p>
   </div>
-  <form method="post" action="/suscribir" style="max-width:420px;margin:0 auto;display:flex;gap:0.75rem;">
+  <form method="post" action="/suscribir" class="newsletter-form">
     <?= \App\Helpers\Csrf::field() ?>
-    <input type="email" name="email" required placeholder="tu@correo.com" style="flex:1;">
+    <input type="email" name="email" autocomplete="email" required placeholder="tu@correo.com">
     <button type="submit" class="btn btn-primario">Suscribirme</button>
   </form>
 </section>

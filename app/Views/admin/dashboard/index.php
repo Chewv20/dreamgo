@@ -125,7 +125,7 @@
           ?>
           <tr>
             <td><?= htmlspecialchars($salida['paquete_titulo']) ?></td>
-            <td><?= date('d M Y', strtotime($salida['fecha_salida'])) ?></td>
+            <td><?= \App\Helpers\Fecha::corta($salida['fecha_salida']) ?></td>
             <td><?= $ocupados ?> / <?= $salida['cupo_maximo'] ?></td>
             <td><span class="admin-badge <?= $badge ?>"><?= $porcentaje ?>%</span></td>
           </tr>

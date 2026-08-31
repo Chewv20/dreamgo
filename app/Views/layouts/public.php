@@ -16,7 +16,7 @@
 <link rel="apple-touch-icon" href="/assets/icons/icon-180.png">
 <link rel="icon" href="/assets/icons/icon-96.png" type="image/png">
 
-<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="<?= htmlspecialchars(\App\Helpers\Asset::url('/assets/css/site.css'), ENT_QUOTES, 'UTF-8') ?>">
 <?php
 $coloresClaves = ['color_primario', 'color_primario_oscuro', 'color_texto_oscuro', 'color_fondo', 'color_fondo_alterno', 'color_exito', 'color_error'];
 $coloresPersonalizados = [];
@@ -57,8 +57,8 @@ foreach ($coloresClaves as $claveColor) {
 </header>
 
 <?php foreach (\App\Helpers\Flash::pull() as $flash): ?>
-  <div class="contenedor" style="margin-top:1rem;">
-    <div style="padding:0.9rem 1.2rem;border-radius:12px;background:<?= $flash['tipo'] === 'error' ? '#fbe7e5' : '#e9f2ea' ?>;color:<?= $flash['tipo'] === 'error' ? 'var(--color-error)' : 'var(--color-exito)' ?>;">
+  <div class="contenedor">
+    <div class="alert alert--<?= $flash['tipo'] === 'error' ? 'error' : 'exito' ?>" role="status">
       <?= htmlspecialchars($flash['mensaje'], ENT_QUOTES, 'UTF-8') ?>
     </div>
   </div>
@@ -185,6 +185,12 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
 </div>
 <?php endif; ?>
 
-<script src="/assets/js/site.js" defer></script>
+<?php if ($footerWhatsappLink !== ''): ?>
+<a href="<?= htmlspecialchars($footerWhatsappLink, ENT_QUOTES, 'UTF-8') ?>" class="whatsapp-fab" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.2 1.2-1.7 1.3-.4.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.6-2.7-1.2-4.5-3.9-4.6-4.1-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 1-2.2.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.4.2.5.7 1.7.8 1.8.1.2.1.4 0 .6-.1.2-.2.4-.4.6-.2.2-.4.4-.2.8.2.4.9 1.5 2 2.4 1.4 1.2 2.4 1.5 2.8 1.7.4.2.6.1.8-.1.2-.2.9-1 1.1-1.4.2-.4.4-.3.7-.2.3.1 1.8.9 2.1 1 .3.2.5.2.6.3.1.2.1.7-.1 1.3Z"/></svg>
+</a>
+<?php endif; ?>
+
+<script src="<?= htmlspecialchars(\App\Helpers\Asset::url('/assets/js/site.js'), ENT_QUOTES, 'UTF-8') ?>" defer></script>
 </body>
 </html>

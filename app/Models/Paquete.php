@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Core\Model;
@@ -25,17 +27,35 @@ class Paquete extends Model
     }
 
     /**
+     * Criterios de orden aceptados por el catalogo publico. Clave = valor del query param
+     * `?orden=`; valor = fragmento SQL de ORDER BY (nunca viene del usuario sin pasar por
+     * este mapa, asi que es seguro interpolarlo).
+     */
+    public const ORDENES = [
+        'recientes' => 'p.destacado DESC, p.creado_en DESC',
+        'precio_asc' => 'p.precio_desde ASC',
+        'precio_desc' => 'p.precio_desde DESC',
+        'duracion_asc' => 'p.duracion_dias ASC',
+        'mejor_valorados' => 'promedio_resenas DESC, p.destacado DESC',
+    ];
+
+    public const ORDEN_DEFECTO = 'recientes';
+
+    /**
      * @param array{categoria?: string, tipo?: string, q?: string, precio_min?: int, precio_max?: int, duracion?: string} $filtros
      */
-    public static function publicadosConFiltros(array $filtros = [], int $limite = 12, int $offset = 0): array
+    public static function publicadosConFiltros(array $filtros = [], int $limite = 12, int $offset = 0, string $orden = self::ORDEN_DEFECTO): array
     {
         [$clausula, $params] = self::clausulaFiltrosPublicados($filtros);
 
-        $sql = 'SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug
+        $orderBy = self::ORDENES[$orden] ?? self::ORDENES[self::ORDEN_DEFECTO];
+
+        $sql = 'SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug,
+                       (SELECT AVG(r.calificacion) FROM resenas r WHERE r.paquete_id = p.id AND r.estado = "aprobada") AS promedio_resenas
                 FROM paquetes p
                 INNER JOIN categorias c ON c.id = p.categoria_id
                 WHERE ' . $clausula . '
-                ORDER BY p.destacado DESC, p.creado_en DESC
+                ORDER BY ' . $orderBy . ', p.id DESC
                 LIMIT :limite OFFSET :offset';
 
         $stmt = self::db()->prepare($sql);
@@ -215,6 +235,28 @@ class Paquete extends Model
     public static function contarTotal(): int
     {
         return (int) self::db()->query('SELECT COUNT(*) FROM paquetes')->fetchColumn();
+    }
+
+    /**
+     * Otros paquetes publicados de la misma categoria, para la seccion "te puede interesar"
+     * de la ficha. Excluye el paquete actual.
+     */
+    public static function relacionados(int $categoriaId, int $excluirId, int $limite = 3): array
+    {
+        $stmt = self::db()->prepare(
+            'SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug
+             FROM paquetes p
+             INNER JOIN categorias c ON c.id = p.categoria_id
+             WHERE p.estado = "publicado" AND p.categoria_id = :categoria AND p.id <> :excluir
+             ORDER BY p.destacado DESC, p.creado_en DESC
+             LIMIT :limite'
+        );
+        $stmt->bindValue(':categoria', $categoriaId, \PDO::PARAM_INT);
+        $stmt->bindValue(':excluir', $excluirId, \PDO::PARAM_INT);
+        $stmt->bindValue(':limite', $limite, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
     }
 
     public static function salidasFuturas(int $paqueteId): array

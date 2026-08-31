@@ -6,7 +6,7 @@
       <tbody>
         <?php foreach ($resenas as $r): ?>
           <tr>
-            <td><?= date('d M Y', strtotime($r['creado_en'])) ?></td>
+            <td><?= \App\Helpers\Fecha::corta($r['creado_en']) ?></td>
             <td><?= htmlspecialchars($r['cliente_nombre'], ENT_QUOTES, 'UTF-8') ?></td>
             <td><?= htmlspecialchars($r['paquete_titulo'], ENT_QUOTES, 'UTF-8') ?></td>
             <td><?= str_repeat('★', (int) $r['calificacion']) . str_repeat('☆', 5 - (int) $r['calificacion']) ?></td>

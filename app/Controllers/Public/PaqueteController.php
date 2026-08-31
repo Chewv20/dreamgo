@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers\Public;
 
 use App\Helpers\PaqueteJsonLd;
@@ -27,6 +29,8 @@ class PaqueteController extends Controller
         $precioMin = (string) $this->request->query('precio_min', '');
         $precioMax = (string) $this->request->query('precio_max', '');
         $duracion = (string) $this->request->query('duracion', '');
+        $ordenPedido = (string) $this->request->query('orden', '');
+        $orden = isset(Paquete::ORDENES[$ordenPedido]) ? $ordenPedido : Paquete::ORDEN_DEFECTO;
 
         $filtros = array_filter([
             'categoria' => $categoriaSlug,
@@ -45,7 +49,7 @@ class PaqueteController extends Controller
             Paquete::contarPublicados($filtros)
         );
 
-        $paquetes = Paquete::publicadosConFiltros($filtros, $paginador->porPagina, $paginador->offset());
+        $paquetes = Paquete::publicadosConFiltros($filtros, $paginador->porPagina, $paginador->offset(), $orden);
 
         $this->view('public/paquetes/catalogo', [
             'paquetes' => $paquetes,
@@ -57,6 +61,8 @@ class PaqueteController extends Controller
             'precioMinActivo' => $filtros['precio_min'] ?? '',
             'precioMaxActivo' => $filtros['precio_max'] ?? '',
             'duracionActiva' => $filtros['duracion'] ?? '',
+            'ordenActivo' => $orden,
+            'totalResultados' => $paginador->total,
             'intro' => $bloques[0] ?? null,
             'paginador' => $paginador,
         ], [
@@ -80,12 +86,16 @@ class PaqueteController extends Controller
 
         $jsonLd = PaqueteJsonLd::construir($paquete, $resumen, $resenas, (string) ($_ENV['APP_URL'] ?? ''));
 
+        $relacionados = Paquete::relacionados((int) $paquete['categoria_id'], (int) $paquete['id'], 3);
+
         $this->view('public/paquetes/ficha', [
             'paquete' => $paquete,
             'imagenes' => $imagenes,
             'salidas' => $salidas,
             'resenas' => $resenas,
             'resumen' => $resumen,
+            'relacionados' => $relacionados,
+            'resumenesRelacionados' => Resena::resumenPorPaquetes(array_column($relacionados, 'id')),
         ], [
             'title' => $paquete['meta_title'] ?: ($paquete['titulo'] . ' | Dream Go Operadora Turistica'),
             'description' => $paquete['meta_description'] ?: $paquete['resumen'],
