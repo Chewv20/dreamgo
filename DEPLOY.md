@@ -1,6 +1,6 @@
 # Despliegue a Hostinger — Dream Go
 
-Esta guia asume un plan de hosting compartido de Hostinger con acceso a hPanel, PHP 8.1+ y MariaDB/MySQL.
+Esta guia asume un plan de hosting compartido de Hostinger con acceso a hPanel, PHP 8.2+ y MariaDB/MySQL.
 
 ## 1. Subir el proyecto
 

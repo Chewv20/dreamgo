@@ -117,9 +117,9 @@ class ReservaAdminController extends AdminController
 
         $validator = new Validator($datos);
         $validator->requerido('salida_id', 'La fecha de salida')
-            ->requerido('nombre', 'El nombre')
+            ->requerido('nombre', 'El nombre')->maxLength('nombre', 150, 'El nombre')
             ->requerido('email', 'El correo')->email('email', 'El correo')
-            ->requerido('telefono', 'El telefono')
+            ->requerido('telefono', 'El telefono')->telefono('telefono', 'El telefono')
             ->requerido('num_personas', 'El numero de personas')->entero('num_personas', 'El numero de personas')
             ->enRango('num_personas', 1, 30, 'El numero de personas');
 

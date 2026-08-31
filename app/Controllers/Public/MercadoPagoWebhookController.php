@@ -49,6 +49,13 @@ class MercadoPagoWebhookController extends Controller
                 error_log('[MercadoPagoWebhook] Firma invalida para el pago ' . $paymentId);
                 $this->json(['error' => 'Firma invalida'], 401);
             }
+
+            // Auditoria 2026-08-31, hallazgo SEG-03: firma valida pero con un ts viejo = replay
+            // de una notificacion capturada. Se rechaza aunque el HMAC cuadre.
+            if (!$servicio->tsWebhookEsReciente($xSignature)) {
+                error_log('[MercadoPagoWebhook] Timestamp fuera de ventana (posible replay) para el pago ' . $paymentId);
+                $this->json(['error' => 'Notificacion expirada'], 401);
+            }
         } elseif (($_ENV['APP_ENV'] ?? 'production') !== 'local') {
             // Auditoria 2026-08-25, hallazgo SEG-03: sin secreto configurado, cualquiera podia
             // invocar este endpoint con un data.id arbitrario y forzar el momento de la

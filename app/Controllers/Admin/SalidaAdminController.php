@@ -8,9 +8,12 @@ use App\Helpers\Flash;
 use App\Helpers\Validator;
 use App\Models\Paquete;
 use App\Models\Salida;
+use PDOException;
 
 class SalidaAdminController extends AdminController
 {
+    private const ESTADOS = ['abierta', 'cerrada', 'cancelada'];
+
     public function index(int $paqueteId): void
     {
         $paquete = $this->encontrarO404(Paquete::class, $paqueteId);
@@ -34,26 +37,29 @@ class SalidaAdminController extends AdminController
     {
         $this->verifyCsrf();
 
-        $paquete = $this->encontrarO404(Paquete::class, $paqueteId);
+        $this->encontrarO404(Paquete::class, $paqueteId);
 
         $datos = $this->request->only(['fecha_salida', 'fecha_regreso', 'cupo_maximo', 'precio_override']);
 
-        $validator = new Validator($datos);
-        $validator->requerido('fecha_salida', 'La fecha de salida')
-            ->requerido('cupo_maximo', 'El cupo maximo')
-            ->entero('cupo_maximo', 'El cupo maximo');
+        if (!$this->validar($datos)) {
+            $this->redirect("/admin/paquetes/{$paqueteId}/salidas/crear");
+        }
 
-        $this->redirigirSiInvalido($validator, "/admin/paquetes/{$paqueteId}/salidas/crear");
-
-        Salida::insert([
-            'paquete_id' => $paqueteId,
-            'fecha_salida' => $datos['fecha_salida'],
-            'fecha_regreso' => $datos['fecha_regreso'] ?: null,
-            'cupo_maximo' => (int) $datos['cupo_maximo'],
-            'cupo_disponible' => (int) $datos['cupo_maximo'],
-            'precio_override' => $datos['precio_override'] !== '' ? $datos['precio_override'] : null,
-            'estado' => 'abierta',
-        ]);
+        try {
+            Salida::insert([
+                'paquete_id' => $paqueteId,
+                'fecha_salida' => $datos['fecha_salida'],
+                'fecha_regreso' => ($datos['fecha_regreso'] ?? '') !== '' ? $datos['fecha_regreso'] : null,
+                'cupo_maximo' => (int) $datos['cupo_maximo'],
+                'cupo_disponible' => (int) $datos['cupo_maximo'],
+                'precio_override' => ($datos['precio_override'] ?? '') !== '' ? $datos['precio_override'] : null,
+                'estado' => 'abierta',
+            ]);
+        } catch (PDOException $e) {
+            error_log('[SalidaAdminController] Error de base de datos al crear salida: ' . $e->getMessage());
+            Flash::set('error', 'No se pudo guardar la fecha de salida. Revisa los datos e intenta de nuevo.');
+            $this->redirect("/admin/paquetes/{$paqueteId}/salidas/crear");
+        }
 
         Flash::set('exito', 'Fecha de salida creada.');
         $this->redirect("/admin/paquetes/{$paqueteId}/salidas");
@@ -76,20 +82,76 @@ class SalidaAdminController extends AdminController
 
         $salida = $this->encontrarO404(Salida::class, $id);
 
-        $cupoMaximo = (int) $this->request->input('cupo_maximo');
+        $datos = $this->request->only(['fecha_salida', 'fecha_regreso', 'cupo_maximo', 'precio_override', 'estado']);
+
+        if (!$this->validar($datos)) {
+            $this->redirect("/admin/paquetes/{$paqueteId}/salidas/{$id}/editar");
+        }
+
+        $cupoMaximo = (int) $datos['cupo_maximo'];
         $diferencia = $cupoMaximo - (int) $salida['cupo_maximo'];
         $nuevoDisponible = max(0, (int) $salida['cupo_disponible'] + $diferencia);
 
-        Salida::update($id, [
-            'fecha_salida' => $this->request->input('fecha_salida'),
-            'fecha_regreso' => $this->request->input('fecha_regreso') ?: null,
-            'cupo_maximo' => $cupoMaximo,
-            'cupo_disponible' => min($nuevoDisponible, $cupoMaximo),
-            'precio_override' => $this->request->input('precio_override') !== '' ? $this->request->input('precio_override') : null,
-            'estado' => $this->request->input('estado', 'abierta'),
-        ]);
+        try {
+            Salida::update($id, [
+                'fecha_salida' => $datos['fecha_salida'],
+                'fecha_regreso' => ($datos['fecha_regreso'] ?? '') !== '' ? $datos['fecha_regreso'] : null,
+                'cupo_maximo' => $cupoMaximo,
+                'cupo_disponible' => min($nuevoDisponible, $cupoMaximo),
+                'precio_override' => ($datos['precio_override'] ?? '') !== '' ? $datos['precio_override'] : null,
+                'estado' => $datos['estado'] ?? 'abierta',
+            ]);
+        } catch (PDOException $e) {
+            error_log('[SalidaAdminController] Error de base de datos al editar salida: ' . $e->getMessage());
+            Flash::set('error', 'No se pudo guardar la fecha de salida. Revisa los datos e intenta de nuevo.');
+            $this->redirect("/admin/paquetes/{$paqueteId}/salidas/{$id}/editar");
+        }
 
         Flash::set('exito', 'Fecha de salida actualizada.');
         $this->redirect("/admin/paquetes/{$paqueteId}/salidas");
+    }
+
+    /**
+     * Auditoria 2026-08-31, hallazgo BD-01: antes solo se exigia fecha_salida y un cupo_maximo
+     * entero. Una fecha mal formada, un precio no numerico o un estado fuera del ENUM llegaban
+     * al INSERT/UPDATE y salian como 500 generico (PDOException sin capturar) en vez de un
+     * mensaje al operador.
+     *
+     * @param array<string, mixed> $datos
+     */
+    private function validar(array $datos): bool
+    {
+        $validator = new Validator($datos);
+        $validator->requerido('fecha_salida', 'La fecha de salida')->fecha('fecha_salida', 'La fecha de salida')
+            ->fecha('fecha_regreso', 'La fecha de regreso')
+            ->requerido('cupo_maximo', 'El cupo maximo')->entero('cupo_maximo', 'El cupo maximo')
+            ->enRango('cupo_maximo', 1, 65535, 'El cupo maximo');
+
+        if (!$validator->pasa()) {
+            Flash::set('error', 'Revisa los datos del formulario.');
+
+            return false;
+        }
+
+        if (($datos['fecha_regreso'] ?? '') !== '' && $datos['fecha_regreso'] < $datos['fecha_salida']) {
+            Flash::set('error', 'La fecha de regreso no puede ser anterior a la fecha de salida.');
+
+            return false;
+        }
+
+        if (($datos['precio_override'] ?? '') !== ''
+            && (!is_numeric($datos['precio_override']) || (float) $datos['precio_override'] < 0)) {
+            Flash::set('error', 'El precio especifico debe ser un numero mayor o igual a cero.');
+
+            return false;
+        }
+
+        if (isset($datos['estado']) && !in_array($datos['estado'], self::ESTADOS, true)) {
+            Flash::set('error', 'Selecciona un estado valido.');
+
+            return false;
+        }
+
+        return true;
     }
 }

@@ -15,6 +15,16 @@ final class MercadoPagoService
 {
     private const API_BASE = 'https://api.mercadopago.com';
 
+    /**
+     * Ventana de tolerancia para el `ts` del header x-signature (Auditoria 2026-08-31,
+     * hallazgo SEG-03). Se comprueba aparte de la firma: la firma HMAC garantiza integridad
+     * (el ts va dentro del manifest firmado), esto garantiza frescura para que una
+     * notificacion valida capturada de un log no pueda reproducirse dias despues. 10 min
+     * cubre reintentos inmediatos de Mercado Pago y el desfase de reloj entre servidores;
+     * un replay ademas terminaria en PAGO_DUPLICADO (dedup por UNIQUE(referencia_pago)).
+     */
+    private const TOLERANCIA_TS_WEBHOOK = 600;
+
     public function __construct(private readonly string $accessToken)
     {
     }
@@ -84,11 +94,7 @@ final class MercadoPagoService
      */
     public function verificarFirmaWebhook(string $xSignature, string $xRequestId, string $dataId, string $secret): bool
     {
-        $partes = [];
-        foreach (explode(',', $xSignature) as $par) {
-            [$clave, $valor] = array_pad(explode('=', trim($par), 2), 2, '');
-            $partes[$clave] = $valor;
-        }
+        $partes = $this->parsearXSignature($xSignature);
 
         if (empty($partes['ts']) || empty($partes['v1'])) {
             return false;
@@ -98,6 +104,35 @@ final class MercadoPagoService
         $hashEsperado = hash_hmac('sha256', $manifest, $secret);
 
         return hash_equals($hashEsperado, $partes['v1']);
+    }
+
+    /**
+     * Rechaza notificaciones cuyo `ts` (Unix, en segundos) esta fuera de la ventana de
+     * tolerancia respecto al reloj de este servidor (replay de una notificacion vieja).
+     * Complementa a verificarFirmaWebhook(): la firma no basta porque el atacante que
+     * capturo una notificacion valida tiene tambien su x-signature intacto.
+     */
+    public function tsWebhookEsReciente(string $xSignature, int $toleranciaSegundos = self::TOLERANCIA_TS_WEBHOOK): bool
+    {
+        $ts = (int) ($this->parsearXSignature($xSignature)['ts'] ?? 0);
+
+        return $ts > 0 && abs(time() - $ts) <= $toleranciaSegundos;
+    }
+
+    /**
+     * "ts=1704908010,v1=<hmac>" -> ['ts' => '1704908010', 'v1' => '<hmac>'].
+     *
+     * @return array<string, string>
+     */
+    private function parsearXSignature(string $xSignature): array
+    {
+        $partes = [];
+        foreach (explode(',', $xSignature) as $par) {
+            [$clave, $valor] = array_pad(explode('=', trim($par), 2), 2, '');
+            $partes[$clave] = $valor;
+        }
+
+        return $partes;
     }
 
     /**
@@ -115,6 +150,9 @@ final class MercadoPagoService
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_RETURNTRANSFER => true,
+            // CONNECTTIMEOUT aparte de TIMEOUT (Auditoria 2026-08-31, INFRA-03): un handshake
+            // colgado no debe acercarse al max_execution_time con una transaccion abierta.
+            CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_TIMEOUT => 15,
             CURLOPT_POSTFIELDS => $body !== null ? json_encode($body, JSON_UNESCAPED_UNICODE) : null,
         ]);

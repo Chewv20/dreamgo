@@ -10,9 +10,13 @@ use App\Helpers\Validator;
 use App\Models\CodigoDescuento;
 use App\Models\OfertaEnvioCola;
 use App\Models\Paquete;
+use PDOException;
 
 class OfertaAdminController extends AdminController
 {
+    private const TIPOS = ['porcentaje', 'monto_fijo'];
+    private const ALCANCES = ['global', 'paquete'];
+
     public function index(): void
     {
         $this->view('admin/ofertas/index', [
@@ -42,7 +46,13 @@ class OfertaAdminController extends AdminController
             $this->redirect('/admin/ofertas/crear');
         }
 
-        CodigoDescuento::insert($datos);
+        try {
+            CodigoDescuento::insert($datos);
+        } catch (PDOException $e) {
+            error_log('[OfertaAdminController] Error de base de datos al crear oferta: ' . $e->getMessage());
+            Flash::set('error', 'No se pudo guardar el codigo de descuento. Revisa los datos e intenta de nuevo.');
+            $this->redirect('/admin/ofertas/crear');
+        }
 
         Flash::set('exito', 'Codigo de descuento creado.');
         $this->redirect('/admin/ofertas');
@@ -76,7 +86,13 @@ class OfertaAdminController extends AdminController
             $this->redirect("/admin/ofertas/{$id}/editar");
         }
 
-        CodigoDescuento::update($id, $datos);
+        try {
+            CodigoDescuento::update($id, $datos);
+        } catch (PDOException $e) {
+            error_log('[OfertaAdminController] Error de base de datos al editar oferta: ' . $e->getMessage());
+            Flash::set('error', 'No se pudo guardar el codigo de descuento. Revisa los datos e intenta de nuevo.');
+            $this->redirect("/admin/ofertas/{$id}/editar");
+        }
 
         Flash::set('exito', 'Codigo de descuento actualizado.');
         $this->redirect('/admin/ofertas');
@@ -159,6 +175,20 @@ class OfertaAdminController extends AdminController
 
         if (!is_numeric($datos['valor']) || (float) $datos['valor'] <= 0) {
             Flash::set('error', 'El valor del descuento debe ser un numero mayor a cero.');
+
+            return false;
+        }
+
+        // Auditoria 2026-08-31, hallazgo BD-01: tipo y alcance venian del input sin contrastar
+        // contra su ENUM; un valor fuera de lista reventaba el INSERT como 500.
+        if (!in_array($datos['tipo'], self::TIPOS, true)) {
+            Flash::set('error', 'Selecciona un tipo de descuento valido.');
+
+            return false;
+        }
+
+        if (!in_array($datos['alcance'], self::ALCANCES, true)) {
+            Flash::set('error', 'Selecciona un alcance valido.');
 
             return false;
         }

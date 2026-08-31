@@ -22,9 +22,16 @@ $stmtAccion->execute();
 $stmtBitacora = $db->prepare('DELETE FROM bitacora_admin WHERE creado_en < (NOW() - INTERVAL 12 MONTH)');
 $stmtBitacora->execute();
 
+// Auditoria 2026-08-31, hallazgo PERF-03: log_correos_enviados (trazabilidad de correos, ver
+// App\Services\MailerService) era la unica tabla de solo-crecimiento sin politica de
+// retencion. 6 meses cubre de sobra cualquier revision de "se envio el correo X".
+$stmtCorreos = $db->prepare('DELETE FROM log_correos_enviados WHERE enviado_en < (NOW() - INTERVAL 6 MONTH)');
+$stmtCorreos->execute();
+
 cron_log(
     'limpiar_intentos_login',
     $stmtLogin->rowCount() . ' registro(s) de intentos de login purgado(s), '
     . $stmtAccion->rowCount() . ' registro(s) de intentos_accion purgado(s), '
-    . $stmtBitacora->rowCount() . ' registro(s) de bitacora_admin purgado(s).'
+    . $stmtBitacora->rowCount() . ' registro(s) de bitacora_admin purgado(s), '
+    . $stmtCorreos->rowCount() . ' registro(s) de log_correos_enviados purgado(s).'
 );

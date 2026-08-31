@@ -124,4 +124,41 @@ final class MercadoPagoServiceTest extends TestCase
             $service->verificarFirmaWebhook($xSignatureAlterado, 'req-1', '123456789', self::SECRET)
         );
     }
+
+    public function testTsRecienteEsAceptado(): void
+    {
+        $service = new MercadoPagoService('token-no-usado');
+
+        $this->assertTrue($service->tsWebhookEsReciente('ts=' . time() . ',v1=hash'));
+    }
+
+    public function testTsViejoEsRechazado(): void
+    {
+        // Una notificacion valida capturada hace horas: firma intacta pero ts fuera de ventana.
+        $service = new MercadoPagoService('token-no-usado');
+
+        $this->assertFalse($service->tsWebhookEsReciente('ts=1700000000,v1=hash'));
+    }
+
+    public function testTsEnElFuturoFueraDeVentanaEsRechazado(): void
+    {
+        $service = new MercadoPagoService('token-no-usado');
+
+        $this->assertFalse($service->tsWebhookEsReciente('ts=' . (time() + 4000) . ',v1=hash'));
+    }
+
+    public function testTsAusenteEsRechazado(): void
+    {
+        $service = new MercadoPagoService('token-no-usado');
+
+        $this->assertFalse($service->tsWebhookEsReciente('v1=hash'));
+    }
+
+    public function testTsDentroDeUnaToleranciaPersonalizadaEsAceptado(): void
+    {
+        $service = new MercadoPagoService('token-no-usado');
+
+        $this->assertTrue($service->tsWebhookEsReciente('ts=' . (time() - 120) . ',v1=hash', 300));
+        $this->assertFalse($service->tsWebhookEsReciente('ts=' . (time() - 600) . ',v1=hash', 300));
+    }
 }
