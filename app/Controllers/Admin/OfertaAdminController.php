@@ -146,8 +146,8 @@ class OfertaAdminController extends AdminController
         $validator = new Validator($datos);
         $validator->requerido('codigo', 'El codigo')->maxLength('codigo', 40, 'El codigo')
             ->requerido('valor', 'El valor')
-            ->requerido('fecha_inicio', 'La fecha de inicio')
-            ->requerido('fecha_fin', 'La fecha de fin');
+            ->requerido('fecha_inicio', 'La fecha de inicio')->fecha('fecha_inicio', 'La fecha de inicio')
+            ->requerido('fecha_fin', 'La fecha de fin')->fecha('fecha_fin', 'La fecha de fin');
 
         if (!$validator->pasa()) {
             Flash::set('error', 'Revisa los datos del formulario.');

@@ -5,6 +5,7 @@ namespace App\Controllers\Public;
 use App\Helpers\Atribucion;
 use App\Helpers\Csrf;
 use App\Helpers\Flash;
+use App\Helpers\RateLimiter;
 use App\Helpers\Validator;
 use App\Models\Cotizacion;
 use App\Models\ConfiguracionSitio;
@@ -31,6 +32,16 @@ class CotizadorController extends Controller
     public function enviar(): void
     {
         $this->verifyCsrf();
+
+        // Sin esto, una sola IP podia mandar POSTs ilimitados: cada uno inserta una cotizacion
+        // y dispara un correo al equipo (mismo criterio que /reservar y /suscribir; el email
+        // no sirve de identificador porque lo pone el propio formulario).
+        $ip = $this->request->ip();
+        if (RateLimiter::demasiados('cotizador', null, $ip)) {
+            RateLimiter::registrar('cotizador', null, $ip);
+            $this->abort(429, 'Demasiados envios. Espera unos minutos e intenta de nuevo.');
+        }
+        RateLimiter::registrar('cotizador', null, $ip);
 
         $datos = array_merge(
             ['nombre' => '', 'email' => '', 'telefono' => '', 'num_personas' => '', 'fecha_tentativa' => '', 'mensaje' => '', 'paquete_slug' => ''],

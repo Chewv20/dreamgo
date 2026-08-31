@@ -774,3 +774,132 @@ remoto ni PHP) · filtros SQL de `Cotizacion`/`Paquete`/`Bitacora` (parametrizad
 con `ESCAPE`) · rate-limiting de `resena`/`reserva_consulta`/`pagar_saldo` · consentimiento
 de cookies previo a GA4/Pixel · rangos de fecha del dashboard validados por regex antes de
 las consultas.
+
+## Auditoría 2026-08-29 — barrido completo (estado `858781f`)
+
+Cuarta auditoría completa sobre el repositorio al día (`858781f` "Arreglo errores",
+`6e5b98e` "saneacion csv injection", más el backlog de `MEJORAS.md` ya integrado). Revisión
+de seguridad, base de datos, configuración/infraestructura y calidad de código, contrastada
+contra las tres auditorías anteriores para detectar regresiones de hallazgos ya cerrados.
+
+**Estado general:** sólido. PDO preparado en toda consulta (incluidos los filtros nuevos de
+CRM/blog/bitácora), CSRF con `hash_equals` en toda mutación pública y de panel, RBAC con
+sello de sesión + guardas contra auto-promoción y bloqueo del último administrador (M-03 de
+la 3ª auditoría intactas), verificación de firma + validación server-side del monto en el
+webhook de Mercado Pago, `Response::csv()` neutraliza inyección de fórmulas en las 3
+exportaciones, JSON-LD con `JSON_HEX_*`, `ImageUploadService` con `is_uploaded_file()` +
+tope anti-bomba, cabeceras de seguridad + CSP con nonce, `.htaccess` de raíz/`public`/`uploads`
+y exclusión de `/admin/` en `sw.js` sin cambios. El ENUM `log_correos_enviados.tipo` sí fue
+ampliado (migración 0017) para `recordatorio_saldo`/`pago_recibido` — no se repitió el bug
+clase del hallazgo #17 de la 1ª auditoría.
+
+**Hallazgos: 0 críticos/altos, 1 medio, 4 bajos, ~6 informativos.** El medio y los 4 bajos
+quedaron corregidos en la misma sesión (detalle en cada punto); `composer test` pasa de 83 a
+103 tests en verde (nuevo `tests/Unit/Helpers/UrlTest.php`). Los informativos se dejaron sin
+tocar.
+
+### Medio
+
+- **M4-01 — `POST /cotizador` sin rate-limiting. [CORREGIDO]** Todos los demás POST públicos
+  recibieron límite de intentos en la 2ª auditoría (SEG-04/05/07: `reservar`, `mi-reserva`,
+  `resena`, `suscribir`, y luego `pagar_saldo`), pero `/cotizador` quedó fuera de ese barrido
+  y seguía sin límite: `App\Helpers\RateLimiter::LIMITES` no tenía clave `cotizador` y
+  `CotizadorController::enviar()` no llamaba a `RateLimiter`. Cada envío hace un `INSERT` en
+  `cotizaciones` **y** dispara un correo saliente a `email_equipo_reportes`
+  (`MailerService::enviarNotificacionCotizacion`). Un atacante anónimo (el token CSRF se
+  obtiene gratis del `GET /cotizador`) podía: inundar la tabla `cotizaciones` y el CRM,
+  bombardear el buzón del equipo, y quemar la cuota/reputación del SMTP saliente.
+  *Corrección:* se añadió `'cotizador' => [null, 10, 30]` (10 envíos por IP cada 30 min) a
+  `RateLimiter::LIMITES` y el par `demasiados()`/`registrar()` al inicio de
+  `CotizadorController::enviar()`, con `abort(429)`, mismo patrón que `/reservar` y
+  `/suscribir`. Probado en vivo con `php -S`: los primeros 10 POST responden 200, el 11º y 12º
+  dan 429; filas de prueba (`cotizaciones`, `log_correos_enviados`, `intentos_accion`)
+  limpiadas después.
+  [app/Controllers/Public/CotizadorController.php:33](app/Controllers/Public/CotizadorController.php#L33)
+
+### Bajo
+
+- **M4-02 — `SitemapService::escribirRobotsTxt()` regresionaba el hallazgo #16 de la 1ª
+  auditoría. [CORREGIDO]** Aquella quitó a propósito `Disallow: /admin/` de
+  `public/robots.txt` (no publicar la ruta del panel; la no-indexación real la da el
+  `<meta robots noindex>` del layout admin). `SitemapService::regenerar()` — que corre en
+  cada crear/editar/archivar artículo y en cambios de paquete — reescribía `public/robots.txt`
+  desde un string fijo que volvía a incluir `Disallow: /admin/`. Además, `$baseUrl` caía a
+  `http://dreamgo.local` si faltaba `APP_URL` (no está en las variables obligatorias de
+  `config/database.php`), con lo que el dominio de desarrollo se filtraría a los `<loc>` del
+  `sitemap.xml`. *Corrección:* se eliminaron el método `escribirRobotsTxt()` y su llamada —
+  `robots.txt` vuelve a ser un archivo estático del repo, no se regenera; y el respaldo de
+  `APP_URL` ausente pasó de `http://dreamgo.local` a la constante `DOMINIO_PRODUCCION`
+  (`https://dreamgooperadoraturistica.com`, el mismo dominio hardcodeado en el
+  `public/robots.txt` del repo). Probado en vivo: `regenerar()` deja `public/robots.txt`
+  byte a byte igual y solo reescribe `sitemap.xml`.
+  [app/Services/SitemapService.php:13](app/Services/SitemapService.php#L13)
+
+- **M4-03 — `Url::segura()` se evadía con backslash. [CORREGIDO]** `Url::segura('/\\evil.com')`
+  empezaba con `/` y no con `//`, así que pasaba el filtro y se devolvía intacta. Los
+  navegadores normalizan `\` → `/`, de modo que `<a href="/\evil.com">` navega a `//evil.com`
+  (fuera del sitio). Es alcanzable por roles no-admin: `contenido.gestionar` (links de CTA),
+  `configuracion.gestionar` (URLs de redes) y `articulos.gestionar` (href dentro del HTML del
+  blog, vía `HtmlSanitizer::normalizarHref` que delega en `Url::segura`). Deriva en
+  open-redirect / pivote de phishing desde un rol de edición — misma frontera de confianza
+  que M-02 de la 3ª auditoría (Medio); se queda en Bajo porque `javascript:` seguía
+  bloqueado. *Corrección:* `Url::segura()` ahora también descarta cualquier valor con `\` o
+  con caracteres de control (`\x00-\x1F\x7F`). Nuevo `tests/Unit/Helpers/UrlTest.php` (20
+  casos: conserva http/https/ruta/mailto/tel/`#`; descarta `javascript:` en sus variantes,
+  `data:`, `vbscript:`, `//host`, `/\host`, `\\host`, backslash intermedio, salto de línea,
+  tab, esquemas raros). `composer test`: 103 en verde.
+  [app/Helpers/Url.php:19](app/Helpers/Url.php#L19)
+
+- **M4-04 — Varias fechas del panel no usaban `Validator::fecha()`. [CORREGIDO]**
+  `CotizacionAdminController::seguimiento()` validaba `seguimiento_en` con
+  `preg_match('/^\d{4}-\d{2}-\d{2}$/') && strtotime()`; `strtotime('2026-02-30')` no falla,
+  así que fechas imposibles entraban a una columna `DATE`. `OfertaAdminController::validar()`
+  no validaba formato de `fecha_inicio`/`fecha_fin` en absoluto (solo `requerido` + comparación
+  de strings). El helper `Validator::fecha()` se creó en la 3ª auditoría (B-06) para
+  exactamente esta clase de bug. *Corrección:* ambos caminos usan ahora `Validator::fecha()`
+  (`seguimiento_en` con valor vacío = limpiar; `fecha_inicio`/`fecha_fin` encadenadas al
+  `requerido`). Verificado: `Validator::fecha()` rechaza `2026-02-30`, `2026-13-01`,
+  `15/09/2026`, `2026-9-5`; acepta ISO válido y vacío.
+  [app/Controllers/Admin/CotizacionAdminController.php:139](app/Controllers/Admin/CotizacionAdminController.php#L139)
+  · [app/Controllers/Admin/OfertaAdminController.php:149](app/Controllers/Admin/OfertaAdminController.php#L149)
+
+- **M4-05 — El service worker cacheaba documentos personales tokenizados. [CORREGIDO]**
+  `PAGES_CACHE` hacía `cache.put` de toda respuesta GET same-origin no-admin con status 2xx,
+  lo que incluía `GET /reserva/{codigo}/comprobante?t=…` (PDF con nombre del cliente,
+  itinerario y precio) y `/reserva/{codigo}/pagar-saldo`. Esos datos quedaban en Cache
+  Storage del dispositivo. También se cacheaban respuestas no-OK (404, redirecciones) y luego
+  se servían offline. Solo afecta al propio dispositivo/datos del visitante → Bajo.
+  *Corrección* (`public/sw.js`, `CACHE_VERSION` `dreamgo-v8` → `dreamgo-v9` para que los
+  navegadores con la versión vieja purguen la caché): `esRutaPrivadaConToken()` — todo
+  `/reserva/...` o cualquier URL con `?t=` — pasa a network-only sin `cache.put`, igual que
+  `/admin/`; y el `cache.put` de `PAGES_CACHE` ahora se condiciona a
+  `esCacheable(response)` (`response.ok && response.type === 'basic'`). Revisado por lectura
+  + `node --check`.
+  [public/sw.js:58](public/sw.js#L58)
+
+### Informativo / calidad
+
+- `GET /reserva/{codigo}/comprobante` genera un PDF con dompdf en cada petición sin ningún
+  límite de tasa (el `POST .../pagar-saldo` sí lo tiene, el `mostrar`/`descargar` GET no).
+  Requiere conocer el token de 32 hex, pero un link reenviado basta para amplificar carga.
+- `Slugify::generar()` puede devolver slug vacío para títulos sin caracteres ASCII
+  representables → artículo/paquete con `slug = ''`, no alcanzable por la ruta `/{slug}`.
+  Calidad de datos, no seguridad.
+- `Router::add()` sigue sin `preg_quote()` de los segmentos estáticos (arrastrado de la 3ª
+  auditoría; hoy inofensivo, ninguna ruta tiene metacaracteres).
+- `Request::method()` respeta `_method` para PUT/PATCH/DELETE aunque ninguna ruta los use.
+- `DashboardController` usa `Database::connection()` directo en vez de `$this->db`
+  (arrastrado de la 3ª auditoría).
+- `porCodigoYToken()` / `Suscriptor::porToken()` comparan el token con `=` de SQL en vez de
+  `hash_equals`; aceptable con tokens de 128 bits (mismo criterio que las auditorías previas).
+- CSP sigue con `style-src 'unsafe-inline'` (ya documentado y aceptado).
+
+### Verificado sin regresiones
+
+`.htaccess` raíz/`public`/`uploads` · cabeceras de seguridad + CSP con nonce · exclusión de
+`/admin/` en `sw.js` (`dreamgo-v8`) + `Cache-Control: no-store` del `AuthMiddleware` ·
+CSV-injection (`Response::csv`, 3 exportaciones) · RBAC anti-escalada y anti-bloqueo del
+último admin · firma + monto server-side del webhook de Mercado Pago + dedup
+`INSERT IGNORE` · `ImageUploadService` (`is_uploaded_file` + tope de píxeles + reencode GD) ·
+`HtmlSanitizer` (lista blanca DOM) · ENUM `log_correos_enviados.tipo` ampliado en 0017 ·
+todas las consultas nuevas de CRM/blog/bitácora parametrizadas.
