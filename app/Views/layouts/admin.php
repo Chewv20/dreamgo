@@ -25,7 +25,7 @@
       <?php if (Auth::hasPermission('reservas.ver')): ?><a href="/admin/reservas">Reservas</a><?php endif; ?>
       <?php if (Auth::hasPermission('cotizaciones.ver')): ?><a href="/admin/cotizaciones">Cotizaciones</a><?php endif; ?>
       <?php if (Auth::hasPermission('resenas.ver')): ?><a href="/admin/resenas">Resenas</a><?php endif; ?>
-      <?php if (Auth::hasPermission('articulos.gestionar')): ?><a href="/admin/articulos">Blog</a><?php endif; ?>
+      <?php if (Auth::hasPermission('articulos.ver')): ?><a href="/admin/articulos">Blog</a><?php endif; ?>
       <?php if (Auth::hasPermission('suscriptores.ver')): ?><a href="/admin/suscriptores">Suscriptores</a><?php endif; ?>
       <?php if (Auth::hasPermission('ofertas.gestionar')): ?><a href="/admin/ofertas">Ofertas</a><?php endif; ?>
       <?php if (Auth::hasPermission('usuarios.gestionar')): ?><a href="/admin/usuarios">Usuarios</a><?php endif; ?>

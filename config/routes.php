@@ -97,12 +97,12 @@ $router->get('/admin/paquetes/{id}/editar', [PaqueteAdminController::class, 'edi
 $router->post('/admin/paquetes/{id}/editar', [PaqueteAdminController::class, 'editar'], ['auth' => true, 'permiso' => 'paquetes.editar']);
 $router->post('/admin/paquetes/{id}/archivar', [PaqueteAdminController::class, 'archivar'], ['auth' => true, 'permiso' => 'paquetes.eliminar']);
 
-$router->get('/admin/articulos', [ArticuloAdminController::class, 'index'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
-$router->get('/admin/articulos/crear', [ArticuloAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
-$router->post('/admin/articulos', [ArticuloAdminController::class, 'crear'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
-$router->get('/admin/articulos/{id}/editar', [ArticuloAdminController::class, 'editarForm'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
-$router->post('/admin/articulos/{id}/editar', [ArticuloAdminController::class, 'editar'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
-$router->post('/admin/articulos/{id}/archivar', [ArticuloAdminController::class, 'archivar'], ['auth' => true, 'permiso' => 'articulos.gestionar']);
+$router->get('/admin/articulos', [ArticuloAdminController::class, 'index'], ['auth' => true, 'permiso' => 'articulos.ver']);
+$router->get('/admin/articulos/crear', [ArticuloAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'articulos.crear']);
+$router->post('/admin/articulos', [ArticuloAdminController::class, 'crear'], ['auth' => true, 'permiso' => 'articulos.crear']);
+$router->get('/admin/articulos/{id}/editar', [ArticuloAdminController::class, 'editarForm'], ['auth' => true, 'permiso' => 'articulos.editar']);
+$router->post('/admin/articulos/{id}/editar', [ArticuloAdminController::class, 'editar'], ['auth' => true, 'permiso' => 'articulos.editar']);
+$router->post('/admin/articulos/{id}/archivar', [ArticuloAdminController::class, 'archivar'], ['auth' => true, 'permiso' => 'articulos.eliminar']);
 
 $router->get('/admin/paquetes/{paqueteId}/salidas', [SalidaAdminController::class, 'index'], ['auth' => true, 'permiso' => 'salidas.gestionar']);
 $router->get('/admin/paquetes/{paqueteId}/salidas/crear', [SalidaAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'salidas.gestionar']);

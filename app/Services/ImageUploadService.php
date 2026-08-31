@@ -22,10 +22,18 @@ final class ImageUploadService
      * Procesa un archivo subido ($_FILES[campo]) y devuelve las rutas publicas
      * (relativas, listas para guardarse en BD) de la imagen original redimensionada y su miniatura.
      *
+     * @param string $carpeta subcarpeta bajo public/uploads/ (p. ej. 'paquetes', 'articulos').
+     *   Se crea si no existe. El .htaccess anti-ejecucion de public/uploads/ la cubre por
+     *   herencia de Apache.
      * @return array{original: string, thumb: string}
      */
-    public function procesar(array $archivo, string $slugBase): array
+    public function procesar(array $archivo, string $slugBase, string $carpeta = 'paquetes'): array
     {
+        $carpeta = trim($carpeta, '/');
+        if (preg_match('/^[a-z0-9_-]+$/', $carpeta) !== 1) {
+            throw new RuntimeException('Carpeta de destino invalida.');
+        }
+
         if (($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
             throw new RuntimeException('No se pudo subir el archivo.');
         }
@@ -51,8 +59,8 @@ final class ImageUploadService
         $origen = $this->crearImagenDesdeArchivo($rutaTemporal, $mime);
         $nombreArchivo = $this->nombreUnico($slugBase);
 
-        $rutaOriginal = 'uploads/paquetes/original/' . $nombreArchivo;
-        $rutaThumb = 'uploads/paquetes/thumbs/' . $nombreArchivo;
+        $rutaOriginal = 'uploads/' . $carpeta . '/original/' . $nombreArchivo;
+        $rutaThumb = 'uploads/' . $carpeta . '/thumbs/' . $nombreArchivo;
 
         $this->guardarRedimensionado($origen, BASE_PATH . '/public/' . $rutaOriginal, self::ANCHO_MAX_ORIGINAL);
         $this->guardarRedimensionado($origen, BASE_PATH . '/public/' . $rutaThumb, self::ANCHO_MAX_THUMB);
@@ -81,6 +89,11 @@ final class ImageUploadService
 
     private function guardarRedimensionado(\GdImage $origen, string $rutaDestino, int $anchoMax): void
     {
+        $directorio = dirname($rutaDestino);
+        if (!is_dir($directorio) && !mkdir($directorio, 0755, true) && !is_dir($directorio)) {
+            throw new RuntimeException('No se pudo crear el directorio de destino de la imagen.');
+        }
+
         $anchoOriginal = imagesx($origen);
         $altoOriginal = imagesy($origen);
 

@@ -6,13 +6,12 @@ use App\Models\Cotizacion;
 use App\Models\Reserva;
 use App\Models\Salida;
 use Core\Auth;
-use Core\Database;
 
 class DashboardController extends AdminController
 {
     public function index(): void
     {
-        $db = Database::connection();
+        $db = $this->db;
 
         [$desde, $hasta] = $this->rangoPeriodo();
 

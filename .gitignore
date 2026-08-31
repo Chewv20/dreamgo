@@ -8,6 +8,10 @@
 /public/uploads/paquetes/thumbs/*
 !/public/uploads/paquetes/original/.gitkeep
 !/public/uploads/paquetes/thumbs/.gitkeep
+/public/uploads/articulos/original/*
+/public/uploads/articulos/thumbs/*
+!/public/uploads/articulos/original/.gitkeep
+!/public/uploads/articulos/thumbs/.gitkeep
 .DS_Store
 Thumbs.db
 /.phpunit.cache/

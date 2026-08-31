@@ -185,7 +185,7 @@ class ArticuloAdminController extends AdminController
         }
 
         try {
-            $rutas = (new ImageUploadService())->procesar($archivo, 'articulo-' . $slug);
+            $rutas = (new ImageUploadService())->procesar($archivo, $slug, 'articulos');
         } catch (\RuntimeException $e) {
             Flash::set('error', 'La imagen no se pudo procesar: ' . $e->getMessage());
 

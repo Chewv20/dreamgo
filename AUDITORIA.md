@@ -673,8 +673,8 @@ Hallazgos: **0 críticos/altos, 3 medios, 6 bajos, ~8 informativos/calidad.**
    → intactos) y el saneo de celda CSV con 8 casos (`=` `+` `@` `\t` y `-` no numérico →
    prefijados con `'`; `-100`, `-100.50` y texto normal → intactos).
 
-Tras los medios y los bajos, `composer test` queda en **83 tests en verde** (68 previos + 13
-de `HtmlSanitizerTest` + 2 de `Validator::fecha`).
+Tras corregir medios, bajos e informativos, `composer test` queda en **87 tests en verde**
+(68 previos + 13 de `HtmlSanitizerTest` + 2 de `Validator::fecha` + 4 de `RouterTest`).
 
 ### Bajos corregidos
 
@@ -719,22 +719,52 @@ de `HtmlSanitizerTest` + 2 de `Validator::fecha`).
   arriesga rechazar los reintentos de entrega legítimos de Mercado Pago (que reintenta una
   notificación fallida con backoff durante horas). Se deja como está.
 
-### Informativo / calidad
+### Informativo / calidad — corregidos
 
-- RBAC inconsistente: `articulos.gestionar` es un permiso único para ver/crear/editar/
-  archivar, mientras `paquetes.*` está dividido en `ver/crear/editar/eliminar`.
-- Las imágenes del blog se guardan en `public/uploads/paquetes/` (rutas hardcodeadas en
-  `ImageUploadService`); comparten carpeta con los paquetes. El `.htaccess` de la carpeta
-  protege igual.
-- `DashboardController` usa `Database::connection()` directo en vez del `$this->db`
-  heredado, a diferencia del resto de controladores.
-- `Router::add()` no hace `preg_quote` de los segmentos estáticos antes de armar el regex.
-  Hoy inofensivo (ninguna ruta tiene metacaracteres).
-- CSP sigue con `style-src 'unsafe-inline'` (ya documentado y aceptado arriba).
+9. **RBAC: `articulos.gestionar` era un permiso único** para ver/crear/editar/archivar,
+   mientras `paquetes.*` (módulo equivalente) está dividido. Se separó en
+   `articulos.ver` / `.crear` / `.editar` / `.eliminar`:
+   - `database/migrations/0022_permisos_articulos_granulares.sql` (nueva): agrega los 4
+     permisos, se los da a todo rol que tuviera el viejo (y al rol Administrador como red de
+     seguridad) y borra `articulos.gestionar` (`ON DELETE CASCADE` limpia el pivote). Solo
+     DML + `INSERT IGNORE` / `DELETE` idempotente.
+   - `database/seeds/seed_demo.sql`: los 4 permisos en vez del único.
+   - `config/routes.php`: las 6 rutas de `/admin/articulos/*` piden el permiso fino que les
+     toca.
+   - `app/Views/layouts/admin.php`: el link "Blog" del sidebar usa `articulos.ver`.
+
+   Probado contra la BD local: `php database/migrate.php` la aplicó; verificado que quedan
+   4 permisos `modulo='blog'`, que `articulos.gestionar` ya no existe, que el rol
+   Administrador tiene los 4 y que no quedan filas huérfanas en `rol_permiso`. Re-ejecutar
+   `migrate.php` → "Nada que aplicar"; re-ejecutar el SQL a mano → sin errores ni duplicados.
+
+10. **Imágenes del blog iban a `public/uploads/paquetes/`.** `ImageUploadService::procesar()`
+    ahora acepta un tercer parámetro `$carpeta` (default `'paquetes'`, validado
+    `^[a-z0-9_-]+$`) y crea el directorio destino si no existe.
+    `ArticuloAdminController` pasa `'articulos'`. Nuevas carpetas
+    `public/uploads/articulos/{original,thumbs}/` con `.gitkeep` y entradas en `.gitignore`;
+    el `.htaccess` anti-ejecución de `public/uploads/` las cubre por herencia de Apache.
+
+11. **`DashboardController` usaba `Database::connection()` directo.** Cambiado a `$this->db`
+    (el que hereda de `Core\Controller`); se quitó el `use Core\Database`.
+
+12. **`Router::add()` no escapaba los tramos literales del patrón.** Ahora parte el patrón por
+    `{param}` con `preg_split(..., PREG_SPLIT_DELIM_CAPTURE)`, pasa cada tramo literal por
+    `preg_quote($t, '#')` y solo los marcadores se vuelven `([^/]+)`. Para las rutas actuales
+    la regex generada es idéntica a la anterior (`#^/paquetes/([^/]+)$#`), solo que un
+    metacaracter de PCRE en una ruta ya no altera el matching. Nuevo
+    `tests/Unit/Core/RouterTest.php` (4 casos).
+
+13. **Enumeración de usuarios por timing en login.** `Core\Auth::attempt()` corría
+    `password_verify` solo si la cuenta existía y estaba activa, así que un email no
+    registrado respondía más rápido. Ahora la rama de "no existe / inactivo" también hace un
+    `password_verify` contra un hash bcrypt dummy (cost 12) antes de devolver `false`.
+
+### Notas (sin acción)
+
+- CSP sigue con `style-src 'unsafe-inline'`: cerrarlo exige mover `style=""` inline de ~46
+  vistas a clases o nonce — refactor grande con QA visual, fuera del alcance de esta ronda.
 - Dependencias al día: dompdf `v3.1.6`, phpmailer `v6.12.0`, phpdotenv `v5.6.4`.
-- Enumeración de usuarios por timing en login: `password_verify` solo corre si la cuenta
-  existe y está activa. Oráculo menor; se mitiga con un `password_verify` dummy en la rama
-  de "no existe".
 
 ### Verificado sin cambios necesarios
 

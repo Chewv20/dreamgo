@@ -33,7 +33,14 @@ final class Router
 
     private function add(string $method, string $pattern, array $handler, array $options): void
     {
-        $regex = preg_replace('#\{[a-zA-Z_]+\}#', '([^/]+)', $pattern);
+        // Se escapan los tramos literales del patron (preg_quote) y solo los marcadores
+        // {param} se convierten en grupos de captura, para que un caracter con significado en
+        // PCRE dentro de una ruta no altere el matching.
+        $tramos = preg_split('#(\{[a-zA-Z_]+\})#', $pattern, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $regex = '';
+        foreach ($tramos as $i => $tramo) {
+            $regex .= $i % 2 === 1 ? '([^/]+)' : preg_quote($tramo, '#');
+        }
 
         $this->routes[] = [
             'method' => $method,

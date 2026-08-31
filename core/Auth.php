@@ -20,6 +20,14 @@ final class Auth
     private const MAX_INTENTOS_IP = 15;
 
     /**
+     * Hash bcrypt (cost 12, de una cadena aleatoria) que nunca va a coincidir con ninguna
+     * contrasena real. Se usa para correr password_verify() tambien cuando el email no existe
+     * o esta inactivo, y asi el tiempo de respuesta no delate si una cuenta esta registrada
+     * (enumeracion de usuarios).
+     */
+    private const HASH_DUMMY = '$2y$12$czDk9s8bJYsQex8PJdlgN.uTBg.xHUJs099pfgb3rVGvY1TbeHqdG';
+
+    /**
      * Ventana movil: cada intento (incluso mientras esta bloqueado) queda
      * registrado, asi que insistir extiende el bloqueo en vez de acortarlo.
      */
@@ -45,7 +53,16 @@ final class Auth
         $stmt->execute(['email' => $email]);
         $usuario = $stmt->fetch();
 
-        if (!$usuario || (int) $usuario['activo'] !== 1 || !password_verify($password, $usuario['password_hash'])) {
+        if (!$usuario || (int) $usuario['activo'] !== 1) {
+            // Igualar el costo con el camino "usuario valido": sin este verify, un email no
+            // registrado responde mas rapido y se vuelve distinguible.
+            password_verify($password, self::HASH_DUMMY);
+            IntentoLogin::registrar($email, $ip, false);
+
+            return false;
+        }
+
+        if (!password_verify($password, $usuario['password_hash'])) {
             IntentoLogin::registrar($email, $ip, false);
 
             return false;
