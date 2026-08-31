@@ -219,6 +219,17 @@ input[type="radio"]:focus-visible,
   box-shadow: 0 0 0 3px rgba(168, 95, 77, 0.25);
 }
 
+/* Auditoria 2026-08-31, hallazgo A11Y-01: solo los controles de formulario y .btn tenian
+   foco visible; navegacion, tarjetas y footer se quedaban con el outline del navegador, que
+   sobre fondos de color a menudo no se ve (WCAG 2.4.7). Se excluye .btn, que ya tiene su
+   propio tratamiento arriba. */
+a:not(.btn):focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--color-primario-oscuro);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .campo {
   margin-bottom: 1.1rem;
 }

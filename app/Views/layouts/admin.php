@@ -12,6 +12,7 @@
 <script src="<?= htmlspecialchars(\App\Helpers\Asset::url('/assets/js/admin.js'), ENT_QUOTES, 'UTF-8') ?>" defer></script>
 </head>
 <body class="admin-body">
+<a href="#contenido-admin" class="sr-only-focusable">Saltar al contenido</a>
 <div class="admin-layout">
   <button type="button" class="admin-sidebar-toggle" data-admin-sidebar-toggle aria-expanded="false" aria-controls="admin-sidebar">&#9776; Menu</button>
 
@@ -52,7 +53,7 @@
       </div>
     <?php endforeach; ?>
 
-    <main class="admin-content">
+    <main class="admin-content" id="contenido-admin">
       <?= $content ?>
     </main>
   </div>

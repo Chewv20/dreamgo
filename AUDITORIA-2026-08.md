@@ -325,11 +325,25 @@ Verificado: `composer test` → 112 pruebas OK; `php -l` en los 8 archivos; smok
 Verificado: `composer test` → 125 pruebas OK; `php -l` en todos los archivos; smoke con servidor
 embebido (canonical sin `utm_*`, `?pagina=2` auto-referencial, cron de sitemap escribe el XML).
 
-**Cuando haya margen:**
-13. Tests de integración del flujo de reservas y del middleware de permisos (CAL-03).
-14. Lista blanca de columnas en `Core\Model` (CAL-02).
-15. Pasada dedicada de accesibilidad (A11Y-01) y de contraste de la paleta configurable.
-16. Materializar el rating de paquetes si crece el catálogo (PERF-02).
+**Cuando haya margen — IMPLEMENTADO / PARCIAL 2026-08-31:**
+13. ⚠️ **Parcial** (CAL-03): añadidas pruebas de `PermissionMiddleware` (RBAC por ruta, 4 casos) y de
+    `Auth::sesionCaducada()` / `registrarActividad()` (5 casos). **Pendiente:** el harness de
+    integración con BD real (flujo `reserva → webhook → confirmación → correo`, rollback por test) —
+    es un montaje aparte (BD de pruebas, fixtures, bootstrap) que no cabe en esta tanda.
+14. ✅ `Core\Model::assertColumnas()` / `assertOrderBy()`: `insert`/`update`/`where`/`all` validan que
+    los identificadores sean simples antes de tocar la BD (footgun de `insert($request->all())`). 19 pruebas (CAL-02).
+15. ⚠️ **Parcial** (A11Y-01): `a:not(.btn):focus-visible` global en `site.css` (antes solo formularios y
+    `.btn` tenían foco visible — WCAG 2.4.7) + *skip link* en el layout admin (`sw.js` → v14 para
+    refrescar el shell cacheado). **Pendiente:** validación de contraste de la paleta configurable —
+    requiere decisión de producto (¿bloquear el guardado si no cumple AA, o solo advertir?).
+16. ✅ `Paquete::publicadosConFiltros()`: la subconsulta correlacionada de rating pasó a un
+    `LEFT JOIN` con agregación única (una pasada sobre `resenas` en vez de N). Sin cambio de esquema (PERF-02).
+
+Verificado: `composer test` → 158 pruebas OK; `php -l`; smoke con servidor embebido (catálogo con
+`orden=mejor_valorados` y filtros → 200 sin errores; regla de foco presente en el CSS servido).
+
+**Queda abierto:** el harness de integración con BD (parte de CAL-03) y la herramienta de contraste
+de paleta (parte de A11Y-01). Ambos necesitan una decisión previa (infra de test / política de producto).
 
 ---
 

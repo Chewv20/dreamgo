@@ -50,10 +50,20 @@ class Paquete extends Model
 
         $orderBy = self::ORDENES[$orden] ?? self::ORDENES[self::ORDEN_DEFECTO];
 
+        // Auditoria 2026-08-31, hallazgo PERF-02: antes el promedio de resenas era una
+        // subconsulta correlacionada evaluada una vez por fila devuelta. Ahora se agrega una
+        // sola vez en una tabla derivada y se une con LEFT JOIN (NULL = sin resenas aprobadas,
+        // igual que antes). El alias promedio_resenas sigue disponible para ORDER BY.
         $sql = 'SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug,
-                       (SELECT AVG(r.calificacion) FROM resenas r WHERE r.paquete_id = p.id AND r.estado = "aprobada") AS promedio_resenas
+                       ra.promedio_resenas
                 FROM paquetes p
                 INNER JOIN categorias c ON c.id = p.categoria_id
+                LEFT JOIN (
+                    SELECT paquete_id, AVG(calificacion) AS promedio_resenas
+                    FROM resenas
+                    WHERE estado = "aprobada"
+                    GROUP BY paquete_id
+                ) ra ON ra.paquete_id = p.id
                 WHERE ' . $clausula . '
                 ORDER BY ' . $orderBy . ', p.id DESC
                 LIMIT :limite OFFSET :offset';
