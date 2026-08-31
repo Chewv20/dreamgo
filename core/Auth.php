@@ -253,6 +253,12 @@ final class Auth
         return in_array($clave, $permisos, true);
     }
 
+    /** @return list<string> claves de permiso del rol en sesion */
+    public static function permisos(): array
+    {
+        return $_SESSION[self::SESSION_PERMISOS] ?? [];
+    }
+
     public static function debeCambiarPassword(): bool
     {
         return (bool) ($_SESSION[self::SESSION_DEBE_CAMBIAR_PASSWORD] ?? false);

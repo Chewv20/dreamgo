@@ -24,6 +24,38 @@ final class Response
         exit;
     }
 
+    /**
+     * Igual que json(), pero NO corta el proceso: envia la respuesta, la vacia hacia el
+     * cliente (fastcgi_finish_request / litespeed_finish_request cuando existen) y devuelve
+     * el control para que el llamador haga trabajo diferido (p. ej. enviar un correo) sin que
+     * el cliente siga esperando. El llamador debe terminar normal (return/exit) despues.
+     * Auditoria 2026-09, hallazgo PERF-01 (webhook de Mercado Pago).
+     */
+    public static function jsonYContinuar(mixed $data, int $status = 200): void
+    {
+        // Se descartan buffers pendientes (el rewrite de rutas de public/index.php opera sobre
+        // HTML); a partir de aca se escribe directo al cliente.
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        $payload = (string) json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        header('Content-Length: ' . strlen($payload));
+        header('Connection: close');
+        echo $payload;
+
+        flush();
+
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } elseif (function_exists('litespeed_finish_request')) {
+            litespeed_finish_request();
+        }
+    }
+
     public static function status(int $status): void
     {
         http_response_code($status);

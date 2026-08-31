@@ -214,6 +214,11 @@ final class MailerService
         $mail->isSMTP();
         $mail->Host = $_ENV['SMTP_HOST'] ?? '';
         $mail->Port = (int) ($_ENV['SMTP_PORT'] ?? 587);
+        // Auditoria 2026-09, hallazgo PERF-01: sin esto PHPMailer usa Timeout = 300 s. Como el
+        // envio es sincrono dentro del request (reserva publica, webhook de Mercado Pago), un
+        // SMTP lento o caido bloqueaba la respuesta hasta 5 min. 10 s cubre de sobra un envio
+        // sano; si falla, enviar() lo registra en log_correos_enviados como no exitoso.
+        $mail->Timeout = 10;
         $mail->SMTPAuth = true;
         $mail->Username = $_ENV['SMTP_USER'] ?? '';
         $mail->Password = $_ENV['SMTP_PASS'] ?? '';

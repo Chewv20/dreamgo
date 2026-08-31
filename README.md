@@ -56,6 +56,26 @@ El comprobante PDF de reserva se genera con `dompdf/dompdf` (dependencia de prod
 `require`). Solo usa la fuente DejaVu que viene incluida en el paquete, asi que no necesita
 permisos de escritura extra en el servidor.
 
+### Pruebas de integracion (con base de datos)
+
+`composer test:integration` corre `tests/Integration/` contra una base MySQL/MariaDB real y
+**desechable** (cada test recrea/limpia tablas). Cubre el camino de dinero de punta a punta:
+descuento de cupo con `FOR UPDATE`, generacion de codigo/token de reserva, registro de pagos
+del webhook con dedup por `UNIQUE(referencia_pago)`, confirmacion segun el anticipo
+calculado server-side, reposicion de cupo en cancelacion y expiracion, y codigos de
+descuento con limite de usos.
+
+Puesta en marcha (una sola vez):
+
+```
+mysql -u root -p -e "CREATE DATABASE dreamgo_test CHARACTER SET utf8mb4"
+composer test:integration
+```
+
+Usa las mismas `DB_USER` / `DB_PASS` del `.env`. Para otro nombre de base, exporta
+`DB_NAME_TEST`. Si la base no existe, la suite se marca como *skipped* con instrucciones (no
+falla). No la apuntes nunca a la base de desarrollo: el harness hace `TRUNCATE` de todo.
+
 ## Documentacion relacionada
 
 - `cron/README.md` — que hace cada tarea programada y como configurarla en Hostinger.

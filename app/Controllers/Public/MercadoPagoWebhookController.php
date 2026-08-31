@@ -9,6 +9,7 @@ use App\Services\MailerService;
 use App\Services\MercadoPagoService;
 use App\Services\ReservaService;
 use Core\Controller;
+use Core\Response;
 use RuntimeException;
 
 /**
@@ -96,12 +97,17 @@ class MercadoPagoWebhookController extends Controller
             $concepto
         );
 
+        // Auditoria 2026-09, hallazgo PERF-01: se responde 200 a Mercado Pago ANTES de enviar
+        // el correo. enviarConfirmacionReserva()/enviarPagoRecibido() hacen un envio SMTP que
+        // puede tardar segundos; si la respuesta se demora, Mercado Pago da la notificacion por
+        // fallida y la reintenta (el dedup por UNIQUE(referencia_pago) evita el doble cobro,
+        // pero genera trabajo repetido y ruido en el log).
+        Response::jsonYContinuar(['ok' => true, 'resultado' => $resultado]);
+
         if ($resultado === ReservaService::PAGO_CONFIRMO) {
             (new MailerService($this->db))->enviarConfirmacionReserva(Reserva::conDetalle($reservaId));
         } elseif ($resultado === ReservaService::PAGO_REGISTRADO) {
             (new MailerService($this->db))->enviarPagoRecibido(Reserva::conDetalle($reservaId));
         }
-
-        $this->json(['ok' => true, 'resultado' => $resultado]);
     }
 }

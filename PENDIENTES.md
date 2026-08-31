@@ -9,37 +9,38 @@ informe y se dejan aquí para no perderlos.
 
 ## 1. Harness de pruebas de integración con base de datos  (CAL-03, parcial)
 
-**Hecho:** pruebas unitarias de `PermissionMiddleware` (RBAC por ruta) y de
-`Auth::sesionCaducada()` / `registrarActividad()` — `tests/Unit/Core/`.
+**Hecho:**
+- Pruebas unitarias de `PermissionMiddleware` (RBAC por ruta) y de
+  `Auth::sesionCaducada()` / `registrarActividad()` — `tests/Unit/Core/`.
+- **Auditoría 2026-09:** harness de integración con BD real ya montado —
+  `phpunit.integration.xml` (suite `integration` aparte de `unit`),
+  `composer test:integration`, `tests/Integration/bootstrap.php` +
+  `IntegrationTestCase.php` (recrea `schema.sql`, `TRUNCATE` + fixture por test, *skipped*
+  si no hay BD). `tests/Integration/ReservaFlujoDineroTest.php` cubre el **flujo de dinero
+  completo**: `ReservaService::crear` (descuento de cupo), `registrarPagoAprobado` (dedup
+  por `UNIQUE(referencia_pago)`, anticipo server-side, pago insuficiente/acumulado/saldo),
+  reposición de cupo en cancelación y expiración, y `DescuentoService` cerca de `uso_maximo`.
+  Requiere `mysql -u root -e "CREATE DATABASE dreamgo_test CHARACTER SET utf8mb4"` (ver
+  `README.md`).
 
-**Falta:** pruebas que ejerciten el camino crítico contra una BD real, no lógica pura:
+**Falta:** ampliar la cobertura de integración a:
 
-- Flujo de dinero completo: `POST /reservar` → `ReservaService::crear` (descuento de cupo con
-  `FOR UPDATE`) → webhook de Mercado Pago (`registrarPagoAprobado`, dedup por
-  `UNIQUE(referencia_pago)`) → confirmación → correo (`log_correos_enviados`).
-- Reposición de cupo en cancelación y en expiración (`cron/liberar_reservas_expiradas.php`).
+- Reposición de cupo desde `cron/liberar_reservas_expiradas.php` end-to-end (hoy se prueba
+  `ReservaService::expirarVencidas()`, no el script del cron).
 - Que una ruta admin con `['permiso' => 'x']` rechaza a un usuario sin ese permiso de punta a
-  punta (no solo el middleware aislado).
+  punta (no solo el middleware aislado) — pasa por `Router` + `AuthMiddleware::sesionVigente()`
+  contra BD.
 - Condiciones de carrera ya cubiertas por código pero sin test: `Cliente::encontrarOCrear`,
-  `DescuentoService::validar` cerca de `uso_maximo`, doble submit de reseña.
+  doble submit de reseña.
+- Correo del webhook (`log_correos_enviados`): hoy los tests llaman `registrarPagoAprobado()`
+  directo (sin SMTP). Falta un test del controlador con un `MailerService` doble.
 
-**Qué hay que decidir antes:**
-- ¿BD de pruebas dedicada (p. ej. `dreamgo_test`) que se crea desde `database/schema.sql` +
-  `database/seeds/`? ¿O SQLite en memoria? (Hay SQL específico de MySQL: `FOR UPDATE`,
-  `INSERT IGNORE`, `ON DUPLICATE KEY`, `DATE_ADD` — SQLite no sirve sin reescribir; lo
-  realista es MySQL/MariaDB de prueba).
-- Aislamiento entre tests: envolver cada test en una transacción y hacer `rollback` en
-  `tearDown` (rápido, pero no cubre código que hace su propio `COMMIT`), o `TRUNCATE` de las
-  tablas tocadas.
-- ¿Corre en CI? Hoy no hay CI configurado.
-
-**Esbozo:**
-- Nuevo suite `tests/Integration/` + sección en `phpunit.xml` (`<testsuite name="integration">`),
-  separada de `unit` para poder correr solo una.
-- `tests/Integration/IntegrationTestCase.php`: `setUpBeforeClass()` conecta a la BD de prueba
-  (vars `DB_*` de un `.env.testing` o `phpunit.xml` `<php><env>`), `setUp()` abre transacción,
-  `tearDown()` `rollBack()`.
-- Documentar en `README.md` cómo levantar la BD de prueba y correr `composer test:integration`.
+**Decisiones ya tomadas (auditoría 2026-09):**
+- BD dedicada `dreamgo_test` (o `DB_NAME_TEST`), recreada desde `database/schema.sql`. SQLite
+  descartado por el SQL específico de MySQL.
+- Aislamiento por `TRUNCATE` + fixture por test (no transacción envolvente: el código bajo
+  prueba abre las suyas con `FOR UPDATE`).
+- CI: sigue sin configurarse.
 
 ---
 

@@ -8,6 +8,8 @@ use App\Helpers\Auditoria;
 use App\Helpers\Flash;
 use App\Models\Permiso;
 use App\Models\Rol;
+use App\Models\Usuario;
+use Core\Auth;
 
 class RolAdminController extends AdminController
 {
@@ -17,10 +19,18 @@ class RolAdminController extends AdminController
         $permisosPorModulo = Permiso::agrupadosPorModulo();
         $permisosPorRol = Rol::permisosPorRoles(array_map('intval', array_column($roles, 'id')));
 
+        // Hallazgo SEG-01: un editor sin rol de sistema solo puede togglear los permisos que
+        // el mismo tiene; el resto se muestran bloqueados y guardarMatriz() los ignora.
+        // null = editor con rol de sistema (Administrador): puede asignar cualquiera.
+        $permisosAsignables = Usuario::esRolDeSistema((int) Auth::rolId())
+            ? null
+            : array_flip(Permiso::idsPorClaves(Auth::permisos()));
+
         $this->view('admin/roles/index', [
             'roles' => $roles,
             'permisosPorModulo' => $permisosPorModulo,
             'permisosPorRol' => $permisosPorRol,
+            'permisosAsignables' => $permisosAsignables,
         ], ['title' => 'Roles y permisos | Dream Go', 'heading' => 'Roles y permisos']);
     }
 
@@ -80,14 +90,35 @@ class RolAdminController extends AdminController
             $seleccion = [];
         }
 
+        // Auditoria 2026-09, hallazgo SEG-01: un editor con `roles.gestionar` pero sin rol de
+        // sistema solo puede asignar permisos que el mismo posee. Sin esto podia anadir
+        // `usuarios.gestionar`, `configuracion.gestionar`, etc. a su propio rol y escalar
+        // privilegios. Un Administrador (rol de sistema) sigue pudiendo asignar cualquiera.
+        $editorEsSistema = Usuario::esRolDeSistema((int) Auth::rolId());
+        $asignables = $editorEsSistema ? null : array_flip(Permiso::idsPorClaves(Auth::permisos()));
+
         $roles = Rol::all();
+        $previosPorRol = Rol::permisosPorRoles(array_map('intval', array_column($roles, 'id')));
+
         foreach ($roles as $rol) {
             if ((int) $rol['es_sistema'] === 1) {
                 continue;
             }
 
-            $permisoIds = array_map('intval', $seleccion[$rol['id']] ?? []);
-            Rol::sincronizarPermisos((int) $rol['id'], $permisoIds);
+            $rolId = (int) $rol['id'];
+            $elegidos = array_map('intval', $seleccion[$rolId] ?? []);
+
+            if ($asignables !== null) {
+                // Se conservan los permisos que el rol ya tenia y el editor no puede tocar
+                // (las casillas le aparecen bloqueadas, asi que no viajan en el POST); de la
+                // seleccion nueva solo se aceptan los permisos que el editor posee.
+                $previos = $previosPorRol[$rolId] ?? [];
+                $conservados = array_filter($previos, static fn (int $id): bool => !isset($asignables[$id]));
+                $nuevos = array_filter($elegidos, static fn (int $id): bool => isset($asignables[$id]));
+                $elegidos = [...$conservados, ...$nuevos];
+            }
+
+            Rol::sincronizarPermisos($rolId, array_values(array_unique($elegidos)));
         }
 
         Auditoria::registrar('rol.permisos', 'rol', null, 'Se guardo la matriz de permisos de roles');

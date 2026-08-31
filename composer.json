@@ -25,7 +25,8 @@
     },
     "scripts": {
         "migrate": "php database/migrate.php",
-        "test": "phpunit"
+        "test": "phpunit",
+        "test:integration": "phpunit -c phpunit.integration.xml"
     },
     "config": {
         "optimize-autoloader": true,

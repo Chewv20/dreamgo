@@ -2,6 +2,7 @@
 /** @var array $roles */
 /** @var array $permisosPorModulo */
 /** @var array $permisosPorRol */
+/** @var array<int,bool>|null $permisosAsignables  null = editor con rol de sistema (puede asignar todo) */
 ?>
 <div class="admin-panel">
   <h2 class="mt-0">Nuevo rol</h2>
@@ -50,6 +51,9 @@
 <div class="admin-panel">
   <h2 class="mt-0">Matriz de permisos</h2>
   <p class="op-75">Marca los permisos que tendra cada rol. El rol Administrador siempre tiene acceso total.</p>
+  <?php if ($permisosAsignables !== null): ?>
+    <p class="op-75">Solo puedes asignar permisos que tu propio rol ya tiene; los demas aparecen bloqueados.</p>
+  <?php endif; ?>
   <form method="post" action="/admin/roles/matriz">
     <?= \App\Helpers\Csrf::field() ?>
     <div class="admin-matriz-wrap">
@@ -69,14 +73,17 @@
               <tr>
                 <td><?= htmlspecialchars($permiso['descripcion'] ?? $permiso['clave'], ENT_QUOTES, 'UTF-8') ?></td>
                 <?php foreach ($roles as $rol): ?>
-                  <?php $esSistema = (int) $rol['es_sistema'] === 1; ?>
+                  <?php
+                  $esSistema = (int) $rol['es_sistema'] === 1;
+                  $fueraDeAlcance = $permisosAsignables !== null && !isset($permisosAsignables[(int) $permiso['id']]);
+                  ?>
                   <td>
                     <input
                       type="checkbox"
                       name="permisos[<?= (int) $rol['id'] ?>][]"
                       value="<?= (int) $permiso['id'] ?>"
                       <?= (in_array((int) $permiso['id'], $permisosPorRol[$rol['id']] ?? [], true) || $esSistema) ? 'checked' : '' ?>
-                      <?= $esSistema ? 'disabled' : '' ?>
+                      <?= ($esSistema || $fueraDeAlcance) ? 'disabled' : '' ?>
                     >
                   </td>
                 <?php endforeach; ?>
