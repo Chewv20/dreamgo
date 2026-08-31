@@ -12,7 +12,6 @@ use App\Helpers\Validator;
 use App\Models\Articulo;
 use App\Models\Categoria;
 use App\Services\ImageUploadService;
-use App\Services\SitemapService;
 use Core\Auth;
 
 class ArticuloAdminController extends AdminController
@@ -62,7 +61,6 @@ class ArticuloAdminController extends AdminController
         ]);
 
         $this->procesarImagen($id, $slug);
-        (new SitemapService($this->db))->regenerar();
         Auditoria::registrar('articulo.crear', 'articulo', $id, $datos['titulo'] . ' (' . $datos['estado'] . ')');
 
         Flash::set('exito', 'Articulo creado correctamente.');
@@ -112,7 +110,6 @@ class ArticuloAdminController extends AdminController
         ]);
 
         $this->procesarImagen($id, $slug);
-        (new SitemapService($this->db))->regenerar();
         Auditoria::registrar('articulo.editar', 'articulo', $id, $datos['titulo'] . ' (' . $datos['estado'] . ')');
 
         Flash::set('exito', 'Articulo actualizado correctamente.');
@@ -126,7 +123,6 @@ class ArticuloAdminController extends AdminController
         $articulo = $this->encontrarO404(Articulo::class, $id);
 
         Articulo::update($id, ['estado' => 'archivado']);
-        (new SitemapService($this->db))->regenerar();
         Auditoria::registrar('articulo.archivar', 'articulo', $id, (string) ($articulo['titulo'] ?? ''));
 
         Flash::set('exito', 'Articulo archivado.');
@@ -165,7 +161,7 @@ class ArticuloAdminController extends AdminController
 
     private function slugUnico(string $titulo, ?int $ignorarId = null): string
     {
-        $base = Slugify::generar($titulo);
+        $base = Slugify::generar($titulo, 'articulo');
         $slug = $base;
         $intento = 1;
 

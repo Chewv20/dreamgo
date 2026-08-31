@@ -74,7 +74,9 @@ final class Request
 
     public function ip(): string
     {
-        return $this->server['REMOTE_ADDR'] ?? '0.0.0.0';
+        // Por defecto es REMOTE_ADDR; solo mira X-Forwarded-For si TRUSTED_PROXIES esta
+        // configurado y la conexion entra por uno de esos rangos (Auditoria 2026-08-31, SEG-01).
+        return \App\Helpers\ProxyConfianza::ipCliente($this->server);
     }
 
     public function file(string $key): ?array

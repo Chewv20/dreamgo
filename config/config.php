@@ -49,11 +49,25 @@ if ($appEnv === 'local') {
     ini_set('error_log', $rutaErrorLog);
 }
 
+// ¿La peticion original venia por HTTPS? Se calcula una sola vez: lo usan la cabecera HSTS y
+// el flag Secure de la cookie de sesion mas abajo. X-Forwarded-Proto solo se tiene en cuenta
+// si el sitio esta detras de un proxy declarado en TRUSTED_PROXIES (Auditoria 2026-08-31,
+// SEG-01); sin esa lista, solo cuenta que el propio PHP haya terminado el TLS.
+$isHttps = App\Helpers\ProxyConfianza::esHttps($_SERVER);
+
 if (PHP_SAPI !== 'cli') {
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+
+    // HSTS: solo cuando la peticion ya llega por HTTPS y fuera de APP_ENV=local (en local se
+    // trabaja sobre http://). Sin includeSubDomains ni preload a proposito: el dominio puede
+    // tener subdominios sin certificado (correo, paneles) y preload es una decision de una sola
+    // via que debe tomarse a mano. El redirect http -> https se hace en public/.htaccess.
+    if ($isHttps && $appEnv !== 'local') {
+        header('Strict-Transport-Security: max-age=15552000');
+    }
     // script-src y style-src: 'self' + un nonce por peticion (CSP_NONCE) para los pocos
     // <style>/<script> inline propios (colores del sitio y colores de bloque en las vistas
     // publicas; bootstrap de analitica y eventos de conversion). NINGUNO lleva 'unsafe-inline':
@@ -76,15 +90,9 @@ if (PHP_SAPI !== 'cli') {
 }
 
 if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
-    // $_SERVER['HTTPS'] solo lo pone el servidor web cuando PHP mismo termina el TLS. Si en
-    // algun momento el sitio queda detras de un proxy/balanceador que termina el TLS antes
-    // (Cloudflare, un load balancer, etc.), PHP ve trafico plano y esta variable nunca es
-    // 'on' aunque el visitante si este en HTTPS - la cookie de sesion perderia el flag
-    // Secure sin que nadie lo note. X-Forwarded-Proto es el header estandar que ponen esos
-    // proxies para avisar el esquema original; se usa como respaldo.
-    $isHttps = ($_SERVER['HTTPS'] ?? '') === 'on'
-        || strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
-
+    // $isHttps se calculo mas arriba (lo comparte con la cabecera HSTS). Si el sitio queda
+    // detras de un proxy que termina el TLS, contempla X-Forwarded-Proto para no perder el
+    // flag Secure de la cookie de sesion sin que nadie lo note.
     session_set_cookie_params([
         'lifetime' => 0,
         'path' => '/',

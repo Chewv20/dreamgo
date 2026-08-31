@@ -12,7 +12,6 @@ use App\Helpers\Validator;
 use App\Models\Categoria;
 use App\Models\Paquete;
 use App\Services\ImageUploadService;
-use App\Services\SitemapService;
 use Core\Auth;
 
 class PaqueteAdminController extends AdminController
@@ -77,7 +76,6 @@ class PaqueteAdminController extends AdminController
         ]);
 
         $this->procesarImagenPortada($id, $slug);
-        (new SitemapService($this->db))->regenerar();
 
         Auditoria::registrar('paquete.crear', 'paquete', $id, $datos['titulo'] . ' (' . $datos['estado'] . ')');
 
@@ -139,7 +137,6 @@ class PaqueteAdminController extends AdminController
         ]);
 
         $this->procesarImagenPortada($id, $slug);
-        (new SitemapService($this->db))->regenerar();
 
         Auditoria::registrar('paquete.editar', 'paquete', $id, $datos['titulo'] . ' (' . $datos['estado'] . ')');
 
@@ -205,7 +202,7 @@ class PaqueteAdminController extends AdminController
 
     private function slugUnico(string $titulo, ?int $ignorarId = null): string
     {
-        $base = Slugify::generar($titulo);
+        $base = Slugify::generar($titulo, 'paquete');
         $slug = $base;
         $intento = 1;
 

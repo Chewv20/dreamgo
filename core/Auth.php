@@ -16,10 +16,20 @@ final class Auth
     private const SESSION_USUARIO_SELLO = 'admin_usuario_sello';
     private const SESSION_PERMISOS_SELLO = 'admin_permisos_sello';
     private const SESSION_DEBE_CAMBIAR_PASSWORD = 'admin_debe_cambiar_password';
+    private const SESSION_ULTIMA_ACTIVIDAD = 'admin_ultima_actividad';
+    private const SESSION_INICIO = 'admin_inicio_sesion';
 
     private const VENTANA_MINUTOS = 15;
     private const MAX_INTENTOS_EMAIL = 5;
     private const MAX_INTENTOS_IP = 15;
+
+    /**
+     * Caducidad de la sesion admin (Auditoria 2026-08-31, hallazgo SEG-06). Con lifetime=0 en
+     * la cookie, una sesion robada seguia siendo valida indefinidamente mientras nadie tocara
+     * la cuenta. Se cierra tras 2 h sin actividad o 12 h desde el login, lo que pase primero.
+     */
+    private const MAX_INACTIVIDAD_SEGUNDOS = 7200;
+    private const MAX_DURACION_SEGUNDOS = 43200;
 
     /**
      * Hash bcrypt (cost 12, de una cadena aleatoria) que nunca va a coincidir con ninguna
@@ -96,6 +106,31 @@ final class Auth
         $_SESSION[self::SESSION_USUARIO_SELLO] = $selloActual->fetchColumn();
         $_SESSION[self::SESSION_PERMISOS_SELLO] = self::permisosSello((int) $usuario['rol_id'], $db);
         $_SESSION[self::SESSION_DEBE_CAMBIAR_PASSWORD] = (bool) $usuario['debe_cambiar_password'];
+        $_SESSION[self::SESSION_INICIO] = time();
+        $_SESSION[self::SESSION_ULTIMA_ACTIVIDAD] = time();
+    }
+
+    /**
+     * true si la sesion admin supero el limite de inactividad o el de duracion absoluta.
+     * El AuthMiddleware la cierra y manda a login con un aviso.
+     */
+    public static function sesionCaducada(): bool
+    {
+        $ahora = time();
+        $ultima = $_SESSION[self::SESSION_ULTIMA_ACTIVIDAD] ?? null;
+        $inicio = $_SESSION[self::SESSION_INICIO] ?? null;
+
+        if ($ultima !== null && $ahora - (int) $ultima > self::MAX_INACTIVIDAD_SEGUNDOS) {
+            return true;
+        }
+
+        return $inicio !== null && $ahora - (int) $inicio > self::MAX_DURACION_SEGUNDOS;
+    }
+
+    /** Renueva la marca de actividad. Se llama en cada request autenticada del panel. */
+    public static function registrarActividad(): void
+    {
+        $_SESSION[self::SESSION_ULTIMA_ACTIVIDAD] = time();
     }
 
     /**
@@ -184,7 +219,10 @@ final class Auth
             $_SESSION[self::SESSION_ROL],
             $_SESSION[self::SESSION_PERMISOS],
             $_SESSION[self::SESSION_USUARIO_SELLO],
-            $_SESSION[self::SESSION_PERMISOS_SELLO]
+            $_SESSION[self::SESSION_PERMISOS_SELLO],
+            $_SESSION[self::SESSION_DEBE_CAMBIAR_PASSWORD],
+            $_SESSION[self::SESSION_ULTIMA_ACTIVIDAD],
+            $_SESSION[self::SESSION_INICIO]
         );
     }
 

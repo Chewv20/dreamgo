@@ -5,7 +5,7 @@ patron MVC propio, MariaDB, JS/CSS sin frameworks pesados, PWA instalable.
 
 ## Requisitos locales
 
-- XAMPP (Apache + PHP 8.1+ + MariaDB)
+- XAMPP (Apache + PHP 8.2+ + MariaDB)
 - Composer
 - Un Virtual Host apuntando a `public/` (ver abajo)
 
@@ -33,7 +33,7 @@ lugar se corre con el servidor embebido de PHP, apuntando directo a `public/`:
 app/            Controladores, Modelos, Vistas, Services y Helpers (logica de negocio)
 core/           "Framework" propio: Router, Database, Auth, Controller/Model base
 config/         Bootstrap, rutas, credenciales de BD
-cron/           9 tareas programadas (ver cron/README.md)
+cron/           10 tareas programadas (ver cron/README.md)
 database/       Esquema SQL y datos iniciales
 storage/        Logs y backups (nunca accesible por URL)
 public/         Document root real (front controller, assets, uploads)

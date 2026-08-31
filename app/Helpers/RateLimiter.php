@@ -27,6 +27,10 @@ final class RateLimiter
      * - 'cotizador' y 'contacto': identificador null (el email lo pone el propio formulario).
      *   Cada envio inserta una fila en cotizaciones y dispara un correo al equipo, asi que el
      *   limite es mas estricto que el resto de acciones publicas.
+     * - 'comprobante': identificador null (Auditoria 2026-08-31, hallazgo SEG-04). El link solo
+     *   esta gateado por un token en la URL y cada GET regenera el PDF con dompdf (caro en CPU);
+     *   si el token se filtra, sin esto se puede saturar el worker pidiendolo en bucle. 30 por IP
+     *   cada 10 min deja de sobra margen para descargas legitimas.
      */
     private const LIMITES = [
         'reservar' => [null, 20, 30],
@@ -36,6 +40,7 @@ final class RateLimiter
         'pagar_saldo' => [null, 20, 30],
         'cotizador' => [null, 10, 30],
         'contacto' => [null, 10, 30],
+        'comprobante' => [null, 30, 10],
     ];
 
     public static function demasiados(string $accion, ?string $identificador, string $ip): bool

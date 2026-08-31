@@ -24,6 +24,12 @@ final class AuthMiddleware
             Response::redirect('/admin/login');
         }
 
+        if (Auth::sesionCaducada()) {
+            Auth::forzarCierre();
+            Flash::set('info', 'Tu sesion expiro por inactividad. Inicia sesion de nuevo.');
+            Response::redirect('/admin/login');
+        }
+
         if (!Auth::sesionVigente()) {
             Auth::forzarCierre();
             Flash::set('info', 'Tu sesion se cerro porque tus permisos o tu cuenta cambiaron. Inicia sesion de nuevo.');
@@ -33,5 +39,7 @@ final class AuthMiddleware
         if (Auth::debeCambiarPassword() && !in_array((new Request())->uri(), self::RUTAS_PERMITIDAS_CON_CAMBIO_PENDIENTE, true)) {
             Response::redirect('/admin/cambiar-password');
         }
+
+        Auth::registrarActividad();
     }
 }

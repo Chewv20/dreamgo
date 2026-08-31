@@ -9,6 +9,15 @@ Require all granted
     Require all denied
 </FilesMatch>
 
+# Auditoria 2026-08-31, hallazgo SEG-02: fuerza HTTPS. La segunda condicion cubre el caso de
+# un proxy/CDN que termina el TLS antes (Cloudflare, load balancer): ahi %{HTTPS} llega "off"
+# pero X-Forwarded-Proto dice "https", y sin ese guard el redirect entraria en bucle. En local
+# el sitio corre con el servidor embebido de PHP, que no lee .htaccess, asi que esto no afecta
+# al desarrollo. La cabecera Strict-Transport-Security la pone config/config.php.
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
 # Auditoria 2026-08-25, hallazgo CFG-04: sin esto, cada visita revalidaba CSS/JS/fuentes/
 # imagenes de assets/ sin ningun cache de largo plazo ni compresion.
 #

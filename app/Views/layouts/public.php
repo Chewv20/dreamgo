@@ -9,7 +9,24 @@
 <meta property="og:description" content="<?= htmlspecialchars($meta['description'], ENT_QUOTES, 'UTF-8') ?>">
 <meta property="og:image" content="<?= htmlspecialchars($meta['ogImage'], ENT_QUOTES, 'UTF-8') ?>">
 <meta property="og:type" content="website">
-<link rel="canonical" href="<?= htmlspecialchars(($_ENV['APP_URL'] ?? '') . $_SERVER['REQUEST_URI'], ENT_QUOTES, 'UTF-8') ?>">
+<?php
+// Auditoria 2026-08-31, hallazgo SEG-05: el canonical usaba $_SERVER['REQUEST_URI'] entero, asi
+// que cada query string (?utm_*, ?fbclid, ?cualquier_cosa) se anunciaba como una URL canonica
+// distinta -> contenido duplicado. Ahora es la ruta normalizada + solo ?pagina= (para que la
+// pagina 2 de un listado sea auto-referencial y no colapse en la pagina 1). Un controlador
+// puede forzar otro valor con $meta['canonical'].
+if (!empty($meta['canonical'])) {
+    $canonical = $meta['canonical'];
+} else {
+    $rutaCanonica = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $paginaCanonica = (int) ($_GET['pagina'] ?? 0);
+    if ($paginaCanonica > 1) {
+        $rutaCanonica .= '?pagina=' . $paginaCanonica;
+    }
+    $canonical = ($_ENV['APP_URL'] ?? '') . $rutaCanonica;
+}
+?>
+<link rel="canonical" href="<?= htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8') ?>">
 <?php if (!empty($meta['feed'])): ?>
 <link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($meta['feed']['titulo'], ENT_QUOTES, 'UTF-8') ?>" href="<?= htmlspecialchars($meta['feed']['url'], ENT_QUOTES, 'UTF-8') ?>">
 <?php endif; ?>
