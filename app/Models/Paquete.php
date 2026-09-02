@@ -16,7 +16,7 @@ class Paquete extends Model
             'SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug
              FROM paquetes p
              INNER JOIN categorias c ON c.id = p.categoria_id
-             WHERE p.estado = "publicado" AND p.destacado = 1
+             WHERE p.estado = "publicado" AND p.destacado = 1 AND c.activo = 1
              ORDER BY p.creado_en DESC
              LIMIT :limite'
         );
@@ -110,7 +110,9 @@ class Paquete extends Model
      */
     private static function clausulaFiltrosPublicados(array $filtros): array
     {
-        $clausula = 'p.estado = "publicado"';
+        // c.activo = 1: ocultar un destino desde el panel tambien lo saca del catalogo publico,
+        // del buscador y del conteo de resultados (no solo de la lista /destinos).
+        $clausula = 'p.estado = "publicado" AND c.activo = 1';
         $params = [];
 
         if (!empty($filtros['categoria'])) {
@@ -163,7 +165,7 @@ class Paquete extends Model
             'SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug, c.tipo AS categoria_tipo
              FROM paquetes p
              INNER JOIN categorias c ON c.id = p.categoria_id
-             WHERE p.slug = :slug AND p.estado = "publicado"
+             WHERE p.slug = :slug AND p.estado = "publicado" AND c.activo = 1
              LIMIT 1'
         );
         $stmt->execute(['slug' => $slug]);
@@ -194,7 +196,7 @@ class Paquete extends Model
             'SELECT p.*, c.nombre AS categoria_nombre
              FROM paquetes p
              INNER JOIN categorias c ON c.id = p.categoria_id
-             WHERE p.slug IN (' . implode(', ', $placeholders) . ') AND p.estado = "publicado"'
+             WHERE p.slug IN (' . implode(', ', $placeholders) . ') AND p.estado = "publicado" AND c.activo = 1'
         );
         $stmt->execute($params);
 
@@ -248,6 +250,19 @@ class Paquete extends Model
     }
 
     /**
+     * Mueve todos los paquetes de un destino a otro (reasignacion en lote). Se usa desde el
+     * panel de destinos para poder vaciar un destino y luego eliminarlo, sin editar cada
+     * paquete a mano. Devuelve cuantas filas se movieron.
+     */
+    public static function reasignarCategoria(int $desde, int $hacia): int
+    {
+        $stmt = self::db()->prepare('UPDATE paquetes SET categoria_id = :hacia WHERE categoria_id = :desde');
+        $stmt->execute(['hacia' => $hacia, 'desde' => $desde]);
+
+        return $stmt->rowCount();
+    }
+
+    /**
      * Otros paquetes publicados de la misma categoria, para la seccion "te puede interesar"
      * de la ficha. Excluye el paquete actual.
      */
@@ -257,7 +272,7 @@ class Paquete extends Model
             'SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug
              FROM paquetes p
              INNER JOIN categorias c ON c.id = p.categoria_id
-             WHERE p.estado = "publicado" AND p.categoria_id = :categoria AND p.id <> :excluir
+             WHERE p.estado = "publicado" AND p.categoria_id = :categoria AND p.id <> :excluir AND c.activo = 1
              ORDER BY p.destacado DESC, p.creado_en DESC
              LIMIT :limite'
         );

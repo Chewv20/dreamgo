@@ -30,7 +30,9 @@ class DestinoController extends Controller
     {
         $categoria = Categoria::porSlug($slug);
 
-        if (!$categoria) {
+        // Un destino oculto desde el panel (activo = 0) no debe ser accesible ni por URL directa,
+        // igual que ya no aparece en la lista /destinos ni en el sitemap.
+        if (!$categoria || (int) $categoria['activo'] !== 1) {
             $this->abort(404, 'Destino no encontrado.');
         }
 

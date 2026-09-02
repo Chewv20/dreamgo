@@ -9,6 +9,7 @@ use App\Helpers\Flash;
 use App\Helpers\Slugify;
 use App\Helpers\Validator;
 use App\Models\Categoria;
+use App\Models\Paquete;
 use App\Services\ImageUploadService;
 
 /**
@@ -131,6 +132,35 @@ class DestinoAdminController extends AdminController
             }
         }
 
+        $this->redirect('/admin/destinos');
+    }
+
+    /**
+     * Mueve todos los paquetes de este destino a otro, de golpe. Evita tener que reeditar
+     * cada paquete a mano cuando se quiere jubilar un destino que todavia tiene paquetes.
+     */
+    public function reasignar(int $id): void
+    {
+        $this->verifyCsrf();
+
+        $origen = $this->encontrarO404(Categoria::class, $id);
+        $destinoId = (int) $this->request->input('destino_destino', 0);
+        $destino = $destinoId > 0 ? Categoria::find($destinoId) : false;
+
+        if ($destino === false || $destinoId === $id) {
+            Flash::set('error', 'Elige un destino distinto para mover los paquetes.');
+            $this->redirect('/admin/destinos');
+        }
+
+        $movidos = Paquete::reasignarCategoria($id, $destinoId);
+        Auditoria::registrar(
+            'destino.reasignar',
+            'destino',
+            $id,
+            sprintf('%d paquete(s) de "%s" -> "%s"', $movidos, (string) $origen['nombre'], (string) $destino['nombre'])
+        );
+
+        Flash::set('exito', sprintf('%d paquete(s) movido(s) a "%s".', $movidos, (string) $destino['nombre']));
         $this->redirect('/admin/destinos');
     }
 

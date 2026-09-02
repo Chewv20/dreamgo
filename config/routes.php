@@ -107,6 +107,7 @@ $router->get('/admin/destinos/{id}/editar', [DestinoAdminController::class, 'edi
 $router->post('/admin/destinos/{id}/editar', [DestinoAdminController::class, 'editar'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
 $router->post('/admin/destinos/{id}/visible', [DestinoAdminController::class, 'alternarActivo'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
 $router->post('/admin/destinos/{id}/mover', [DestinoAdminController::class, 'mover'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
+$router->post('/admin/destinos/{id}/reasignar', [DestinoAdminController::class, 'reasignar'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
 $router->post('/admin/destinos/{id}/eliminar', [DestinoAdminController::class, 'eliminar'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
 
 $router->get('/admin/articulos', [ArticuloAdminController::class, 'index'], ['auth' => true, 'permiso' => 'articulos.ver']);

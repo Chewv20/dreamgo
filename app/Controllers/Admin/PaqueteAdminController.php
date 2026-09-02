@@ -37,7 +37,7 @@ class PaqueteAdminController extends AdminController
     public function crearForm(): void
     {
         $this->view('admin/paquetes/create', [
-            'categorias' => Categoria::all('nombre ASC'),
+            'categorias' => $this->categoriasSeleccionables(),
             'monedas' => self::MONEDAS,
             'monedaBloqueada' => false,
         ], ['title' => 'Nuevo paquete | Dream Go', 'heading' => 'Nuevo paquete']);
@@ -89,7 +89,7 @@ class PaqueteAdminController extends AdminController
 
         $this->view('admin/paquetes/edit', [
             'paquete' => $paquete,
-            'categorias' => Categoria::all('nombre ASC'),
+            'categorias' => $this->categoriasSeleccionables($paquete),
             'imagenes' => Paquete::imagenes($id),
             'monedas' => self::MONEDAS,
             'monedaBloqueada' => Paquete::tieneReservas($id),
@@ -157,6 +157,31 @@ class PaqueteAdminController extends AdminController
     }
 
     /**
+     * Opciones del <select> "Categoria / destino" del formulario: solo destinos visibles, para
+     * no asignar paquetes nuevos a un destino oculto. Al editar, si el paquete ya apunta a un
+     * destino oculto se agrega esa opcion igual, para no perder la asignacion al guardar.
+     *
+     * @param array<string, mixed>|null $paquete
+     * @return list<array<string, mixed>>
+     */
+    private function categoriasSeleccionables(?array $paquete = null): array
+    {
+        $categorias = Categoria::activas();
+
+        $actualId = (int) ($paquete['categoria_id'] ?? 0);
+        $yaEsta = in_array($actualId, array_map(static fn ($c) => (int) $c['id'], $categorias), true);
+
+        if ($actualId > 0 && !$yaEsta) {
+            $actual = Categoria::find($actualId);
+            if ($actual !== false) {
+                $categorias[] = $actual;
+            }
+        }
+
+        return $categorias;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function datosFormulario(): array
@@ -181,6 +206,14 @@ class PaqueteAdminController extends AdminController
 
         if ($validator->pasa() && !is_numeric($datos['precio_desde'])) {
             Flash::set('error', 'El precio debe ser un numero valido.');
+
+            return false;
+        }
+
+        // El <select> solo ofrece destinos validos, pero un POST manipulado con un id
+        // inexistente reventaria contra la FK (error 500) en vez de dar un mensaje claro.
+        if ($validator->pasa() && Categoria::find((int) $datos['categoria_id']) === false) {
+            Flash::set('error', 'El destino seleccionado no existe.');
 
             return false;
         }

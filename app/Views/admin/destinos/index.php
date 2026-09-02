@@ -43,6 +43,19 @@
                   <?= \App\Helpers\Csrf::field() ?>
                   <button type="submit" class="btn btn-secundario btn--xs">Eliminar</button>
                 </form>
+              <?php elseif (count($destinos) > 1): ?>
+                <form method="post" action="/admin/destinos/<?= (int) $d['id'] ?>/reasignar" data-confirm="¿Mover todos los paquetes de este destino al destino elegido?">
+                  <?= \App\Helpers\Csrf::field() ?>
+                  <select name="destino_destino" required aria-label="Mover paquetes a">
+                    <option value="">Mover paquetes a...</option>
+                    <?php foreach ($destinos as $otro): ?>
+                      <?php if ((int) $otro['id'] !== (int) $d['id']): ?>
+                        <option value="<?= (int) $otro['id'] ?>"><?= htmlspecialchars($otro['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                      <?php endif; ?>
+                    <?php endforeach; ?>
+                  </select>
+                  <button type="submit" class="btn btn-secundario btn--xs">Mover</button>
+                </form>
               <?php endif; ?>
             </td>
           </tr>
