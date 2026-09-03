@@ -7,7 +7,7 @@ $errores ??= [];
 $valores ??= [];
 
 $etiquetasEstado = [
-    'pendiente' => 'Pendiente de confirmacion',
+    'pendiente' => 'Pendiente de confirmación',
     'confirmada' => 'Confirmada',
     'cancelada' => 'Cancelada',
     'expirada' => 'Expirada',
@@ -15,13 +15,13 @@ $etiquetasEstado = [
 ?>
 <section class="seccion contenedor bloque-medio">
   <h1>Mi reserva</h1>
-  <p>Ingresa el codigo de tu reserva y el correo con el que la hiciste para ver su estado.</p>
+  <p>Ingresa el código de tu reserva y el correo con el que la hiciste para ver su estado.</p>
 
   <form method="post" action="/mi-reserva">
     <?= \App\Helpers\Csrf::field() ?>
 
     <div class="campo">
-      <label for="codigo">Codigo de reserva</label>
+      <label for="codigo">Código de reserva</label>
       <input type="text" id="codigo" name="codigo" required placeholder="DG-2026-000123" value="<?= htmlspecialchars($valores['codigo'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
       <?php if (!empty($errores['codigo'])): ?><small class="campo__error"><?= htmlspecialchars($errores['codigo'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     </div>
@@ -39,7 +39,7 @@ $etiquetasEstado = [
     <?php if ($reserva): ?>
       <div class="panel-resultado">
         <h2 class="mt-0"><?= htmlspecialchars($reserva['paquete_titulo'], ENT_QUOTES, 'UTF-8') ?></h2>
-        <p><strong>Codigo:</strong> <?= htmlspecialchars($reserva['codigo_reserva'], ENT_QUOTES, 'UTF-8') ?></p>
+        <p><strong>Código:</strong> <?= htmlspecialchars($reserva['codigo_reserva'], ENT_QUOTES, 'UTF-8') ?></p>
         <p><strong>Estado:</strong> <?= htmlspecialchars($etiquetasEstado[$reserva['estado']] ?? ucfirst($reserva['estado']), ENT_QUOTES, 'UTF-8') ?></p>
         <p><strong>Fecha de salida:</strong> <?= htmlspecialchars(\App\Helpers\Fecha::corta($reserva['fecha_salida']), ENT_QUOTES, 'UTF-8') ?></p>
         <p><strong>Personas:</strong> <?= (int) $reserva['num_personas'] ?></p>
@@ -62,10 +62,10 @@ $etiquetasEstado = [
             <?php endif; ?>
           </p>
         <?php endif; ?>
-        <p>Si tienes dudas sobre tu reserva, contactanos por <a href="/contacto">nuestra pagina de contacto</a>.</p>
+        <p>Si tienes dudas sobre tu reserva, contáctanos por <a href="/contacto">nuestra página de contacto</a>.</p>
       </div>
     <?php else: ?>
-      <p class="campo__error mt-2">No encontramos ninguna reserva con ese codigo y correo. Verifica los datos e intenta de nuevo.</p>
+      <p class="campo__error mt-2">No encontramos ninguna reserva con ese código y correo. Verifica los datos e intenta de nuevo.</p>
     <?php endif; ?>
   <?php endif; ?>
 </section>

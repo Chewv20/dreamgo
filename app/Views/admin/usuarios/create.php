@@ -11,7 +11,7 @@
       <input type="email" id="email" name="email" required>
     </div>
     <div class="campo">
-      <label for="password">Contrasena</label>
+      <label for="password">Contraseña</label>
       <input type="password" id="password" name="password" required minlength="8">
     </div>
     <div class="campo">

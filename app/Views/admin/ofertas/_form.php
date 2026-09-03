@@ -7,7 +7,7 @@ $oferta ??= [];
 
 <div class="admin-form-grid admin-form-grid--2">
   <div class="campo">
-    <label for="codigo">Codigo</label>
+    <label for="codigo">Código</label>
     <input type="text" id="codigo" name="codigo" required maxlength="40" class="tt-upper" value="<?= htmlspecialchars($oferta['codigo'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
   </div>
   <div class="campo">
@@ -25,7 +25,7 @@ $oferta ??= [];
     <input type="number" step="0.01" min="0" id="valor" name="valor" required value="<?= htmlspecialchars((string) ($oferta['valor'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
   </div>
   <div class="campo">
-    <label for="uso_maximo">Uso maximo (opcional, en blanco = ilimitado)</label>
+    <label for="uso_maximo">Uso máximo (opcional, en blanco = ilimitado)</label>
     <input type="number" min="1" id="uso_maximo" name="uso_maximo" value="<?= htmlspecialchars((string) ($oferta['uso_maximo'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
   </div>
 </div>
@@ -46,7 +46,7 @@ $oferta ??= [];
     <label for="alcance">Alcance</label>
     <select id="alcance" name="alcance" data-toggle-target="campo-paquete" data-toggle-value="paquete">
       <option value="global" <?= ($oferta['alcance'] ?? 'global') === 'global' ? 'selected' : '' ?>>Global (todos los paquetes)</option>
-      <option value="paquete" <?= ($oferta['alcance'] ?? '') === 'paquete' ? 'selected' : '' ?>>Un paquete especifico</option>
+      <option value="paquete" <?= ($oferta['alcance'] ?? '') === 'paquete' ? 'selected' : '' ?>>Un paquete específico</option>
     </select>
   </div>
   <div class="campo<?= ($oferta['alcance'] ?? '') === 'paquete' ? '' : ' oculto' ?>" id="campo-paquete">
@@ -66,4 +66,4 @@ $oferta ??= [];
   <label for="activo" class="m-0">Activo</label>
 </div>
 
-<button type="submit" class="btn btn-primario">Guardar codigo</button>
+<button type="submit" class="btn btn-primario">Guardar código</button>

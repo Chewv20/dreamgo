@@ -42,25 +42,25 @@ $anticipoEstimado = round($totalEstimado * $porcentajeAnticipo / 100, 2);
     </div>
 
     <div class="campo">
-      <label for="email">Correo electronico</label>
+      <label for="email">Correo electrónico</label>
       <input type="email" id="email" name="email" autocomplete="email" required value="<?= htmlspecialchars($valores['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
       <?php if (!empty($errores['email'])): ?><small class="campo__error"><?= htmlspecialchars($errores['email'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     </div>
 
     <div class="campo">
-      <label for="telefono">Telefono / WhatsApp</label>
+      <label for="telefono">Teléfono / WhatsApp</label>
       <input type="tel" id="telefono" name="telefono" autocomplete="tel" required value="<?= htmlspecialchars($valores['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
       <?php if (!empty($errores['telefono'])): ?><small class="campo__error"><?= htmlspecialchars($errores['telefono'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     </div>
 
     <div class="campo">
-      <label for="num_personas">Numero de personas</label>
+      <label for="num_personas">Número de personas</label>
       <input type="number" id="num_personas" name="num_personas" min="1" max="<?= (int) $salida['cupo_disponible'] ?>" required value="<?= htmlspecialchars((string) $numPersonasVista, ENT_QUOTES, 'UTF-8') ?>">
       <?php if (!empty($errores['num_personas'])): ?><small class="campo__error"><?= htmlspecialchars($errores['num_personas'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     </div>
 
     <div class="campo">
-      <label for="codigo_descuento">Codigo de descuento (opcional)</label>
+      <label for="codigo_descuento">Código de descuento (opcional)</label>
       <input type="text" id="codigo_descuento" name="codigo_descuento" value="<?= htmlspecialchars($valores['codigo_descuento'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
     </div>
 

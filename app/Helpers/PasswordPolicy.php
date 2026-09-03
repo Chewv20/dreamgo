@@ -17,6 +17,6 @@ final class PasswordPolicy
 
     public static function mensaje(): string
     {
-        return 'La contrasena debe tener al menos ' . self::LONGITUD_MINIMA . ' caracteres, con letras y numeros.';
+        return 'La contraseña debe tener al menos ' . self::LONGITUD_MINIMA . ' caracteres, con letras y números.';
     }
 }

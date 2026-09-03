@@ -8,7 +8,7 @@ $queryExtra = $accionActiva !== null ? ['accion' => $accionActiva] : [];
 ?>
 <div class="admin-filtros">
   <form method="get" action="/admin/bitacora" class="inline-form">
-    <label for="filtro-accion" class="label-sm">Accion:</label>
+    <label for="filtro-accion" class="label-sm">Acción:</label>
     <select id="filtro-accion" name="accion" data-autosubmit>
       <option value="">Todas</option>
       <?php foreach ($acciones as $a): ?>
@@ -22,7 +22,7 @@ $queryExtra = $accionActiva !== null ? ['accion' => $accionActiva] : [];
 <div class="admin-panel">
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
-      <thead><tr><th>Fecha</th><th>Usuario</th><th>Accion</th><th>Entidad</th><th>Detalle</th><th>IP</th></tr></thead>
+      <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Entidad</th><th>Detalle</th><th>IP</th></tr></thead>
       <tbody>
         <?php foreach ($registros as $r): ?>
           <tr>

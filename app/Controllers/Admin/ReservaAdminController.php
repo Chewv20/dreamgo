@@ -138,7 +138,7 @@ class ReservaAdminController extends AdminController
             ]);
         } catch (PDOException $e) {
             error_log('[ReservaAdminController] Error de base de datos al crear reserva: ' . $e->getMessage());
-            Flash::set('error', 'Ocurrio un error al procesar la reserva. Intenta de nuevo.');
+            Flash::set('error', 'Ocurrió un error al procesar la reserva. Intenta de nuevo.');
             $this->redirect('/admin/reservas/crear?salida_id=' . (int) $datos['salida_id']);
         } catch (RuntimeException $e) {
             Flash::set('error', $e->getMessage());
@@ -147,7 +147,7 @@ class ReservaAdminController extends AdminController
 
         Auditoria::registrar('reserva.crear', 'reserva', (int) $reserva['id'], 'Codigo ' . $reserva['codigo_reserva'] . ', ' . (int) $datos['num_personas'] . ' persona(s)');
 
-        Flash::set('exito', 'Reserva ' . $reserva['codigo_reserva'] . ' creada. El cupo ya quedo apartado.');
+        Flash::set('exito', 'Reserva ' . $reserva['codigo_reserva'] . ' creada. El cupo ya quedó apartado.');
         $this->redirect('/admin/reservas/' . $reserva['id']);
     }
 
@@ -157,7 +157,7 @@ class ReservaAdminController extends AdminController
 
         $service = new ReservaService($this->db);
         if (!$service->confirmar($id)) {
-            Flash::set('error', 'La reserva ya no esta pendiente.');
+            Flash::set('error', 'La reserva ya no está pendiente.');
             $this->redirect('/admin/reservas/' . $id);
         }
 

@@ -25,7 +25,7 @@ final class Validator
     {
         $valor = (string) ($this->datos[$campo] ?? '');
         if ($valor !== '' && !filter_var($valor, FILTER_VALIDATE_EMAIL)) {
-            $this->errores[$campo] = "{$etiqueta} no es un correo valido.";
+            $this->errores[$campo] = "{$etiqueta} no es un correo válido.";
         }
 
         return $this;
@@ -35,7 +35,7 @@ final class Validator
     {
         $valor = (string) ($this->datos[$campo] ?? '');
         if ($valor !== '' && !preg_match('/^[0-9+\s()-]{7,20}$/', $valor)) {
-            $this->errores[$campo] = "{$etiqueta} no es un telefono valido.";
+            $this->errores[$campo] = "{$etiqueta} no es un teléfono válido.";
         }
 
         return $this;
@@ -55,7 +55,7 @@ final class Validator
     {
         $valor = $this->datos[$campo] ?? '';
         if ($valor !== '' && $valor !== null && filter_var($valor, FILTER_VALIDATE_INT) === false) {
-            $this->errores[$campo] = "{$etiqueta} debe ser un numero.";
+            $this->errores[$campo] = "{$etiqueta} debe ser un número.";
         }
 
         return $this;
@@ -73,7 +73,7 @@ final class Validator
         // desbordando (2026-02-30 -> 2 de marzo).
         $fecha = \DateTime::createFromFormat('!Y-m-d', $valor);
         if ($fecha === false || $fecha->format('Y-m-d') !== $valor) {
-            $this->errores[$campo] = "{$etiqueta} no es una fecha valida.";
+            $this->errores[$campo] = "{$etiqueta} no es una fecha válida.";
         }
 
         return $this;

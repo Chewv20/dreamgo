@@ -29,8 +29,8 @@ final class ArticuloJsonLd
             'image' => !empty($articulo['imagen']) ? $appUrl . $articulo['imagen'] : null,
             'datePublished' => date('c', strtotime((string) $publicado)),
             'dateModified' => !empty($articulo['actualizado_en']) ? date('c', strtotime((string) $articulo['actualizado_en'])) : null,
-            'author' => ['@type' => 'Organization', 'name' => 'Dream Go Operadora Turistica'],
-            'publisher' => ['@type' => 'Organization', 'name' => 'Dream Go Operadora Turistica'],
+            'author' => ['@type' => 'Organization', 'name' => 'Dream Go Operadora Turística'],
+            'publisher' => ['@type' => 'Organization', 'name' => 'Dream Go Operadora Turística'],
             'mainEntityOfPage' => $url,
         ], static fn ($v) => $v !== null);
 

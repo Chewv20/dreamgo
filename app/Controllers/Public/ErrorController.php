@@ -10,7 +10,7 @@ class ErrorController extends Controller
 {
     public function notFound(): void
     {
-        $this->view('errors/404', [], ['title' => 'Pagina no encontrada | Dream Go']);
+        $this->view('errors/404', [], ['title' => 'Página no encontrada | Dream Go']);
     }
 
     public function forbidden(string $message = ''): void

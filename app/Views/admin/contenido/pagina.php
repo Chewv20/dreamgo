@@ -12,19 +12,19 @@ $urlsPublicas = [
 ];
 ?>
 <div class="admin-acciones mb-md">
-  <a href="/admin/contenido" class="btn btn-secundario">&larr; Todas las paginas</a>
+  <a href="/admin/contenido" class="btn btn-secundario">&larr; Todas las páginas</a>
   <a href="/admin/colores" class="btn btn-secundario">Colores del sitio</a>
   <a href="<?= htmlspecialchars($urlsPublicas[$pagina] ?? '/', ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener" class="btn btn-secundario">Ver "<?= htmlspecialchars($nombrePagina, ENT_QUOTES, 'UTF-8') ?>"</a>
 </div>
 
 <div class="admin-panel">
   <p class="op-75 mt-0">
-    Ordena las secciones, ocultalas temporalmente o edita su texto. Los cambios se ven de inmediato en el sitio.
+    Ordena las secciones, ocúltalas temporalmente o edita su texto. Los cambios se ven de inmediato en el sitio.
   </p>
 
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
-      <thead><tr><th>Orden</th><th>Seccion</th><th>Titulo actual</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>Orden</th><th>Sección</th><th>Título actual</th><th>Estado</th><th>Acciones</th></tr></thead>
       <tbody>
         <?php foreach ($bloques as $i => $bloque): ?>
           <tr>

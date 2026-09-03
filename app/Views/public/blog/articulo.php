@@ -49,7 +49,7 @@ $fechaPub = $a['publicado_en'] ?? $a['creado_en'];
 
 <?php if (!empty($relacionados)): ?>
 <section class="seccion contenedor">
-  <div class="seccion__encabezado"><h2>Mas articulos</h2></div>
+  <div class="seccion__encabezado"><h2>Más artículos</h2></div>
   <div class="grid-tarjetas grid-tarjetas--3">
     <?php foreach ($relacionados as $r): ?>
       <article class="tarjeta animar-entrada">

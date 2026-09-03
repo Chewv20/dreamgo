@@ -9,11 +9,11 @@ $paquete ??= [];
 
 <div class="admin-form-grid admin-form-grid--2">
   <div class="campo">
-    <label for="titulo">Titulo</label>
+    <label for="titulo">Título</label>
     <input type="text" id="titulo" name="titulo" required maxlength="180" value="<?= htmlspecialchars($paquete['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
   </div>
   <div class="campo">
-    <label for="categoria_id">Categoria / destino</label>
+    <label for="categoria_id">Categoría / destino</label>
     <select id="categoria_id" name="categoria_id" required>
       <?php foreach ($categorias as $categoria): ?>
         <option value="<?= (int) $categoria['id'] ?>" <?= (int) ($paquete['categoria_id'] ?? 0) === (int) $categoria['id'] ? 'selected' : '' ?>>
@@ -25,7 +25,7 @@ $paquete ??= [];
 </div>
 
 <div class="campo">
-  <label for="resumen">Resumen corto (para tarjetas de catalogo)</label>
+  <label for="resumen">Resumen corto (para tarjetas de catálogo)</label>
   <input type="text" id="resumen" name="resumen" maxlength="300" value="<?= htmlspecialchars($paquete['resumen'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 </div>
 
@@ -61,11 +61,11 @@ $paquete ??= [];
 
 <div class="admin-form-grid admin-form-grid--2">
   <div class="campo">
-    <label for="duracion_dias">Duracion (dias)</label>
+    <label for="duracion_dias">Duración (días)</label>
     <input type="number" min="1" id="duracion_dias" name="duracion_dias" value="<?= htmlspecialchars((string) ($paquete['duracion_dias'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
   </div>
   <div class="campo">
-    <label for="duracion_noches">Duracion (noches)</label>
+    <label for="duracion_noches">Duración (noches)</label>
     <input type="number" min="0" id="duracion_noches" name="duracion_noches" value="<?= htmlspecialchars((string) ($paquete['duracion_noches'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
   </div>
 </div>
@@ -76,12 +76,12 @@ $paquete ??= [];
 </div>
 
 <div class="campo">
-  <label for="descripcion_larga">Descripcion (HTML basico: negritas, listas, parrafos)</label>
+  <label for="descripcion_larga">Descripción (HTML básico: negritas, listas, párrafos)</label>
   <textarea id="descripcion_larga" name="descripcion_larga" class="textarea-md"><?= htmlspecialchars($paquete['descripcion_larga'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
 </div>
 
 <div class="campo">
-  <label for="itinerario">Itinerario (HTML basico)</label>
+  <label for="itinerario">Itinerario (HTML básico)</label>
   <textarea id="itinerario" name="itinerario" class="textarea-md"><?= htmlspecialchars($paquete['itinerario'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
 </div>
 
@@ -98,11 +98,11 @@ $paquete ??= [];
 
 <div class="admin-form-grid admin-form-grid--2">
   <div class="campo">
-    <label for="meta_title">Titulo SEO (opcional)</label>
+    <label for="meta_title">Título SEO (opcional)</label>
     <input type="text" id="meta_title" name="meta_title" maxlength="180" value="<?= htmlspecialchars($paquete['meta_title'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
   </div>
   <div class="campo">
-    <label for="meta_description">Descripcion SEO (opcional)</label>
+    <label for="meta_description">Descripción SEO (opcional)</label>
     <input type="text" id="meta_description" name="meta_description" maxlength="300" value="<?= htmlspecialchars($paquete['meta_description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
   </div>
 </div>

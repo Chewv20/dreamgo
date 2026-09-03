@@ -32,7 +32,7 @@ class ReservaPublicaController extends Controller
         }
 
         if ($salida['estado'] !== 'abierta' || (int) $salida['cupo_disponible'] < 1) {
-            $this->abort(404, 'Esta fecha de salida ya no esta disponible.');
+            $this->abort(404, 'Esta fecha de salida ya no está disponible.');
         }
 
         $precioUnitario = $salida['precio_override'] !== null
@@ -47,7 +47,7 @@ class ReservaPublicaController extends Controller
             'errores' => [],
             'valores' => ['nombre' => '', 'email' => '', 'telefono' => '', 'num_personas' => '1', 'codigo_descuento' => ''],
         ], [
-            'title' => 'Reservar ' . $paquete['titulo'] . ' | Dream Go Operadora Turistica',
+            'title' => 'Reservar ' . $paquete['titulo'] . ' | Dream Go Operadora Turística',
         ]);
     }
 
@@ -95,7 +95,7 @@ class ReservaPublicaController extends Controller
                 'porcentajeAnticipo' => $this->porcentajeAnticipo(),
                 'errores' => $validator->errores(),
                 'valores' => $datos,
-            ], ['title' => 'Reservar ' . $paquete['titulo'] . ' | Dream Go Operadora Turistica']);
+            ], ['title' => 'Reservar ' . $paquete['titulo'] . ' | Dream Go Operadora Turística']);
 
             return;
         }
@@ -125,9 +125,9 @@ class ReservaPublicaController extends Controller
                 'salida' => $salida,
                 'precioUnitario' => $precioUnitario,
                 'porcentajeAnticipo' => $this->porcentajeAnticipo(),
-                'errores' => ['general' => 'Ocurrio un error al procesar tu reserva. Intenta de nuevo.'],
+                'errores' => ['general' => 'Ocurrió un error al procesar tu reserva. Intenta de nuevo.'],
                 'valores' => $datos,
-            ], ['title' => 'Reservar ' . $paquete['titulo'] . ' | Dream Go Operadora Turistica']);
+            ], ['title' => 'Reservar ' . $paquete['titulo'] . ' | Dream Go Operadora Turística']);
 
             return;
         } catch (RuntimeException $e) {
@@ -138,14 +138,14 @@ class ReservaPublicaController extends Controller
                 'porcentajeAnticipo' => $this->porcentajeAnticipo(),
                 'errores' => ['general' => $e->getMessage()],
                 'valores' => $datos,
-            ], ['title' => 'Reservar ' . $paquete['titulo'] . ' | Dream Go Operadora Turistica']);
+            ], ['title' => 'Reservar ' . $paquete['titulo'] . ' | Dream Go Operadora Turística']);
 
             return;
         }
 
         $accessToken = $_ENV['MP_ACCESS_TOKEN'] ?? '';
         if ($accessToken === '') {
-            Flash::set('exito', 'Tu reserva ' . $reserva['codigo_reserva'] . ' quedo registrada y tu cupo apartado. No pudimos iniciar el pago en linea (aun no esta configurado): te contactaremos para coordinarlo.');
+            Flash::set('exito', 'Tu reserva ' . $reserva['codigo_reserva'] . ' quedó registrada y tu cupo apartado. No pudimos iniciar el pago en línea (aún no está configurado): te contactaremos para coordinarlo.');
             $this->redirect('/reservar/' . $reserva['codigo_reserva'] . '/gracias');
         }
 
@@ -161,7 +161,7 @@ class ReservaPublicaController extends Controller
             );
         } catch (RuntimeException $e) {
             error_log('[ReservaPublicaController] No se pudo crear la preferencia de Mercado Pago: ' . $e->getMessage());
-            Flash::set('exito', 'Tu reserva ' . $reserva['codigo_reserva'] . ' quedo registrada y tu cupo apartado. No pudimos iniciar el pago en linea en este momento: te contactaremos para coordinarlo.');
+            Flash::set('exito', 'Tu reserva ' . $reserva['codigo_reserva'] . ' quedó registrada y tu cupo apartado. No pudimos iniciar el pago en línea en este momento: te contactaremos para coordinarlo.');
             $this->redirect('/reservar/' . $reserva['codigo_reserva'] . '/gracias');
         }
 
@@ -174,12 +174,12 @@ class ReservaPublicaController extends Controller
         $esSaldo = $this->request->query('concepto') === 'saldo';
 
         $mensajes = $esSaldo ? [
-            'approved' => 'Tu pago del saldo fue aprobado. En unos minutos veras el saldo actualizado en Mi reserva.',
-            'pending' => 'Tu pago del saldo esta en revision. Te avisaremos por correo apenas se acredite.',
+            'approved' => 'Tu pago del saldo fue aprobado. En unos minutos verás el saldo actualizado en Mi reserva.',
+            'pending' => 'Tu pago del saldo está en revisión. Te avisaremos por correo apenas se acredite.',
             'failure' => 'El pago del saldo no se pudo completar. Puedes intentarlo de nuevo desde Mi reserva o contactarnos.',
         ] : [
-            'approved' => 'Tu pago fue aprobado. En unos minutos tu reserva quedara confirmada.',
-            'pending' => 'Tu pago esta en revision. Te avisaremos por correo apenas se confirme.',
+            'approved' => 'Tu pago fue aprobado. En unos minutos tu reserva quedará confirmada.',
+            'pending' => 'Tu pago está en revisión. Te avisaremos por correo apenas se confirme.',
             'failure' => 'Tu pago no se pudo completar. Puedes intentarlo de nuevo o contactarnos para coordinar el pago de otra forma.',
         ];
 
@@ -187,7 +187,7 @@ class ReservaPublicaController extends Controller
             'codigo' => $codigo,
             'mensaje' => $mensajes[$status] ?? null,
             'esAprobado' => $status === 'approved',
-        ], ['title' => 'Reserva ' . $codigo . ' | Dream Go Operadora Turistica']);
+        ], ['title' => 'Reserva ' . $codigo . ' | Dream Go Operadora Turística']);
     }
 
     private function porcentajeAnticipo(): int

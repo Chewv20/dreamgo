@@ -6,7 +6,7 @@ $esAprobado ??= false;
 ?>
 <section class="seccion contenedor bloque-medio centrado">
   <h1>Gracias por tu reserva</h1>
-  <p>Codigo de reserva: <strong><?= htmlspecialchars($codigo, ENT_QUOTES, 'UTF-8') ?></strong></p>
+  <p>Código de reserva: <strong><?= htmlspecialchars($codigo, ENT_QUOTES, 'UTF-8') ?></strong></p>
 
   <?php if ($mensaje): ?>
     <p><?= htmlspecialchars($mensaje, ENT_QUOTES, 'UTF-8') ?></p>
@@ -15,7 +15,7 @@ $esAprobado ??= false;
   <?php endif; ?>
 
   <p>Puedes consultar el estado real de tu reserva en cualquier momento en
-    <a href="/mi-reserva">Mi reserva</a> con tu codigo y correo.</p>
+    <a href="/mi-reserva">Mi reserva</a> con tu código y correo.</p>
 
   <a href="/" class="btn btn-primario">Volver al inicio</a>
 </section>

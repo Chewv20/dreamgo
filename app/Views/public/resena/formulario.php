@@ -8,16 +8,16 @@ $errores ??= [];
 $valores ??= [];
 ?>
 <section class="seccion contenedor bloque-medio">
-  <h1>Deja tu resena</h1>
+  <h1>Deja tu reseña</h1>
 
   <?php if ($enviado): ?>
     <?php if ($yaExistia): ?>
-      <p class="mt-1">Ya registramos tu resena anteriormente. ¡Gracias por compartir tu experiencia!</p>
+      <p class="mt-1">Ya registramos tu reseña anteriormente. ¡Gracias por compartir tu experiencia!</p>
     <?php else: ?>
-      <p class="mt-1">Gracias por tu resena. Sera publicada en la ficha del paquete despues de una breve revision.</p>
+      <p class="mt-1">Gracias por tu reseña. Será publicada en la ficha del paquete después de una breve revisión.</p>
     <?php endif; ?>
   <?php else: ?>
-    <p>Cuentanos que tal estuvo tu viaje. Confirma tu correo para verificar tu reserva.</p>
+    <p>Cuéntanos qué tal estuvo tu viaje. Confirma tu correo para verificar tu reserva.</p>
 
     <?php if (!empty($errores['general'])): ?>
       <p class="txt-error"><?= htmlspecialchars($errores['general'], ENT_QUOTES, 'UTF-8') ?></p>
@@ -33,9 +33,9 @@ $valores ??= [];
       </div>
 
       <div class="campo">
-        <label for="calificacion">Calificacion</label>
+        <label for="calificacion">Calificación</label>
         <select id="calificacion" name="calificacion" required>
-          <option value="">Selecciona una calificacion</option>
+          <option value="">Selecciona una calificación</option>
           <?php for ($i = 5; $i >= 1; $i--): ?>
             <option value="<?= $i ?>" <?= (string) $i === (string) ($valores['calificacion'] ?? '') ? 'selected' : '' ?>><?= str_repeat('★', $i) ?> (<?= $i ?>)</option>
           <?php endfor; ?>
@@ -49,7 +49,7 @@ $valores ??= [];
         <?php if (!empty($errores['comentario'])): ?><small class="txt-error"><?= htmlspecialchars($errores['comentario'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
       </div>
 
-      <button type="submit" class="btn btn-primario w-100">Enviar resena</button>
+      <button type="submit" class="btn btn-primario w-100">Enviar reseña</button>
     </form>
   <?php endif; ?>
 </section>

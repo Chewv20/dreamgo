@@ -21,7 +21,7 @@ class ResenaPublicaController extends Controller
             'yaExistia' => false,
             'errores' => [],
             'valores' => ['email' => '', 'calificacion' => '', 'comentario' => ''],
-        ], ['title' => 'Deja tu resena | Dream Go Operadora Turistica']);
+        ], ['title' => 'Deja tu reseña | Dream Go Operadora Turística']);
     }
 
     public function guardar(string $codigo): void
@@ -52,20 +52,20 @@ class ResenaPublicaController extends Controller
         $reserva = Reserva::porCodigoYEmail($codigo, $valores['email']);
 
         if (!$reserva) {
-            $this->mostrarError($codigo, $valores, ['general' => 'No encontramos una reserva con ese codigo y ese correo.']);
+            $this->mostrarError($codigo, $valores, ['general' => 'No encontramos una reserva con ese código y ese correo.']);
 
             return;
         }
 
         if ($reserva['estado'] !== 'confirmada') {
-            $this->mostrarError($codigo, $valores, ['general' => 'Solo se pueden dejar resenas de reservas confirmadas.']);
+            $this->mostrarError($codigo, $valores, ['general' => 'Solo se pueden dejar reseñas de reservas confirmadas.']);
 
             return;
         }
 
         $finViaje = $reserva['fecha_regreso'] ?? $reserva['fecha_salida'];
         if (strtotime($finViaje) > strtotime('today')) {
-            $this->mostrarError($codigo, $valores, ['general' => 'Podras dejar tu resena despues de completar el viaje.']);
+            $this->mostrarError($codigo, $valores, ['general' => 'Podrás dejar tu reseña después de completar el viaje.']);
 
             return;
         }
@@ -77,7 +77,7 @@ class ResenaPublicaController extends Controller
                 'yaExistia' => true,
                 'errores' => [],
                 'valores' => $valores,
-            ], ['title' => 'Deja tu resena | Dream Go Operadora Turistica']);
+            ], ['title' => 'Deja tu reseña | Dream Go Operadora Turística']);
 
             return;
         }
@@ -105,7 +105,7 @@ class ResenaPublicaController extends Controller
                 'yaExistia' => true,
                 'errores' => [],
                 'valores' => $valores,
-            ], ['title' => 'Deja tu resena | Dream Go Operadora Turistica']);
+            ], ['title' => 'Deja tu reseña | Dream Go Operadora Turística']);
 
             return;
         }
@@ -116,7 +116,7 @@ class ResenaPublicaController extends Controller
             'yaExistia' => false,
             'errores' => [],
             'valores' => $valores,
-        ], ['title' => 'Deja tu resena | Dream Go Operadora Turistica']);
+        ], ['title' => 'Deja tu reseña | Dream Go Operadora Turística']);
     }
 
     private function mostrarError(string $codigo, array $valores, array $errores): void
@@ -127,6 +127,6 @@ class ResenaPublicaController extends Controller
             'yaExistia' => false,
             'errores' => $errores,
             'valores' => $valores,
-        ], ['title' => 'Deja tu resena | Dream Go Operadora Turistica']);
+        ], ['title' => 'Deja tu reseña | Dream Go Operadora Turística']);
     }
 }

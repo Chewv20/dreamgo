@@ -21,7 +21,7 @@ class DestinoController extends Controller
             'categorias' => Categoria::activas(),
             'intro' => $bloques[0] ?? null,
         ], [
-            'title' => 'Destinos | Dream Go Operadora Turistica',
+            'title' => 'Destinos | Dream Go Operadora Turística',
             'description' => 'Explora nuestros destinos nacionales e internacionales.',
         ]);
     }
@@ -44,7 +44,7 @@ class DestinoController extends Controller
             'resumenes' => Resena::resumenPorPaquetes(array_column($paquetes, 'id')),
             'articulos' => Articulo::publicadosDeCategoria((int) $categoria['id']),
         ], [
-            'title' => $categoria['nombre'] . ' | Dream Go Operadora Turistica',
+            'title' => $categoria['nombre'] . ' | Dream Go Operadora Turística',
             'description' => $categoria['descripcion'] ?? ('Paquetes y excursiones en ' . $categoria['nombre']),
         ]);
     }

@@ -21,7 +21,7 @@ final class MailerService
             return false;
         }
 
-        $asunto = 'Nueva cotizacion de ' . $cotizacion['nombre'];
+        $asunto = 'Nueva cotización de ' . $cotizacion['nombre'];
         $html = $this->renderPlantilla('notificacion_cotizacion', ['cotizacion' => $cotizacion]);
 
         return $this->enviar($destino, $asunto, $html, 'cotizacion_equipo', 'cotizacion', (int) ($cotizacion['id'] ?? 0));
@@ -29,7 +29,7 @@ final class MailerService
 
     public function enviarReservaPendiente(array $reserva): bool
     {
-        $asunto = 'Tu reserva ' . $reserva['codigo_reserva'] . ' esta en revision';
+        $asunto = 'Tu reserva ' . $reserva['codigo_reserva'] . ' está en revisión';
         $html = $this->renderPlantilla('reserva_pendiente', ['reserva' => $reserva]);
 
         return $this->enviar($reserva['cliente_email'], $asunto, $html, 'reserva_pendiente', 'reserva', (int) $reserva['id']);
@@ -127,7 +127,7 @@ final class MailerService
 
     public function enviarSolicitudResena(array $reserva): bool
     {
-        $asunto = 'Cuentanos que tal estuvo tu viaje: ' . $reserva['paquete_titulo'];
+        $asunto = 'Cuéntanos qué tal estuvo tu viaje: ' . $reserva['paquete_titulo'];
         $urlResena = rtrim($_ENV['APP_URL'] ?? '', '/') . '/resena/' . $reserva['codigo_reserva'];
         $html = $this->renderPlantilla('solicitud_resena', ['reserva' => $reserva, 'urlResena' => $urlResena]);
 
@@ -136,7 +136,7 @@ final class MailerService
 
     public function enviarConfirmacionSuscripcion(array $suscriptor): bool
     {
-        $asunto = 'Confirma tu suscripcion a Dream Go';
+        $asunto = 'Confirma tu suscripción a Dream Go';
         $urlConfirmar = rtrim($_ENV['APP_URL'] ?? '', '/') . '/suscribir/confirmar/' . $suscriptor['token'];
         $html = $this->renderPlantilla('confirmacion_suscripcion', ['urlConfirmar' => $urlConfirmar]);
 
@@ -227,7 +227,7 @@ final class MailerService
         $mail->isHTML(true);
         $mail->setFrom(
             $_ENV['SMTP_FROM_EMAIL'] ?? 'no-reply@dreamgooperadoraturistica.com',
-            $_ENV['SMTP_FROM_NAME'] ?? 'Dream Go Operadora Turistica'
+            $_ENV['SMTP_FROM_NAME'] ?? 'Dream Go Operadora Turística'
         );
 
         return $mail;

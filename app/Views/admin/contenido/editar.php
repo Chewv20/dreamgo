@@ -4,7 +4,7 @@
 /** @var string $etiqueta */
 $v = static fn (string $valor): string => htmlspecialchars($valor, ENT_QUOTES, 'UTF-8');
 $iconos = [
-    'chat' => 'Conversacion',
+    'chat' => 'Conversación',
     'mapa' => 'Mapa / ruta',
     'reloj' => 'Reloj',
     'etiqueta' => 'Etiqueta de precio',
@@ -23,18 +23,18 @@ $iconos = [
     <h2 class="mt-0"><?= $v($etiqueta) ?></h2>
 
     <div class="campo">
-      <label for="titulo">Titulo de la seccion</label>
+      <label for="titulo">Título de la sección</label>
       <input type="text" id="titulo" name="titulo" value="<?= $v($bloque['titulo'] ?? '') ?>">
     </div>
 
     <div class="campo">
-      <label for="subtitulo">Texto / subtitulo</label>
+      <label for="subtitulo">Texto / subtítulo</label>
       <textarea id="subtitulo" name="subtitulo"><?= $v($bloque['subtitulo'] ?? '') ?></textarea>
     </div>
 
     <?php if ($bloque['clave'] !== 'hero'): ?>
       <div class="campo mw-220">
-        <label for="color_fondo">Color de fondo de la seccion</label>
+        <label for="color_fondo">Color de fondo de la sección</label>
         <input type="color" id="color_fondo" name="color_fondo" value="<?= $v($bloque['color_fondo'] ?: '#ffffff') ?>">
       </div>
     <?php endif; ?>
@@ -45,19 +45,19 @@ $iconos = [
       <h2 class="mt-0">Botones</h2>
       <div class="admin-form-grid admin-form-grid--2">
         <div class="campo">
-          <label for="cta_primario_texto">Texto del boton principal</label>
+          <label for="cta_primario_texto">Texto del botón principal</label>
           <input type="text" id="cta_primario_texto" name="cta_primario_texto" value="<?= $v($contenido['cta_primario_texto'] ?? '') ?>">
         </div>
         <div class="campo">
-          <label for="cta_primario_link">Enlace del boton principal</label>
+          <label for="cta_primario_link">Enlace del botón principal</label>
           <input type="text" id="cta_primario_link" name="cta_primario_link" value="<?= $v($contenido['cta_primario_link'] ?? '') ?>">
         </div>
         <div class="campo">
-          <label for="cta_secundario_texto">Texto del boton secundario</label>
+          <label for="cta_secundario_texto">Texto del botón secundario</label>
           <input type="text" id="cta_secundario_texto" name="cta_secundario_texto" value="<?= $v($contenido['cta_secundario_texto'] ?? '') ?>">
         </div>
         <div class="campo">
-          <label for="cta_secundario_link">Enlace del boton secundario</label>
+          <label for="cta_secundario_link">Enlace del botón secundario</label>
           <input type="text" id="cta_secundario_link" name="cta_secundario_link" value="<?= $v($contenido['cta_secundario_link'] ?? '') ?>">
         </div>
       </div>
@@ -66,14 +66,14 @@ $iconos = [
 
   <?php if ($bloque['clave'] === 'cta_final'): ?>
     <div class="admin-panel ancho-760">
-      <h2 class="mt-0">Boton</h2>
+      <h2 class="mt-0">Botón</h2>
       <div class="admin-form-grid admin-form-grid--2">
         <div class="campo">
-          <label for="boton_texto">Texto del boton</label>
+          <label for="boton_texto">Texto del botón</label>
           <input type="text" id="boton_texto" name="boton_texto" value="<?= $v($contenido['boton_texto'] ?? '') ?>">
         </div>
         <div class="campo">
-          <label for="boton_link">Enlace del boton</label>
+          <label for="boton_link">Enlace del botón</label>
           <input type="text" id="boton_link" name="boton_link" value="<?= $v($contenido['boton_link'] ?? '') ?>">
         </div>
       </div>
@@ -93,7 +93,7 @@ $iconos = [
           </select>
         </div>
         <div class="campo">
-          <label for="item_<?= $i ?>_titulo">Titulo</label>
+          <label for="item_<?= $i ?>_titulo">Título</label>
           <input type="text" id="item_<?= $i ?>_titulo" name="item_<?= $i ?>_titulo" value="<?= $v($item['titulo'] ?? '') ?>">
         </div>
         <div class="campo">
@@ -106,7 +106,7 @@ $iconos = [
 
   <?php if ($bloque['clave'] === 'intro' && $bloque['pagina'] === 'nosotros'): ?>
     <div class="admin-panel ancho-760">
-      <h2 class="mt-0">Segundo parrafo</h2>
+      <h2 class="mt-0">Segundo párrafo</h2>
       <div class="campo">
         <label for="parrafo_2">Texto</label>
         <textarea id="parrafo_2" name="parrafo_2"><?= $v($contenido['parrafo_2'] ?? '') ?></textarea>
@@ -120,7 +120,7 @@ $iconos = [
         <h2 class="mt-0">Cifra <?= $i + 1 ?></h2>
         <div class="admin-form-grid admin-form-grid--2">
           <div class="campo">
-            <label for="item_<?= $i ?>_numero">Numero</label>
+            <label for="item_<?= $i ?>_numero">Número</label>
             <input type="text" id="item_<?= $i ?>_numero" name="item_<?= $i ?>_numero" value="<?= $v($item['numero'] ?? '') ?>" placeholder="Ej. +50">
           </div>
           <div class="campo">

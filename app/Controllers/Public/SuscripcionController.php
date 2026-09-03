@@ -24,7 +24,7 @@ class SuscripcionController extends Controller
         $validator->requerido('email', 'El correo')->email('email', 'El correo');
 
         if (!$validator->pasa()) {
-            Flash::set('error', 'Ingresa un correo valido.');
+            Flash::set('error', 'Ingresa un correo válido.');
             $this->redirect('/#newsletter');
         }
 
@@ -37,7 +37,7 @@ class SuscripcionController extends Controller
         $existente = Suscriptor::porEmail($email);
 
         if ($existente && $existente['estado'] === 'confirmado') {
-            Flash::set('exito', 'Este correo ya esta suscrito. ¡Gracias!');
+            Flash::set('exito', 'Este correo ya está suscrito. ¡Gracias!');
             $this->redirect('/#newsletter');
         }
 
@@ -76,7 +76,7 @@ class SuscripcionController extends Controller
 
         (new MailerService($this->db))->enviarConfirmacionSuscripcion($suscriptor);
 
-        Flash::set('exito', 'Revisa tu correo y confirma tu suscripcion.');
+        Flash::set('exito', 'Revisa tu correo y confirma tu suscripción.');
         $this->redirect('/#newsletter');
     }
 
@@ -92,7 +92,7 @@ class SuscripcionController extends Controller
             Suscriptor::update($suscriptor['id'], ['estado' => 'confirmado', 'confirmado_en' => date('Y-m-d H:i:s')]);
         }
 
-        $this->view('public/suscripcion/confirmado', [], ['title' => 'Suscripcion confirmada | Dream Go Operadora Turistica']);
+        $this->view('public/suscripcion/confirmado', [], ['title' => 'Suscripción confirmada | Dream Go Operadora Turística']);
     }
 
     public function baja(string $token): void
@@ -107,6 +107,6 @@ class SuscripcionController extends Controller
             Suscriptor::update($suscriptor['id'], ['estado' => 'baja', 'baja_en' => date('Y-m-d H:i:s')]);
         }
 
-        $this->view('public/suscripcion/baja', [], ['title' => 'Suscripcion cancelada | Dream Go Operadora Turistica']);
+        $this->view('public/suscripcion/baja', [], ['title' => 'Suscripción cancelada | Dream Go Operadora Turística']);
     }
 }

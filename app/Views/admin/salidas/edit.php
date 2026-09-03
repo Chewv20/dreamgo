@@ -11,7 +11,7 @@
       <input type="date" id="fecha_regreso" name="fecha_regreso" value="<?= htmlspecialchars($salida['fecha_regreso'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
     </div>
     <div class="campo">
-      <label for="cupo_maximo">Cupo maximo</label>
+      <label for="cupo_maximo">Cupo máximo</label>
       <input type="number" min="0" id="cupo_maximo" name="cupo_maximo" required value="<?= (int) $salida['cupo_maximo'] ?>">
       <small class="op-70">Cupo disponible actual: <?= (int) $salida['cupo_disponible'] ?></small>
     </div>

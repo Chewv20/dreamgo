@@ -13,15 +13,15 @@
       <input type="email" id="email" name="email" required>
     </div>
     <div class="campo">
-      <label for="telefono">Telefono</label>
+      <label for="telefono">Teléfono</label>
       <input type="tel" id="telefono" name="telefono" required>
     </div>
     <div class="campo">
-      <label for="num_personas">Numero de personas</label>
+      <label for="num_personas">Número de personas</label>
       <input type="number" id="num_personas" name="num_personas" min="1" max="<?= (int) $salida['cupo_disponible'] ?>" required value="1">
     </div>
     <div class="campo">
-      <label for="codigo_descuento">Codigo de descuento (opcional)</label>
+      <label for="codigo_descuento">Código de descuento (opcional)</label>
       <input type="text" id="codigo_descuento" name="codigo_descuento" placeholder="Ej. VERANO2026">
     </div>
     <button type="submit" class="btn btn-primario">Crear reserva</button>

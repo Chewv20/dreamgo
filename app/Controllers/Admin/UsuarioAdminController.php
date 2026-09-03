@@ -126,7 +126,7 @@ class UsuarioAdminController extends AdminController
         // al ultimo o por desactivarlo.
         $pierdeAcceso = $usuarioEraSistema && (!$nuevoRolEsSistema || $datos['activo'] === 0);
         if ($pierdeAcceso && Usuario::contarAdminsSistemaActivos((int) $usuario['id']) === 0) {
-            Flash::set('error', 'No puedes quitar el rol ni desactivar al ultimo Administrador activo.');
+            Flash::set('error', 'No puedes quitar el rol ni desactivar al último Administrador activo.');
             $this->redirect("/admin/usuarios/{$id}/editar");
         }
 

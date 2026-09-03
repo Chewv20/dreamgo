@@ -6,7 +6,7 @@
 <div class="admin-panel">
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
-      <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Ultimo acceso</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th>Acciones</th></tr></thead>
       <tbody>
         <?php foreach ($usuarios as $usuario): ?>
           <tr>

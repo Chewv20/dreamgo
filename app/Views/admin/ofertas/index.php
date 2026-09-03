@@ -1,12 +1,12 @@
 <?php /** @var array $ofertas */ ?>
 <div class="admin-acciones mb-md">
-  <a href="/admin/ofertas/crear" class="btn btn-primario">Nuevo codigo</a>
+  <a href="/admin/ofertas/crear" class="btn btn-primario">Nuevo código</a>
 </div>
 
 <div class="admin-panel">
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
-      <thead><tr><th>Codigo</th><th>Descuento</th><th>Alcance</th><th>Vigencia</th><th>Usos</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>Código</th><th>Descuento</th><th>Alcance</th><th>Vigencia</th><th>Usos</th><th>Estado</th><th>Acciones</th></tr></thead>
       <tbody>
         <?php foreach ($ofertas as $o): ?>
           <tr>
@@ -34,7 +34,7 @@
           </tr>
         <?php endforeach; ?>
         <?php if (empty($ofertas)): ?>
-          <tr><td colspan="7">Aun no hay codigos de descuento.</td></tr>
+          <tr><td colspan="7">Aún no hay códigos de descuento.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>

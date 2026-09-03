@@ -13,7 +13,7 @@ $conceptos = ['anticipo' => 'Anticipo', 'saldo' => 'Saldo', 'otro' => 'Otro'];
     <tr><td>Fecha de salida</td><td><?= \App\Helpers\Fecha::corta($reserva['fecha_salida']) ?></td></tr>
     <tr><td>Cliente</td><td><?= htmlspecialchars($reserva['cliente_nombre'], ENT_QUOTES, 'UTF-8') ?></td></tr>
     <tr><td>Correo</td><td><?= htmlspecialchars($reserva['cliente_email'], ENT_QUOTES, 'UTF-8') ?></td></tr>
-    <tr><td>Telefono</td><td><?= htmlspecialchars($reserva['cliente_telefono'], ENT_QUOTES, 'UTF-8') ?></td></tr>
+    <tr><td>Teléfono</td><td><?= htmlspecialchars($reserva['cliente_telefono'], ENT_QUOTES, 'UTF-8') ?></td></tr>
     <tr><td>Personas</td><td><?= (int) $reserva['num_personas'] ?></td></tr>
     <tr><td>Total</td><td>$<?= number_format((float) $reserva['precio_total'], 2) ?> <?= $moneda ?></td></tr>
     <tr><td>Pagado</td><td>$<?= number_format((float) $reserva['monto_pagado'], 2) ?> <?= $moneda ?></td></tr>

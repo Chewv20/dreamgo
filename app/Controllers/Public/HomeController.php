@@ -23,7 +23,7 @@ class HomeController extends Controller
             'resumenes' => Resena::resumenPorPaquetes(array_column($destacados, 'id')),
             'categorias' => Categoria::activas(),
         ], [
-            'title' => ConfiguracionSitio::get('meta_title_default', 'Dream Go Operadora Turistica'),
+            'title' => ConfiguracionSitio::get('meta_title_default', 'Dream Go Operadora Turística'),
             'description' => ConfiguracionSitio::get('meta_description_default', 'Excursiones y paquetes de viaje.'),
         ]);
     }

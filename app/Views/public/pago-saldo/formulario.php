@@ -14,7 +14,7 @@ $pagado = (float) $reserva['monto_pagado'];
   <p><strong><?= htmlspecialchars($reserva['paquete_titulo'], ENT_QUOTES, 'UTF-8') ?></strong></p>
 
   <div class="panel-resultado">
-    <p><strong>Codigo:</strong> <?= htmlspecialchars($reserva['codigo_reserva'], ENT_QUOTES, 'UTF-8') ?></p>
+    <p><strong>Código:</strong> <?= htmlspecialchars($reserva['codigo_reserva'], ENT_QUOTES, 'UTF-8') ?></p>
     <p><strong>Fecha de salida:</strong> <?= htmlspecialchars(date('d/m/Y', strtotime($reserva['fecha_salida'])), ENT_QUOTES, 'UTF-8') ?></p>
     <p><strong>Precio total:</strong> $<?= $fmt($total) ?> <?= $moneda ?></p>
     <p><strong>Pagado:</strong> $<?= $fmt($pagado) ?> <?= $moneda ?></p>
@@ -29,14 +29,14 @@ $pagado = (float) $reserva['monto_pagado'];
     <form method="post" action="/reserva/<?= rawurlencode((string) $reserva['codigo_reserva']) ?>/pagar-saldo" class="mt-15">
       <?= \App\Helpers\Csrf::field() ?>
       <input type="hidden" name="t" value="<?= htmlspecialchars((string) $reserva['token_publico'], ENT_QUOTES, 'UTF-8') ?>">
-      <button type="submit" class="btn btn-primario w-100">Pagar $<?= $fmt($saldo) ?> <?= $moneda ?> en linea</button>
+      <button type="submit" class="btn btn-primario w-100">Pagar $<?= $fmt($saldo) ?> <?= $moneda ?> en línea</button>
     </form>
     <p class="nota-form">Te llevaremos a Mercado Pago para completar el pago de forma segura.</p>
   <?php elseif ($reserva['estado'] !== 'confirmada'): ?>
-    <p class="mt-15">Esta reserva todavia no esta confirmada, asi que aun no hay un saldo por pagar. Te avisaremos por correo en cuanto se confirme.</p>
+    <p class="mt-15">Esta reserva todavía no está confirmada, así que aún no hay un saldo por pagar. Te avisaremos por correo en cuanto se confirme.</p>
   <?php else: ?>
     <p class="mt-15">Esta reserva no tiene saldo pendiente. ¡Todo listo!</p>
   <?php endif; ?>
 
-  <p class="mt-15">¿Dudas? Escribenos desde <a href="/contacto">nuestra pagina de contacto</a>.</p>
+  <p class="mt-15">¿Dudas? Escríbenos desde <a href="/contacto">nuestra página de contacto</a>.</p>
 </section>

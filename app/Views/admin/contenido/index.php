@@ -5,7 +5,7 @@
 
 <div class="admin-panel">
   <p class="op-75 mt-0">
-    Elige una pagina para editar sus textos, orden y colores. Los cambios se ven de inmediato en el sitio.
+    Elige una página para editar sus textos, orden y colores. Los cambios se ven de inmediato en el sitio.
   </p>
 
   <div class="grid-tarjetas grid-tarjetas--3">

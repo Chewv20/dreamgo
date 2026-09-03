@@ -15,7 +15,7 @@
         <input type="email" id="email" name="email" required autofocus value="<?= htmlspecialchars($email ?? '', ENT_QUOTES, 'UTF-8') ?>">
       </div>
       <div class="campo">
-        <label for="password">Contrasena</label>
+        <label for="password">Contraseña</label>
         <input type="password" id="password" name="password" required>
       </div>
       <button type="submit" class="btn btn-primario w-100">Entrar</button>

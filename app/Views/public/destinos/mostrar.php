@@ -24,9 +24,9 @@ $articulos ??= [];
 
   <?php if (empty($paquetes)): ?>
     <?php
-    $titulo = 'Proximamente';
-    $texto = 'Aun no hay paquetes publicados en este destino. Vuelve pronto o pide una cotizacion a medida.';
-    $cta = ['url' => '/cotizador', 'texto' => 'Solicitar cotizacion'];
+    $titulo = 'Próximamente';
+    $texto = 'Aún no hay paquetes publicados en este destino. Vuelve pronto o pide una cotización a medida.';
+    $cta = ['url' => '/cotizador', 'texto' => 'Solicitar cotización'];
     require __DIR__ . '/../../partials/_estado_vacio.php';
     ?>
   <?php else: ?>
@@ -40,7 +40,7 @@ $articulos ??= [];
 
 <?php if (!empty($articulos)): ?>
 <section class="seccion contenedor">
-  <div class="seccion__encabezado"><h2>Articulos sobre <?= htmlspecialchars($categoria['nombre'], ENT_QUOTES, 'UTF-8') ?></h2></div>
+  <div class="seccion__encabezado"><h2>Artículos sobre <?= htmlspecialchars($categoria['nombre'], ENT_QUOTES, 'UTF-8') ?></h2></div>
   <div class="grid-tarjetas grid-tarjetas--3">
     <?php foreach ($articulos as $a): ?>
       <article class="tarjeta animar-entrada">

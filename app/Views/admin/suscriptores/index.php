@@ -19,7 +19,7 @@
           </tr>
         <?php endforeach; ?>
         <?php if (empty($suscriptores)): ?>
-          <tr><td colspan="3">Aun no hay suscriptores registrados.</td></tr>
+          <tr><td colspan="3">Aún no hay suscriptores registrados.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>

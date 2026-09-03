@@ -205,7 +205,7 @@ class PaqueteAdminController extends AdminController
             ->requerido('estado', 'El estado');
 
         if ($validator->pasa() && !is_numeric($datos['precio_desde'])) {
-            Flash::set('error', 'El precio debe ser un numero valido.');
+            Flash::set('error', 'El precio debe ser un número válido.');
 
             return false;
         }
@@ -219,7 +219,7 @@ class PaqueteAdminController extends AdminController
         }
 
         if (!array_key_exists($datos['moneda'] ?? '', self::MONEDAS)) {
-            Flash::set('error', 'Selecciona una moneda valida.');
+            Flash::set('error', 'Selecciona una moneda válida.');
 
             return false;
         }

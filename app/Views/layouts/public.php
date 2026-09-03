@@ -61,7 +61,7 @@ foreach ($coloresClaves as $claveColor) {
 <header class="header">
   <div class="contenedor header__contenido">
     <a href="/" class="header__logo" aria-label="Dream Go - Inicio">
-      <img src="/assets/img/logo.avif" alt="Dream Go Operadora Turistica">
+      <img src="/assets/img/logo.avif" alt="Dream Go Operadora Turística">
     </a>
     <button type="button" class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-principal">&#9776;</button>
     <nav class="nav" id="nav-principal" data-nav>
@@ -94,7 +94,7 @@ $footerTelefono = \App\Models\ConfiguracionSitio::get('telefono_contacto', '');
 $footerEmail = \App\Models\ConfiguracionSitio::get('email_contacto', '');
 $footerWhatsappNumero = \App\Models\ConfiguracionSitio::get('whatsapp_numero', '');
 $footerWhatsappLink = $footerWhatsappNumero !== ''
-    ? (new \App\Services\WhatsAppLinkService())->generarLink($footerWhatsappNumero, 'Hola, me gustaria mas informacion sobre sus paquetes de viaje.')
+    ? (new \App\Services\WhatsAppLinkService())->generarLink($footerWhatsappNumero, 'Hola, me gustaría más información sobre sus paquetes de viaje.')
     : '';
 $footerRedes = [
     'Facebook' => \App\Models\ConfiguracionSitio::get('facebook_url', ''),
@@ -115,7 +115,7 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
   <div class="contenedor footer__grid">
     <div class="footer__marca">
       <img src="/assets/img/logo.avif" alt="Dream Go" class="footer__logo">
-      <p>Dream Go Operadora Turistica &mdash; Excursiones nacionales e internacionales.</p>
+      <p>Dream Go Operadora Turística &mdash; Excursiones nacionales e internacionales.</p>
     </div>
 
     <?php if ($footerTieneContacto): ?>
@@ -163,7 +163,7 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
       </ul>
 
       <?php if ($footerTieneRedes): ?>
-        <h3 class="mt-15">Siguenos</h3>
+        <h3 class="mt-15">Síguenos</h3>
         <div class="footer__social">
           <?php foreach ($footerRedes as $nombre => $url): ?>
             <?php if ($url !== ''): ?>
@@ -194,8 +194,8 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
   <div class="contenedor banner-consentimiento__contenido">
     <p class="banner-consentimiento__texto">
       Usamos cookies propias y de terceros (Google, Meta) para analizar el uso del sitio y medir
-      nuestras campanas. Puedes aceptarlas o rechazarlas; tu eleccion se guarda en este navegador.
-      Mas informacion en el <a href="/aviso-de-privacidad">Aviso de Privacidad</a>.
+      nuestras campañas. Puedes aceptarlas o rechazarlas; tu elección se guarda en este navegador.
+      Más información en el <a href="/aviso-de-privacidad">Aviso de Privacidad</a>.
     </p>
     <div class="banner-consentimiento__acciones">
       <button type="button" class="btn btn-secundario" data-consentimiento-rechazar>Rechazar</button>

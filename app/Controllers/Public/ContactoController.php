@@ -36,7 +36,7 @@ class ContactoController extends Controller
         $ip = $this->request->ip();
         if (RateLimiter::demasiados('contacto', null, $ip)) {
             RateLimiter::registrar('contacto', null, $ip);
-            $this->abort(429, 'Demasiados envios. Espera unos minutos e intenta de nuevo.');
+            $this->abort(429, 'Demasiados envíos. Espera unos minutos e intenta de nuevo.');
         }
         RateLimiter::registrar('contacto', null, $ip);
 
@@ -83,7 +83,7 @@ class ContactoController extends Controller
             'paquete_titulo' => null,
         ]);
 
-        Flash::set('exito', 'Gracias por escribirnos. Un asesor te contactara pronto.');
+        Flash::set('exito', 'Gracias por escribirnos. Un asesor te contactará pronto.');
         $this->redirect('/contacto');
     }
 
@@ -107,7 +107,7 @@ class ContactoController extends Controller
             'errores' => $errores,
             'valores' => $valores,
         ], [
-            'title' => 'Contacto | Dream Go Operadora Turistica',
+            'title' => 'Contacto | Dream Go Operadora Turística',
             'description' => 'Ponte en contacto con nuestro equipo de asesores de viaje.',
         ]);
     }

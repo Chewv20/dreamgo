@@ -7,14 +7,14 @@ $queryExtra ??= [];
 if ($paginador->totalPaginas > 1):
     $construirUrl = fn (int $pagina): string => $rutaBase . '?' . http_build_query([...$queryExtra, 'pagina' => $pagina]);
 ?>
-<nav class="paginacion" aria-label="Paginacion de resultados">
+<nav class="paginacion" aria-label="Paginación de resultados">
   <?php if ($paginador->tieneAnterior()): ?>
     <a href="<?= htmlspecialchars($construirUrl($paginador->pagina - 1), ENT_QUOTES, 'UTF-8') ?>" class="paginacion__enlace">&laquo; Anterior</a>
   <?php else: ?>
     <span class="paginacion__enlace paginacion__enlace--deshabilitado" aria-disabled="true">&laquo; Anterior</span>
   <?php endif; ?>
 
-  <span class="paginacion__estado">Pagina <?= $paginador->pagina ?> de <?= $paginador->totalPaginas ?></span>
+  <span class="paginacion__estado">Página <?= $paginador->pagina ?> de <?= $paginador->totalPaginas ?></span>
 
   <?php if ($paginador->tieneSiguiente()): ?>
     <a href="<?= htmlspecialchars($construirUrl($paginador->pagina + 1), ENT_QUOTES, 'UTF-8') ?>" class="paginacion__enlace">Siguiente &raquo;</a>

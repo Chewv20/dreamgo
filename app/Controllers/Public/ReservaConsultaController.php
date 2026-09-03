@@ -19,8 +19,8 @@ class ReservaConsultaController extends Controller
             'errores' => [],
             'valores' => ['codigo' => '', 'email' => ''],
         ], [
-            'title' => 'Mi reserva | Dream Go Operadora Turistica',
-            'description' => 'Consulta el estado de tu reserva con tu codigo y correo.',
+            'title' => 'Mi reserva | Dream Go Operadora Turística',
+            'description' => 'Consulta el estado de tu reserva con tu código y correo.',
         ]);
     }
 
@@ -42,7 +42,7 @@ class ReservaConsultaController extends Controller
                 'reserva' => null,
                 'errores' => $validator->errores(),
                 'valores' => $valores,
-            ], ['title' => 'Mi reserva | Dream Go Operadora Turistica']);
+            ], ['title' => 'Mi reserva | Dream Go Operadora Turística']);
 
             return;
         }
@@ -60,6 +60,6 @@ class ReservaConsultaController extends Controller
             'reserva' => $reserva ?: null,
             'errores' => [],
             'valores' => $valores,
-        ], ['title' => 'Mi reserva | Dream Go Operadora Turistica']);
+        ], ['title' => 'Mi reserva | Dream Go Operadora Turística']);
     }
 }

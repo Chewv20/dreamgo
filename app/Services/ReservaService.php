@@ -58,7 +58,7 @@ final class ReservaService
             }
 
             if ($salida['estado'] !== 'abierta') {
-                throw new RuntimeException('Esta fecha de salida ya no esta disponible.');
+                throw new RuntimeException('Esta fecha de salida ya no está disponible.');
             }
 
             if ((int) $salida['cupo_disponible'] < $datos['num_personas']) {

@@ -49,7 +49,7 @@
   <?php endif; ?>
   <?php if (isset($conversion)): ?>
   <div class="admin-panel">
-    <p class="stat-label">Tasa de conversion (periodo)</p>
+    <p class="stat-label">Tasa de conversión (periodo)</p>
     <p class="stat-num"><?= number_format($conversion['tasa'], 1) ?>%</p>
     <p class="stat-sub"><?= $conversion['convertidas'] ?> de <?= $conversion['total'] ?> cotizaciones</p>
   </div>
@@ -95,7 +95,7 @@
 
 <?php if (isset($proximasSalidas)): ?>
 <div class="admin-panel">
-  <h2 class="mt-0">Ocupacion de proximas salidas</h2>
+  <h2 class="mt-0">Ocupación de próximas salidas</h2>
   <?php if ($proximasSalidas === []): ?>
     <p class="op-70">No hay salidas futuras registradas.</p>
   <?php else: ?>
@@ -106,7 +106,7 @@
           <th>Paquete</th>
           <th>Fecha de salida</th>
           <th>Cupo</th>
-          <th>Ocupacion</th>
+          <th>Ocupación</th>
         </tr>
       </thead>
       <tbody>
@@ -138,7 +138,7 @@
 <?php endif; ?>
 
 <div class="admin-panel">
-  <h2 class="mt-0">Accesos rapidos</h2>
+  <h2 class="mt-0">Accesos rápidos</h2>
   <div class="admin-acciones">
     <a href="/admin/paquetes/crear" class="btn btn-primario">Nuevo paquete</a>
     <a href="/admin/paquetes" class="btn btn-secundario">Ver paquetes</a>

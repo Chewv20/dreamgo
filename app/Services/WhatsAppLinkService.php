@@ -18,7 +18,7 @@ final class WhatsAppLinkService
 
     public function generarLinkCotizacionPaquete(string $numeroDestino, string $tituloPaquete): string
     {
-        $mensaje = "Hola, me gustaria cotizar el paquete \"{$tituloPaquete}\". ¿Me pueden ayudar con la disponibilidad?";
+        $mensaje = "Hola, me gustaría cotizar el paquete \"{$tituloPaquete}\". ¿Me pueden ayudar con la disponibilidad?";
 
         return $this->generarLink($numeroDestino, $mensaje);
     }

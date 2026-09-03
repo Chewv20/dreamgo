@@ -2,7 +2,7 @@
 <div class="admin-panel">
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
-      <thead><tr><th>Fecha</th><th>Cliente</th><th>Paquete</th><th>Calificacion</th><th>Comentario</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>Fecha</th><th>Cliente</th><th>Paquete</th><th>Calificación</th><th>Comentario</th><th>Estado</th><th>Acciones</th></tr></thead>
       <tbody>
         <?php foreach ($resenas as $r): ?>
           <tr>
@@ -28,7 +28,7 @@
           </tr>
         <?php endforeach; ?>
         <?php if (empty($resenas)): ?>
-          <tr><td colspan="7">Aun no hay resenas registradas.</td></tr>
+          <tr><td colspan="7">Aún no hay reseñas registradas.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>

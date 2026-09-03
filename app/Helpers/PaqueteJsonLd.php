@@ -69,7 +69,7 @@ final class PaqueteJsonLd
                 'name' => $paquete['titulo'],
                 'description' => $paquete['resumen'] ?? null,
                 'image' => $imagen,
-                'brand' => ['@type' => 'Organization', 'name' => 'Dream Go Operadora Turistica'],
+                'brand' => ['@type' => 'Organization', 'name' => 'Dream Go Operadora Turística'],
                 'offers' => [
                     '@type' => 'Offer',
                     'priceCurrency' => $paquete['moneda'],

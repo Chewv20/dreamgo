@@ -64,7 +64,7 @@ class ConfiguracionController extends AdminController
             Auditoria::registrar('configuracion.guardar', 'configuracion', null, 'Claves: ' . implode(', ', $cambiadas));
         }
 
-        Flash::set('exito', 'Configuracion actualizada correctamente.');
+        Flash::set('exito', 'Configuración actualizada correctamente.');
         $this->redirect('/admin/configuracion');
     }
 }

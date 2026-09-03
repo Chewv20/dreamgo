@@ -3,13 +3,13 @@
 /** @var \Core\Paginator $paginador */
 ?>
 <div class="admin-acciones mb-md">
-  <a href="/admin/articulos/crear" class="btn btn-primario">Nuevo articulo</a>
+  <a href="/admin/articulos/crear" class="btn btn-primario">Nuevo artículo</a>
 </div>
 
 <div class="admin-panel">
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
-      <thead><tr><th>Titulo</th><th>Destino</th><th>Estado</th><th>Publicado</th><th>Autor</th><th></th></tr></thead>
+      <thead><tr><th>Título</th><th>Destino</th><th>Estado</th><th>Publicado</th><th>Autor</th><th></th></tr></thead>
       <tbody>
         <?php foreach ($articulos as $a): ?>
           <tr>
@@ -25,7 +25,7 @@
           </tr>
         <?php endforeach; ?>
         <?php if (empty($articulos)): ?>
-          <tr><td colspan="6">Todavia no hay articulos.</td></tr>
+          <tr><td colspan="6">Todavía no hay artículos.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>

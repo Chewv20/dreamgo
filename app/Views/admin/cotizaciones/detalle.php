@@ -15,7 +15,7 @@ $id = (int) $c['id'];
     <tr><td>Recibida</td><td><?= \App\Helpers\Fecha::cortaHora($c['creado_en']) ?></td></tr>
     <tr><td>Nombre</td><td><?= $e($c['nombre']) ?></td></tr>
     <tr><td>Correo</td><td><a href="mailto:<?= $e($c['email']) ?>"><?= $e($c['email']) ?></a></td></tr>
-    <tr><td>Telefono</td><td><?= $e($c['telefono']) ?></td></tr>
+    <tr><td>Teléfono</td><td><?= $e($c['telefono']) ?></td></tr>
     <tr><td>Paquete</td><td><?= $e($c['paquete_titulo'] ?? 'General / sin paquete') ?></td></tr>
     <tr><td>Personas</td><td><?= $c['num_personas'] !== null ? (int) $c['num_personas'] : '&mdash;' ?></td></tr>
     <tr><td>Fecha tentativa</td><td><?= $c['fecha_tentativa'] ? $e(\App\Helpers\Fecha::corta($c['fecha_tentativa'])) : '&mdash;' ?></td></tr>
@@ -36,7 +36,7 @@ $id = (int) $c['id'];
 </div>
 
 <div class="admin-panel admin-panel--720">
-  <h2 class="mt-0">Gestion</h2>
+  <h2 class="mt-0">Gestión</h2>
   <div class="admin-form-grid admin-form-grid--2">
     <form method="post" action="/admin/cotizaciones/<?= $id ?>/estado">
       <?= $csrf ?>
@@ -68,7 +68,7 @@ $id = (int) $c['id'];
 
     <form method="post" action="/admin/cotizaciones/<?= $id ?>/seguimiento">
       <?= $csrf ?>
-      <label for="seguimiento_en">Proximo contacto</label>
+      <label for="seguimiento_en">Próximo contacto</label>
       <div class="inline-form">
         <input type="date" id="seguimiento_en" name="seguimiento_en" value="<?= $e($c['seguimiento_en'] ?? '') ?>">
         <button type="submit" class="btn btn-secundario">Guardar</button>
@@ -84,13 +84,13 @@ $id = (int) $c['id'];
     <?= $csrf ?>
     <div class="campo">
       <label for="nota">Nueva nota</label>
-      <textarea id="nota" name="nota" rows="3" required maxlength="2000" placeholder="Ej. Llame al cliente, pidio propuesta con vuelos incluidos."></textarea>
+      <textarea id="nota" name="nota" rows="3" required maxlength="2000" placeholder="Ej. Llamé al cliente, pidió propuesta con vuelos incluidos."></textarea>
     </div>
     <button type="submit" class="btn btn-primario">Agregar nota</button>
   </form>
 
   <?php if (empty($notas)): ?>
-    <p class="op-70">Todavia no hay notas.</p>
+    <p class="op-70">Todavía no hay notas.</p>
   <?php else: ?>
     <ul class="lista-notas">
       <?php foreach ($notas as $nota): ?>

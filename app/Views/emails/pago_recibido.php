@@ -19,7 +19,7 @@ reserva <strong><?= htmlspecialchars($reserva['codigo_reserva'], ENT_QUOTES, 'UT
 <?php if ($saldo <= 0): ?>
   <p>Con esto tu reserva queda totalmente pagada. ¡Nos vemos pronto!</p>
 <?php else: ?>
-  <p>Aun queda un saldo por liquidar antes de la salida.</p>
+  <p>Aún queda un saldo por liquidar antes de la salida.</p>
 <?php endif; ?>
-<p>Adjuntamos tu comprobante actualizado en PDF<?php if ($urlComprobante !== ''): ?>. Tambien puedes
-<a href="<?= htmlspecialchars($urlComprobante, ENT_QUOTES, 'UTF-8') ?>" style="color:#a85f4d;">descargarlo desde aqui</a><?php endif; ?>.</p>
+<p>Adjuntamos tu comprobante actualizado en PDF<?php if ($urlComprobante !== ''): ?>. También puedes
+<a href="<?= htmlspecialchars($urlComprobante, ENT_QUOTES, 'UTF-8') ?>" style="color:#a85f4d;">descargarlo desde aquí</a><?php endif; ?>.</p>

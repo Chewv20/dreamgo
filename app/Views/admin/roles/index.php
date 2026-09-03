@@ -13,7 +13,7 @@
       <input type="text" id="nombre" name="nombre" required placeholder="Ej. Contador">
     </div>
     <div class="campo">
-      <label for="descripcion">Descripcion (opcional)</label>
+      <label for="descripcion">Descripción (opcional)</label>
       <input type="text" id="descripcion" name="descripcion" placeholder="Acceso de solo lectura a reservas">
     </div>
     <div>
@@ -26,7 +26,7 @@
   <h2 class="mt-0">Roles existentes</h2>
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
-      <thead><tr><th>Rol</th><th>Descripcion</th><th>Usuarios</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>Rol</th><th>Descripción</th><th>Usuarios</th><th>Acciones</th></tr></thead>
       <tbody>
         <?php foreach ($roles as $rol): ?>
           <tr>
@@ -50,9 +50,9 @@
 
 <div class="admin-panel">
   <h2 class="mt-0">Matriz de permisos</h2>
-  <p class="op-75">Marca los permisos que tendra cada rol. El rol Administrador siempre tiene acceso total.</p>
+  <p class="op-75">Marca los permisos que tendrá cada rol. El rol Administrador siempre tiene acceso total.</p>
   <?php if ($permisosAsignables !== null): ?>
-    <p class="op-75">Solo puedes asignar permisos que tu propio rol ya tiene; los demas aparecen bloqueados.</p>
+    <p class="op-75">Solo puedes asignar permisos que tu propio rol ya tiene; los demás aparecen bloqueados.</p>
   <?php endif; ?>
   <form method="post" action="/admin/roles/matriz">
     <?= \App\Helpers\Csrf::field() ?>

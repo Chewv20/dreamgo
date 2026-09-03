@@ -12,7 +12,7 @@ $pagado = (float) $reserva['monto_pagado'];
 $saldo = max(0, $total - $pagado);
 
 $etiquetasEstado = [
-    'pendiente' => 'Pendiente de confirmacion',
+    'pendiente' => 'Pendiente de confirmación',
     'confirmada' => 'Confirmada',
     'cancelada' => 'Cancelada',
     'expirada' => 'Expirada',
@@ -63,7 +63,7 @@ $fila = static function (string $etiqueta, string $valor) use ($e): string {
 </head>
 <body>
   <div class="encabezado">
-    <div class="marca">Dream Go Operadora Turistica</div>
+    <div class="marca">Dream Go Operadora Turística</div>
     <div class="doc">Comprobante de reserva</div>
   </div>
 
@@ -87,7 +87,7 @@ $fila = static function (string $etiqueta, string $valor) use ($e): string {
     <table class="bloque">
       <?= $fila('Nombre', (string) $reserva['cliente_nombre']) ?>
       <?= $fila('Correo', (string) $reserva['cliente_email']) ?>
-      <?= $fila('Telefono', (string) ($reserva['cliente_telefono'] ?? '')) ?>
+      <?= $fila('Teléfono', (string) ($reserva['cliente_telefono'] ?? '')) ?>
     </table>
 
     <div class="seccion-titulo">Pago</div>
@@ -96,7 +96,7 @@ $fila = static function (string $etiqueta, string $valor) use ($e): string {
       <tr><td style="font-weight:bold;color:#5a6a72;">Anticipo pagado</td><td class="val"><?= $dinero($pagado) ?> <?= $moneda ?></td></tr>
       <tr class="saldo"><td>Saldo pendiente</td><td class="val"><?= $dinero($saldo) ?> <?= $moneda ?></td></tr>
       <?php if ($metodo !== ''): ?>
-        <tr><td style="font-weight:bold;color:#5a6a72;">Metodo de pago</td><td class="val"><?= $e($etiquetasMetodo[$metodo] ?? ucfirst($metodo)) ?></td></tr>
+        <tr><td style="font-weight:bold;color:#5a6a72;">Método de pago</td><td class="val"><?= $e($etiquetasMetodo[$metodo] ?? ucfirst($metodo)) ?></td></tr>
       <?php endif; ?>
       <?php if (!empty($reserva['referencia_pago'])): ?>
         <tr><td style="font-weight:bold;color:#5a6a72;">Referencia</td><td class="val"><?= $e($reserva['referencia_pago']) ?></td></tr>
@@ -110,8 +110,8 @@ $fila = static function (string $etiqueta, string $valor) use ($e): string {
       <?php if ($agencia['email'] !== ''): ?><?= $e($agencia['email']) ?><?php endif; ?>
       <br><br>
       Este comprobante confirma el registro de la reserva con el saldo indicado arriba. El saldo
-      pendiente debe liquidarse segun las condiciones acordadas con la agencia. Documento generado
-      automaticamente el <?= date('d/m/Y H:i') ?>.
+      pendiente debe liquidarse según las condiciones acordadas con la agencia. Documento generado
+      automáticamente el <?= date('d/m/Y H:i') ?>.
     </div>
   </div>
 </body>

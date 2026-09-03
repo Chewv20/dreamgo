@@ -34,8 +34,8 @@ class BlogController extends Controller
             'categorias' => $categorias,
             'categoriaActiva' => $categoria,
         ], [
-            'title' => 'Blog de viajes | Dream Go Operadora Turistica',
-            'description' => 'Guias, consejos e inspiracion para tu proximo viaje con Dream Go.',
+            'title' => 'Blog de viajes | Dream Go Operadora Turística',
+            'description' => 'Guías, consejos e inspiración para tu próximo viaje con Dream Go.',
             'feed' => ['titulo' => 'Blog de viajes - Dream Go', 'url' => '/blog/feed'],
         ]);
     }
@@ -89,7 +89,7 @@ class BlogController extends Controller
         $articulo = Articulo::porSlugPublicado($slug);
 
         if (!$articulo) {
-            $this->abort(404, 'Articulo no encontrado.');
+            $this->abort(404, 'Artículo no encontrado.');
         }
 
         $this->view('public/blog/articulo', [

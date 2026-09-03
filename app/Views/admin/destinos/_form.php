@@ -21,7 +21,7 @@ $destino ??= [];
 </div>
 
 <div class="campo">
-  <label for="descripcion">Descripcion (texto plano; se muestra en la tarjeta y la ficha del destino)</label>
+  <label for="descripcion">Descripción (texto plano; se muestra en la tarjeta y la ficha del destino)</label>
   <textarea id="descripcion" name="descripcion" maxlength="1000"><?= htmlspecialchars($destino['descripcion'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
 </div>
 

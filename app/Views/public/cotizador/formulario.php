@@ -7,10 +7,10 @@ $valores ??= [];
 ?>
 <section class="seccion contenedor bloque-medio">
   <h1>Cotiza tu viaje</h1>
-  <p>Cuentanos que estas buscando y nuestro equipo te enviara una propuesta personalizada.</p>
+  <p>Cuéntanos qué estás buscando y nuestro equipo te enviará una propuesta personalizada.</p>
   <?php if ($paquete): ?>
     <p class="aviso-caja">
-      Estas cotizando: <strong><?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?></strong>
+      Estás cotizando: <strong><?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?></strong>
     </p>
   <?php endif; ?>
 
@@ -25,19 +25,19 @@ $valores ??= [];
     </div>
 
     <div class="campo">
-      <label for="email">Correo electronico</label>
+      <label for="email">Correo electrónico</label>
       <input type="email" id="email" name="email" autocomplete="email" required value="<?= htmlspecialchars($valores['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
       <?php if (!empty($errores['email'])): ?><small class="campo__error"><?= htmlspecialchars($errores['email'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     </div>
 
     <div class="campo">
-      <label for="telefono">Telefono / WhatsApp</label>
+      <label for="telefono">Teléfono / WhatsApp</label>
       <input type="tel" id="telefono" name="telefono" autocomplete="tel" required value="<?= htmlspecialchars($valores['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
       <?php if (!empty($errores['telefono'])): ?><small class="campo__error"><?= htmlspecialchars($errores['telefono'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     </div>
 
     <div class="campo">
-      <label for="num_personas">Numero de personas</label>
+      <label for="num_personas">Número de personas</label>
       <input type="number" id="num_personas" name="num_personas" min="1" value="<?= htmlspecialchars($valores['num_personas'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
     </div>
 
@@ -47,7 +47,7 @@ $valores ??= [];
     </div>
 
     <div class="campo">
-      <label for="mensaje">Cuentanos mas sobre tu viaje (opcional)</label>
+      <label for="mensaje">Cuéntanos más sobre tu viaje (opcional)</label>
       <textarea id="mensaje" name="mensaje"><?= htmlspecialchars($valores['mensaje'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
     </div>
 

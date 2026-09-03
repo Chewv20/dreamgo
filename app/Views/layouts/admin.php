@@ -14,7 +14,7 @@
 <body class="admin-body">
 <a href="#contenido-admin" class="sr-only-focusable">Saltar al contenido</a>
 <div class="admin-layout">
-  <button type="button" class="admin-sidebar-toggle" data-admin-sidebar-toggle aria-expanded="false" aria-controls="admin-sidebar">&#9776; Menu</button>
+  <button type="button" class="admin-sidebar-toggle" data-admin-sidebar-toggle aria-expanded="false" aria-controls="admin-sidebar">&#9776; Menú</button>
 
   <aside class="admin-sidebar" id="admin-sidebar" data-admin-sidebar>
     <div class="admin-sidebar__logo">
@@ -26,19 +26,19 @@
       <?php if (Auth::hasPermission('destinos.gestionar')): ?><a href="/admin/destinos">Destinos</a><?php endif; ?>
       <?php if (Auth::hasPermission('reservas.ver')): ?><a href="/admin/reservas">Reservas</a><?php endif; ?>
       <?php if (Auth::hasPermission('cotizaciones.ver')): ?><a href="/admin/cotizaciones">Cotizaciones</a><?php endif; ?>
-      <?php if (Auth::hasPermission('resenas.ver')): ?><a href="/admin/resenas">Resenas</a><?php endif; ?>
+      <?php if (Auth::hasPermission('resenas.ver')): ?><a href="/admin/resenas">Reseñas</a><?php endif; ?>
       <?php if (Auth::hasPermission('articulos.ver')): ?><a href="/admin/articulos">Blog</a><?php endif; ?>
       <?php if (Auth::hasPermission('suscriptores.ver')): ?><a href="/admin/suscriptores">Suscriptores</a><?php endif; ?>
       <?php if (Auth::hasPermission('ofertas.gestionar')): ?><a href="/admin/ofertas">Ofertas</a><?php endif; ?>
       <?php if (Auth::hasPermission('usuarios.gestionar')): ?><a href="/admin/usuarios">Usuarios</a><?php endif; ?>
       <?php if (Auth::hasPermission('roles.gestionar')): ?><a href="/admin/roles">Roles y permisos</a><?php endif; ?>
       <?php if (Auth::hasPermission('contenido.gestionar')): ?><a href="/admin/contenido">Contenido del sitio</a><a href="/admin/colores">Colores del sitio</a><?php endif; ?>
-      <?php if (Auth::hasPermission('configuracion.gestionar')): ?><a href="/admin/configuracion">Configuracion</a><?php endif; ?>
-      <?php if (Auth::hasPermission('bitacora.ver')): ?><a href="/admin/bitacora">Bitacora</a><?php endif; ?>
+      <?php if (Auth::hasPermission('configuracion.gestionar')): ?><a href="/admin/configuracion">Configuración</a><?php endif; ?>
+      <?php if (Auth::hasPermission('bitacora.ver')): ?><a href="/admin/bitacora">Bitácora</a><?php endif; ?>
     </nav>
     <form method="post" action="/admin/logout" class="admin-sidebar__logout">
       <?= \App\Helpers\Csrf::field() ?>
-      <button type="submit" class="btn btn-secundario w-100">Cerrar sesion</button>
+      <button type="submit" class="btn btn-secundario w-100">Cerrar sesión</button>
     </form>
   </aside>
 

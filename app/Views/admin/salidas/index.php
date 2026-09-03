@@ -27,7 +27,7 @@
           </tr>
         <?php endforeach; ?>
         <?php if (empty($salidas)): ?>
-          <tr><td colspan="5">Aun no hay fechas de salida para este paquete.</td></tr>
+          <tr><td colspan="5">Aún no hay fechas de salida para este paquete.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>

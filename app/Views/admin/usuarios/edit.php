@@ -11,7 +11,7 @@
       <input type="email" value="<?= htmlspecialchars($usuario['email'], ENT_QUOTES, 'UTF-8') ?>" disabled>
     </div>
     <div class="campo">
-      <label for="password">Nueva contrasena (dejar en blanco para no cambiar)</label>
+      <label for="password">Nueva contraseña (dejar en blanco para no cambiar)</label>
       <input type="password" id="password" name="password" minlength="8">
     </div>
     <div class="campo">

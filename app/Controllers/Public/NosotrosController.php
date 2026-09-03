@@ -14,8 +14,8 @@ class NosotrosController extends Controller
         $this->view('public/nosotros/index', [
             'bloques' => BloquePagina::porPagina('nosotros'),
         ], [
-            'title' => 'Nosotros | Dream Go Operadora Turistica',
-            'description' => 'Conoce al equipo detras de Dream Go Operadora Turistica.',
+            'title' => 'Nosotros | Dream Go Operadora Turística',
+            'description' => 'Conoce al equipo detrás de Dream Go Operadora Turística.',
         ]);
     }
 }

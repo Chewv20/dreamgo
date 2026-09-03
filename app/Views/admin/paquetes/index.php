@@ -6,7 +6,7 @@
 <div class="admin-panel">
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
-      <thead><tr><th>Titulo</th><th>Categoria</th><th>Precio</th><th>Estado</th><th>Destacado</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>Título</th><th>Categoría</th><th>Precio</th><th>Estado</th><th>Destacado</th><th>Acciones</th></tr></thead>
       <tbody>
         <?php foreach ($paquetes as $paquete): ?>
           <tr>
@@ -17,7 +17,7 @@
               <?php $badge = ['publicado' => 'verde', 'borrador' => 'ambar', 'archivado' => 'gris'][$paquete['estado']]; ?>
               <span class="admin-badge admin-badge--<?= $badge ?>"><?= ucfirst($paquete['estado']) ?></span>
             </td>
-            <td><?= (int) $paquete['destacado'] === 1 ? 'Si' : '-' ?></td>
+            <td><?= (int) $paquete['destacado'] === 1 ? 'Sí' : '-' ?></td>
             <td class="admin-acciones">
               <a href="/admin/paquetes/<?= (int) $paquete['id'] ?>/editar" class="btn btn-secundario">Editar</a>
             </td>

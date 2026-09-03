@@ -2,12 +2,12 @@
 /** @var array $valores */
 $v = static fn (string $valor): string => htmlspecialchars($valor, ENT_QUOTES, 'UTF-8');
 $etiquetas = [
-    'color_primario' => 'Primario (acentos, boton secundario)',
-    'color_primario_oscuro' => 'Primario oscuro (boton principal, enlaces)',
+    'color_primario' => 'Primario (acentos, botón secundario)',
+    'color_primario_oscuro' => 'Primario oscuro (botón principal, enlaces)',
     'color_texto_oscuro' => 'Texto / fondos oscuros (footer, hero)',
     'color_fondo' => 'Fondo general del sitio',
     'color_fondo_alterno' => 'Fondo alterno (secciones destacadas)',
-    'color_exito' => 'Mensajes de exito',
+    'color_exito' => 'Mensajes de éxito',
     'color_error' => 'Mensajes de error',
 ];
 ?>
@@ -19,7 +19,7 @@ $etiquetas = [
   <?= \App\Helpers\Csrf::field() ?>
 
   <div class="admin-panel bloque-medio">
-    <p class="op-75 mt-0">Estos colores aplican a todo el sitio publico. Los cambios se ven de inmediato.</p>
+    <p class="op-75 mt-0">Estos colores aplican a todo el sitio público. Los cambios se ven de inmediato.</p>
 
     <?php foreach ($etiquetas as $clave => $etiqueta): ?>
       <div class="campo fila-color">

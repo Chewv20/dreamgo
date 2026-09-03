@@ -67,7 +67,7 @@ class AuthController extends Controller
         $usuario = Usuario::find((int) Auth::id());
 
         if ($usuario === false || !password_verify($actual, $usuario['password_hash'])) {
-            Flash::set('error', 'La contrasena actual no es correcta.');
+            Flash::set('error', 'La contraseña actual no es correcta.');
             $this->redirect('/admin/cambiar-password');
         }
 
@@ -77,12 +77,12 @@ class AuthController extends Controller
         }
 
         if ($nueva !== $confirmacion) {
-            Flash::set('error', 'La confirmacion no coincide con la nueva contrasena.');
+            Flash::set('error', 'La confirmación no coincide con la nueva contraseña.');
             $this->redirect('/admin/cambiar-password');
         }
 
         if (password_verify($nueva, $usuario['password_hash'])) {
-            Flash::set('error', 'La nueva contrasena debe ser distinta a la actual.');
+            Flash::set('error', 'La nueva contraseña debe ser distinta a la actual.');
             $this->redirect('/admin/cambiar-password');
         }
 
@@ -94,7 +94,7 @@ class AuthController extends Controller
         // forzarCierre() invalida la sesion admin sin destruir la sesion HTTP,
         // para que el mensaje de exito siga visible en la pagina de login.
         Auth::forzarCierre();
-        Flash::set('exito', 'Contrasena actualizada. Inicia sesion con tu nueva contrasena.');
+        Flash::set('exito', 'Contraseña actualizada. Inicia sesión con tu nueva contraseña.');
         $this->redirect('/admin/login');
     }
 }

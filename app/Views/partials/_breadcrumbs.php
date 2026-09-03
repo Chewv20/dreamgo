@@ -8,7 +8,7 @@ if (empty($migas)) {
     return;
 }
 ?>
-<nav class="breadcrumbs" aria-label="Ruta de navegacion">
+<nav class="breadcrumbs" aria-label="Ruta de navegación">
   <ol>
     <?php foreach ($migas as $i => $miga): ?>
       <li>

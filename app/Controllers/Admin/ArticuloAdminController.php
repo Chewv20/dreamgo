@@ -63,7 +63,7 @@ class ArticuloAdminController extends AdminController
         $this->procesarImagen($id, $slug);
         Auditoria::registrar('articulo.crear', 'articulo', $id, $datos['titulo'] . ' (' . $datos['estado'] . ')');
 
-        Flash::set('exito', 'Articulo creado correctamente.');
+        Flash::set('exito', 'Artículo creado correctamente.');
         $this->redirect('/admin/articulos');
     }
 
@@ -112,7 +112,7 @@ class ArticuloAdminController extends AdminController
         $this->procesarImagen($id, $slug);
         Auditoria::registrar('articulo.editar', 'articulo', $id, $datos['titulo'] . ' (' . $datos['estado'] . ')');
 
-        Flash::set('exito', 'Articulo actualizado correctamente.');
+        Flash::set('exito', 'Artículo actualizado correctamente.');
         $this->redirect('/admin/articulos');
     }
 
@@ -125,7 +125,7 @@ class ArticuloAdminController extends AdminController
         Articulo::update($id, ['estado' => 'archivado']);
         Auditoria::registrar('articulo.archivar', 'articulo', $id, (string) ($articulo['titulo'] ?? ''));
 
-        Flash::set('exito', 'Articulo archivado.');
+        Flash::set('exito', 'Artículo archivado.');
         $this->redirect('/admin/articulos');
     }
 
@@ -145,7 +145,7 @@ class ArticuloAdminController extends AdminController
             ->requerido('estado', 'El estado');
 
         if ($validator->pasa() && !array_key_exists($datos['estado'] ?? '', self::ESTADOS)) {
-            Flash::set('error', 'Selecciona un estado valido.');
+            Flash::set('error', 'Selecciona un estado válido.');
 
             return false;
         }

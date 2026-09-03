@@ -11,7 +11,7 @@
       <input type="date" id="fecha_regreso" name="fecha_regreso">
     </div>
     <div class="campo">
-      <label for="cupo_maximo">Cupo maximo</label>
+      <label for="cupo_maximo">Cupo máximo</label>
       <input type="number" min="1" id="cupo_maximo" name="cupo_maximo" required>
     </div>
     <div class="campo">

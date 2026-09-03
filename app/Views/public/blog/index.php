@@ -8,7 +8,7 @@ $fecha = static fn (?string $v): string => \App\Helpers\Fecha::corta($v);
 <section class="hero hero--mini">
   <div class="contenedor">
     <h1>Blog de viajes</h1>
-    <p>Guias, consejos e inspiracion para planear tu proxima escapada.</p>
+    <p>Guías, consejos e inspiración para planear tu próxima escapada.</p>
   </div>
 </section>
 
@@ -16,7 +16,7 @@ $fecha = static fn (?string $v): string => \App\Helpers\Fecha::corta($v);
   <?php $migas = [['texto' => 'Inicio', 'url' => '/'], ['texto' => 'Blog']]; require __DIR__ . '/../../partials/_breadcrumbs.php'; ?>
 
   <?php if (!empty($categorias)): ?>
-    <nav class="blog-categorias" aria-label="Filtrar articulos por categoria">
+    <nav class="blog-categorias" aria-label="Filtrar artículos por categoría">
       <a href="/blog"<?= $categoriaActiva === null ? ' class="is-activa" aria-current="true"' : '' ?>>Todos</a>
       <?php foreach ($categorias as $cat): ?>
         <a href="/blog?categoria=<?= urlencode($cat['slug']) ?>"<?= $categoriaActiva === $cat['slug'] ? ' class="is-activa" aria-current="true"' : '' ?>><?= htmlspecialchars($cat['nombre'], ENT_QUOTES, 'UTF-8') ?></a>
@@ -26,11 +26,11 @@ $fecha = static fn (?string $v): string => \App\Helpers\Fecha::corta($v);
 
   <?php if (empty($articulos)): ?>
     <?php
-    $titulo = 'Sin articulos';
+    $titulo = 'Sin artículos';
     $texto = $categoriaActiva !== null
-        ? 'Todavia no hay articulos publicados en esta categoria.'
-        : 'Todavia no publicamos articulos. Vuelve pronto.';
-    $cta = $categoriaActiva !== null ? ['url' => '/blog', 'texto' => 'Ver todos los articulos'] : null;
+        ? 'Todavía no hay artículos publicados en esta categoría.'
+        : 'Todavía no publicamos artículos. Vuelve pronto.';
+    $cta = $categoriaActiva !== null ? ['url' => '/blog', 'texto' => 'Ver todos los artículos'] : null;
     require __DIR__ . '/../../partials/_estado_vacio.php';
     ?>
   <?php else: ?>
@@ -68,7 +68,7 @@ $fecha = static fn (?string $v): string => \App\Helpers\Fecha::corta($v);
   <p class="blog-rss">
     <a href="/blog/feed">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9h2A11 11 0 0 0 4 9v2Zm0 4a5 5 0 0 1 5 5h2a7 7 0 0 0-7-7v2Zm1.5 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/></svg>
-      Suscribete por RSS
+      Suscríbete por RSS
     </a>
   </p>
 </section>

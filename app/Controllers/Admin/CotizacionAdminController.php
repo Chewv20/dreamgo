@@ -116,7 +116,7 @@ class CotizacionAdminController extends AdminController
 
         if ($valor !== '') {
             if (!ctype_digit($valor) || !Usuario::find((int) $valor)) {
-                Flash::set('error', 'El asesor seleccionado no es valido.');
+                Flash::set('error', 'El asesor seleccionado no es válido.');
                 $this->redirect('/admin/cotizaciones/' . $id);
             }
             $asesor = (int) $valor;
@@ -124,7 +124,7 @@ class CotizacionAdminController extends AdminController
 
         Cotizacion::update($id, ['asignado_a' => $asesor]);
         Auditoria::registrar('cotizacion.asignar', 'cotizacion', $id, $asesor !== null ? 'asesor #' . $asesor : 'sin asignar');
-        Flash::set('exito', 'Asignacion actualizada.');
+        Flash::set('exito', 'Asignación actualizada.');
         $this->redirect('/admin/cotizaciones/' . $id);
     }
 
@@ -143,7 +143,7 @@ class CotizacionAdminController extends AdminController
         $validador = new Validator(['seguimiento_en' => $valor]);
         $validador->fecha('seguimiento_en', 'La fecha de seguimiento');
         if (!$validador->pasa()) {
-            Flash::set('error', 'La fecha de seguimiento no es valida.');
+            Flash::set('error', 'La fecha de seguimiento no es válida.');
             $this->redirect('/admin/cotizaciones/' . $id);
         }
 
@@ -163,7 +163,7 @@ class CotizacionAdminController extends AdminController
 
         $nota = trim((string) $this->request->input('nota', ''));
         if ($nota === '') {
-            Flash::set('error', 'La nota no puede estar vacia.');
+            Flash::set('error', 'La nota no puede estar vacía.');
             $this->redirect('/admin/cotizaciones/' . $id);
         }
 

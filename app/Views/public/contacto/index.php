@@ -13,7 +13,7 @@ $introVisible = $intro && (int) $intro['visible'] === 1;
   <?php if ($introVisible && !empty($intro['subtitulo'])): ?>
     <p><?= htmlspecialchars($intro['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p>
   <?php else: ?>
-    <p>Escribenos y un asesor te contactara. Si prefieres, tambien puedes usar cualquiera de los canales de abajo.</p>
+    <p>Escríbenos y un asesor te contactará. Si prefieres, también puedes usar cualquiera de los canales de abajo.</p>
   <?php endif; ?>
 
   <form method="post" action="/contacto" data-atribucion>
@@ -26,13 +26,13 @@ $introVisible = $intro && (int) $intro['visible'] === 1;
     </div>
 
     <div class="campo">
-      <label for="email">Correo electronico</label>
+      <label for="email">Correo electrónico</label>
       <input type="email" id="email" name="email" autocomplete="email" required value="<?= htmlspecialchars($valores['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
       <?php if (!empty($errores['email'])): ?><small class="campo__error"><?= htmlspecialchars($errores['email'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     </div>
 
     <div class="campo">
-      <label for="telefono">Telefono / WhatsApp</label>
+      <label for="telefono">Teléfono / WhatsApp</label>
       <input type="tel" id="telefono" name="telefono" autocomplete="tel" required value="<?= htmlspecialchars($valores['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
       <?php if (!empty($errores['telefono'])): ?><small class="campo__error"><?= htmlspecialchars($errores['telefono'], ENT_QUOTES, 'UTF-8') ?></small><?php endif; ?>
     </div>
@@ -49,7 +49,7 @@ $introVisible = $intro && (int) $intro['visible'] === 1;
   <div class="grid-tarjetas mt-25">
     <a href="<?= htmlspecialchars($whatsapp, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener" class="tarjeta tarjeta-contacto animar-entrada">
       <h3>WhatsApp</h3>
-      <p class="m-0">Respuesta rapida para dudas y cotizaciones.</p>
+      <p class="m-0">Respuesta rápida para dudas y cotizaciones.</p>
     </a>
     <a href="mailto:<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?>" class="tarjeta tarjeta-contacto animar-entrada">
       <h3>Correo</h3>
@@ -57,7 +57,7 @@ $introVisible = $intro && (int) $intro['visible'] === 1;
     </a>
     <a href="/cotizador" class="tarjeta tarjeta-contacto animar-entrada">
       <h3>Cotizador</h3>
-      <p class="m-0">Cuentanos los detalles de tu viaje ideal.</p>
+      <p class="m-0">Cuéntanos los detalles de tu viaje ideal.</p>
     </a>
   </div>
 </section>

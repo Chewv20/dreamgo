@@ -31,24 +31,24 @@ final class DescuentoService
         $descuento = $stmt->fetch();
 
         if (!$descuento) {
-            throw new RuntimeException('El codigo de descuento no existe.');
+            throw new RuntimeException('El código de descuento no existe.');
         }
 
         if ((int) $descuento['activo'] !== 1) {
-            throw new RuntimeException('Este codigo ya no esta activo.');
+            throw new RuntimeException('Este código ya no está activo.');
         }
 
         $hoy = date('Y-m-d');
         if ($hoy < $descuento['fecha_inicio'] || $hoy > $descuento['fecha_fin']) {
-            throw new RuntimeException('Este codigo no esta vigente en la fecha actual.');
+            throw new RuntimeException('Este código no está vigente en la fecha actual.');
         }
 
         if ($descuento['alcance'] === 'paquete' && (int) $descuento['paquete_id'] !== $paqueteId) {
-            throw new RuntimeException('Este codigo no aplica para el paquete seleccionado.');
+            throw new RuntimeException('Este código no aplica para el paquete seleccionado.');
         }
 
         if ($descuento['uso_maximo'] !== null && (int) $descuento['usos_actuales'] >= (int) $descuento['uso_maximo']) {
-            throw new RuntimeException('Este codigo alcanzo su limite de usos.');
+            throw new RuntimeException('Este código alcanzó su límite de usos.');
         }
 
         return $descuento;

@@ -8,7 +8,7 @@ $articulo ??= [];
 
 <div class="admin-form-grid admin-form-grid--2">
   <div class="campo">
-    <label for="titulo">Titulo</label>
+    <label for="titulo">Título</label>
     <input type="text" id="titulo" name="titulo" required maxlength="180" value="<?= htmlspecialchars($articulo['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
   </div>
   <div class="campo">
@@ -39,17 +39,17 @@ $articulo ??= [];
 </div>
 
 <div class="campo">
-  <label for="contenido">Contenido (HTML basico: parrafos, negritas, listas, subtitulos h3/h4, enlaces)</label>
+  <label for="contenido">Contenido (HTML básico: párrafos, negritas, listas, subtítulos h3/h4, enlaces)</label>
   <textarea id="contenido" name="contenido" class="textarea-lg"><?= htmlspecialchars($articulo['contenido'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
 </div>
 
 <div class="admin-form-grid admin-form-grid--2">
   <div class="campo">
-    <label for="meta_title">Titulo SEO (opcional)</label>
+    <label for="meta_title">Título SEO (opcional)</label>
     <input type="text" id="meta_title" name="meta_title" maxlength="180" value="<?= htmlspecialchars($articulo['meta_title'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
   </div>
   <div class="campo">
-    <label for="meta_description">Descripcion SEO (opcional)</label>
+    <label for="meta_description">Descripción SEO (opcional)</label>
     <input type="text" id="meta_description" name="meta_description" maxlength="300" value="<?= htmlspecialchars($articulo['meta_description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
   </div>
 </div>
@@ -62,4 +62,4 @@ $articulo ??= [];
   <?php endif; ?>
 </div>
 
-<button type="submit" class="btn btn-primario">Guardar articulo</button>
+<button type="submit" class="btn btn-primario">Guardar artículo</button>

@@ -35,7 +35,7 @@ $bloquesColor = array_filter(
 <?php endif; ?>
 <?php if (!$heroVisible): ?>
   <section class="seccion contenedor">
-    <h1>Dream Go Operadora Turistica</h1>
+    <h1>Dream Go Operadora Turística</h1>
   </section>
 <?php endif; ?>
 <?php foreach ($bloques as $bloque): ?>
@@ -146,7 +146,7 @@ $bloquesColor = array_filter(
 <section class="seccion contenedor" id="newsletter">
   <div class="seccion__encabezado">
     <h2>No te pierdas nuestras ofertas</h2>
-    <p>Suscribete y enterate primero de descuentos y paquetes nuevos.</p>
+    <p>Suscríbete y entérate primero de descuentos y paquetes nuevos.</p>
   </div>
   <form method="post" action="/suscribir" class="newsletter-form">
     <?= \App\Helpers\Csrf::field() ?>

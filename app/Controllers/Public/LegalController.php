@@ -18,8 +18,8 @@ class LegalController extends Controller
                 'telefono' => (string) ConfiguracionSitio::get('telefono_contacto', ''),
             ],
         ], [
-            'title' => 'Aviso de Privacidad | Dream Go Operadora Turistica',
-            'description' => 'Aviso de Privacidad de Dream Go Operadora Turistica conforme a la LFPDPPP.',
+            'title' => 'Aviso de Privacidad | Dream Go Operadora Turística',
+            'description' => 'Aviso de Privacidad de Dream Go Operadora Turística conforme a la LFPDPPP.',
         ]);
     }
 }

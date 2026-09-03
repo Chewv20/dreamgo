@@ -61,7 +61,7 @@
           </tr>
         <?php endforeach; ?>
         <?php if (empty($destinos)): ?>
-          <tr><td colspan="6">Todavia no hay destinos. Crea el primero.</td></tr>
+          <tr><td colspan="6">Todavía no hay destinos. Crea el primero.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>

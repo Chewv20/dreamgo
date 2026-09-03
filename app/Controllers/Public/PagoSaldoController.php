@@ -96,6 +96,6 @@ class PagoSaldoController extends Controller
             'saldo' => $saldo,
             'pagable' => $reserva['estado'] === 'confirmada' && $saldo > 0,
             'error' => $error,
-        ], ['title' => 'Pagar saldo ' . $reserva['codigo_reserva'] . ' | Dream Go Operadora Turistica']);
+        ], ['title' => 'Pagar saldo ' . $reserva['codigo_reserva'] . ' | Dream Go Operadora Turística']);
     }
 }

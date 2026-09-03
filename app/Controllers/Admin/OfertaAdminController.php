@@ -42,7 +42,7 @@ class OfertaAdminController extends AdminController
         }
 
         if (CodigoDescuento::porCodigo($datos['codigo'])) {
-            Flash::set('error', 'Ya existe un codigo con ese nombre.');
+            Flash::set('error', 'Ya existe un código con ese nombre.');
             $this->redirect('/admin/ofertas/crear');
         }
 
@@ -50,11 +50,11 @@ class OfertaAdminController extends AdminController
             CodigoDescuento::insert($datos);
         } catch (PDOException $e) {
             error_log('[OfertaAdminController] Error de base de datos al crear oferta: ' . $e->getMessage());
-            Flash::set('error', 'No se pudo guardar el codigo de descuento. Revisa los datos e intenta de nuevo.');
+            Flash::set('error', 'No se pudo guardar el código de descuento. Revisa los datos e intenta de nuevo.');
             $this->redirect('/admin/ofertas/crear');
         }
 
-        Flash::set('exito', 'Codigo de descuento creado.');
+        Flash::set('exito', 'Código de descuento creado.');
         $this->redirect('/admin/ofertas');
     }
 
@@ -82,7 +82,7 @@ class OfertaAdminController extends AdminController
 
         $existente = CodigoDescuento::porCodigo($datos['codigo']);
         if ($existente && (int) $existente['id'] !== $id) {
-            Flash::set('error', 'Ya existe otro codigo con ese nombre.');
+            Flash::set('error', 'Ya existe otro código con ese nombre.');
             $this->redirect("/admin/ofertas/{$id}/editar");
         }
 
@@ -90,11 +90,11 @@ class OfertaAdminController extends AdminController
             CodigoDescuento::update($id, $datos);
         } catch (PDOException $e) {
             error_log('[OfertaAdminController] Error de base de datos al editar oferta: ' . $e->getMessage());
-            Flash::set('error', 'No se pudo guardar el codigo de descuento. Revisa los datos e intenta de nuevo.');
+            Flash::set('error', 'No se pudo guardar el código de descuento. Revisa los datos e intenta de nuevo.');
             $this->redirect("/admin/ofertas/{$id}/editar");
         }
 
-        Flash::set('exito', 'Codigo de descuento actualizado.');
+        Flash::set('exito', 'Código de descuento actualizado.');
         $this->redirect('/admin/ofertas');
     }
 
@@ -105,7 +105,7 @@ class OfertaAdminController extends AdminController
         $this->encontrarO404(CodigoDescuento::class, $id);
 
         CodigoDescuento::update($id, ['activo' => 0]);
-        Flash::set('exito', 'Codigo desactivado.');
+        Flash::set('exito', 'Código desactivado.');
         $this->redirect('/admin/ofertas');
     }
 
@@ -174,7 +174,7 @@ class OfertaAdminController extends AdminController
         }
 
         if (!is_numeric($datos['valor']) || (float) $datos['valor'] <= 0) {
-            Flash::set('error', 'El valor del descuento debe ser un numero mayor a cero.');
+            Flash::set('error', 'El valor del descuento debe ser un número mayor a cero.');
 
             return false;
         }
@@ -182,13 +182,13 @@ class OfertaAdminController extends AdminController
         // Auditoria 2026-08-31, hallazgo BD-01: tipo y alcance venian del input sin contrastar
         // contra su ENUM; un valor fuera de lista reventaba el INSERT como 500.
         if (!in_array($datos['tipo'], self::TIPOS, true)) {
-            Flash::set('error', 'Selecciona un tipo de descuento valido.');
+            Flash::set('error', 'Selecciona un tipo de descuento válido.');
 
             return false;
         }
 
         if (!in_array($datos['alcance'], self::ALCANCES, true)) {
-            Flash::set('error', 'Selecciona un alcance valido.');
+            Flash::set('error', 'Selecciona un alcance válido.');
 
             return false;
         }
@@ -206,7 +206,7 @@ class OfertaAdminController extends AdminController
         }
 
         if ($datos['alcance'] === 'paquete' && empty($datos['paquete_id'])) {
-            Flash::set('error', 'Selecciona un paquete para un descuento de alcance especifico.');
+            Flash::set('error', 'Selecciona un paquete para un descuento de alcance específico.');
 
             return false;
         }

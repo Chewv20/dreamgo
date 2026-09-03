@@ -7,7 +7,7 @@
 <div class="admin-panel">
   <div class="admin-tabla-wrap">
     <table class="admin-tabla">
-      <thead><tr><th>Codigo</th><th>Cliente</th><th>Paquete</th><th>Salida</th><th>Personas</th><th>Estado</th><th></th></tr></thead>
+      <thead><tr><th>Código</th><th>Cliente</th><th>Paquete</th><th>Salida</th><th>Personas</th><th>Estado</th><th></th></tr></thead>
       <tbody>
         <?php foreach ($reservas as $r): ?>
           <tr>
@@ -24,7 +24,7 @@
           </tr>
         <?php endforeach; ?>
         <?php if (empty($reservas)): ?>
-          <tr><td colspan="7">Aun no hay reservas registradas.</td></tr>
+          <tr><td colspan="7">Aún no hay reservas registradas.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>

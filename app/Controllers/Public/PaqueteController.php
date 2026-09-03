@@ -66,8 +66,8 @@ class PaqueteController extends Controller
             'intro' => $bloques[0] ?? null,
             'paginador' => $paginador,
         ], [
-            'title' => 'Paquetes y excursiones | Dream Go Operadora Turistica',
-            'description' => 'Catalogo completo de paquetes y excursiones nacionales e internacionales.',
+            'title' => 'Paquetes y excursiones | Dream Go Operadora Turística',
+            'description' => 'Catálogo completo de paquetes y excursiones nacionales e internacionales.',
         ]);
     }
 
@@ -97,7 +97,7 @@ class PaqueteController extends Controller
             'relacionados' => $relacionados,
             'resumenesRelacionados' => Resena::resumenPorPaquetes(array_column($relacionados, 'id')),
         ], [
-            'title' => $paquete['meta_title'] ?: ($paquete['titulo'] . ' | Dream Go Operadora Turistica'),
+            'title' => $paquete['meta_title'] ?: ($paquete['titulo'] . ' | Dream Go Operadora Turística'),
             'description' => $paquete['meta_description'] ?: $paquete['resumen'],
             'ogImage' => $paquete['imagen_portada'] ?? '/assets/img/logo.avif',
             'jsonLd' => $jsonLd,
@@ -123,8 +123,8 @@ class PaqueteController extends Controller
         $this->view('public/paquetes/comparar', [
             'paquetes' => $paquetes,
         ], [
-            'title' => 'Comparar paquetes | Dream Go Operadora Turistica',
-            'description' => 'Compara precio, duracion y detalles de nuestros paquetes de viaje.',
+            'title' => 'Comparar paquetes | Dream Go Operadora Turística',
+            'description' => 'Compara precio, duración y detalles de nuestros paquetes de viaje.',
         ]);
     }
 }

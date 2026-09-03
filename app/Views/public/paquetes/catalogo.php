@@ -16,16 +16,16 @@ use App\Models\Paquete;
 $introVisible = $intro && (int) $intro['visible'] === 1;
 
 $duracionEtiquetas = [
-    '1-3' => '1 a 3 dias',
-    '4-7' => '4 a 7 dias',
-    '8-14' => '8 a 14 dias',
-    '15+' => '15 dias o mas',
+    '1-3' => '1 a 3 días',
+    '4-7' => '4 a 7 días',
+    '8-14' => '8 a 14 días',
+    '15+' => '15 días o más',
 ];
 $ordenEtiquetas = [
-    'recientes' => 'Mas recientes',
+    'recientes' => 'Más recientes',
     'precio_asc' => 'Precio: menor a mayor',
     'precio_desc' => 'Precio: mayor a menor',
-    'duracion_asc' => 'Duracion: mas corta',
+    'duracion_asc' => 'Duración: más corta',
     'mejor_valorados' => 'Mejor valorados',
 ];
 $categoriaNombre = '';
@@ -87,7 +87,7 @@ if (!empty($filtrosActivos['duracion'])) {
   <form method="get" action="/paquetes" class="filtros">
     <div class="campo filtros__q">
       <label for="q">Buscar</label>
-      <input type="search" name="q" id="q" placeholder="Ej. Cancun, playa, aventura..." value="<?= htmlspecialchars((string) $qActivo, ENT_QUOTES, 'UTF-8') ?>" maxlength="120">
+      <input type="search" name="q" id="q" placeholder="Ej. Cancún, playa, aventura..." value="<?= htmlspecialchars((string) $qActivo, ENT_QUOTES, 'UTF-8') ?>" maxlength="120">
     </div>
     <div class="campo filtros__campo">
       <label for="categoria">Destino</label>
@@ -109,15 +109,15 @@ if (!empty($filtrosActivos['duracion'])) {
       </select>
     </div>
     <div class="campo filtros__campo--chico">
-      <label for="precio_min">Precio min.</label>
+      <label for="precio_min">Precio mín.</label>
       <input type="number" name="precio_min" id="precio_min" min="0" step="1" placeholder="$0" value="<?= htmlspecialchars((string) $precioMinActivo, ENT_QUOTES, 'UTF-8') ?>">
     </div>
     <div class="campo filtros__campo--chico">
-      <label for="precio_max">Precio max.</label>
+      <label for="precio_max">Precio máx.</label>
       <input type="number" name="precio_max" id="precio_max" min="0" step="1" placeholder="$" value="<?= htmlspecialchars((string) $precioMaxActivo, ENT_QUOTES, 'UTF-8') ?>">
     </div>
     <div class="campo filtros__campo">
-      <label for="duracion">Duracion</label>
+      <label for="duracion">Duración</label>
       <select name="duracion" id="duracion">
         <option value="">Cualquiera</option>
         <?php foreach ($duracionEtiquetas as $valor => $etiqueta): ?>
@@ -165,8 +165,8 @@ if (!empty($filtrosActivos['duracion'])) {
     <?php
     $titulo = 'Sin resultados';
     $texto = $chips
-        ? 'No encontramos paquetes con esos filtros. Prueba con otra combinacion.'
-        : 'Todavia no hay paquetes publicados. Vuelve pronto.';
+        ? 'No encontramos paquetes con esos filtros. Prueba con otra combinación.'
+        : 'Todavía no hay paquetes publicados. Vuelve pronto.';
     $cta = $chips ? ['url' => '/paquetes', 'texto' => 'Limpiar filtros'] : null;
     require __DIR__ . '/../../partials/_estado_vacio.php';
     ?>

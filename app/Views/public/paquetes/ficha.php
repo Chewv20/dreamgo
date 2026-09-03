@@ -108,14 +108,14 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     <span class="precio precio--grande">
       Desde $<?= number_format((float) $paquete['precio_desde'], 0, '.', ',') ?> <?= htmlspecialchars($paquete['moneda'], ENT_QUOTES, 'UTF-8') ?>
     </span>
-    <p class="paquete-aside__sub"><?= (int) $paquete['duracion_dias'] ?> dias / <?= (int) $paquete['duracion_noches'] ?> noches</p>
+    <p class="paquete-aside__sub"><?= (int) $paquete['duracion_dias'] ?> días / <?= (int) $paquete['duracion_noches'] ?> noches</p>
 
     <label class="tarjeta__comparar tarjeta__comparar--bloque">
       <input type="checkbox" data-comparar-slug="<?= htmlspecialchars($paquete['slug'], ENT_QUOTES, 'UTF-8') ?>" data-comparar-titulo="<?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?>">
       Agregar a comparar
     </label>
 
-    <h3>Proximas salidas</h3>
+    <h3>Próximas salidas</h3>
     <?php if (empty($salidas)): ?>
       <p>Consulta disponibilidad con nuestro equipo.</p>
     <?php else: ?>
@@ -133,7 +133,7 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     <?php endif; ?>
 
     <div class="acciones-apiladas">
-      <a href="/cotizador?paquete=<?= urlencode($paquete['slug']) ?>" class="btn btn-primario btn--bloque">Solicitar cotizacion</a>
+      <a href="/cotizador?paquete=<?= urlencode($paquete['slug']) ?>" class="btn btn-primario btn--bloque">Solicitar cotización</a>
       <a href="<?= htmlspecialchars($whatsapp, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-whatsapp btn--bloque" target="_blank" rel="noopener">Cotizar por WhatsApp</a>
     </div>
   </aside>
@@ -167,7 +167,7 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
 <?php if (!empty($relacionados)): ?>
 <section class="seccion contenedor seccion--panel">
   <div class="seccion__encabezado">
-    <h2>Tambien te puede interesar</h2>
+    <h2>También te puede interesar</h2>
     <p>Otros paquetes de <?= htmlspecialchars($paquete['categoria_nombre'], ENT_QUOTES, 'UTF-8') ?>.</p>
   </div>
   <div class="grid-tarjetas grid-tarjetas--3">

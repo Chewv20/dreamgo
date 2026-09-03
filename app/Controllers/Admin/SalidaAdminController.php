@@ -141,13 +141,13 @@ class SalidaAdminController extends AdminController
 
         if (($datos['precio_override'] ?? '') !== ''
             && (!is_numeric($datos['precio_override']) || (float) $datos['precio_override'] < 0)) {
-            Flash::set('error', 'El precio especifico debe ser un numero mayor o igual a cero.');
+            Flash::set('error', 'El precio específico debe ser un número mayor o igual a cero.');
 
             return false;
         }
 
         if (isset($datos['estado']) && !in_array($datos['estado'], self::ESTADOS, true)) {
-            Flash::set('error', 'Selecciona un estado valido.');
+            Flash::set('error', 'Selecciona un estado válido.');
 
             return false;
         }

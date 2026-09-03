@@ -33,7 +33,7 @@ final class ImageUploadService
     {
         $carpeta = trim($carpeta, '/');
         if (preg_match('/^[a-z0-9_-]+$/', $carpeta) !== 1) {
-            throw new RuntimeException('Carpeta de destino invalida.');
+            throw new RuntimeException('Carpeta de destino inválida.');
         }
 
         if (($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
@@ -42,7 +42,7 @@ final class ImageUploadService
 
         $rutaTemporal = (string) ($archivo['tmp_name'] ?? '');
         if ($rutaTemporal === '' || !is_uploaded_file($rutaTemporal)) {
-            throw new RuntimeException('El archivo no es una subida valida.');
+            throw new RuntimeException('El archivo no es una subida válida.');
         }
 
         $mime = mime_content_type($rutaTemporal);

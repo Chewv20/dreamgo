@@ -12,7 +12,7 @@
         <table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;">
           <tr>
             <td style="background:#a85f4d;padding:20px 28px;">
-              <span style="color:#ffffff;font-size:20px;font-weight:bold;">Dream Go Operadora Turistica</span>
+              <span style="color:#ffffff;font-size:20px;font-weight:bold;">Dream Go Operadora Turística</span>
             </td>
           </tr>
           <tr>
@@ -22,7 +22,7 @@
           </tr>
           <tr>
             <td style="background:#2f3e46;padding:16px 28px;color:#faf3ef;font-size:12px;">
-              Dream Go Operadora Turistica &mdash; Este es un correo automatico, por favor no respondas directamente.
+              Dream Go Operadora Turística &mdash; Este es un correo automático, por favor no respondas directamente.
             </td>
           </tr>
         </table>

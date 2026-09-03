@@ -12,6 +12,6 @@
 <div class="admin-panel ancho-420">
   <form method="post" action="/admin/articulos/<?= (int) $articulo['id'] ?>/archivar" data-confirm="¿Archivar este articulo? Dejara de verse en el blog.">
     <?= \App\Helpers\Csrf::field() ?>
-    <button type="submit" class="btn btn-secundario">Archivar articulo</button>
+    <button type="submit" class="btn btn-secundario">Archivar artículo</button>
   </form>
 </div>

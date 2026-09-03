@@ -26,8 +26,8 @@ class CotizadorController extends Controller
         $this->view('public/cotizador/formulario', [
             'paquete' => $paquete,
         ], [
-            'title' => 'Cotiza tu viaje | Dream Go Operadora Turistica',
-            'description' => 'Solicita una cotizacion personalizada para tu proximo viaje con Dream Go.',
+            'title' => 'Cotiza tu viaje | Dream Go Operadora Turística',
+            'description' => 'Solicita una cotización personalizada para tu próximo viaje con Dream Go.',
         ]);
     }
 
@@ -41,7 +41,7 @@ class CotizadorController extends Controller
         $ip = $this->request->ip();
         if (RateLimiter::demasiados('cotizador', null, $ip)) {
             RateLimiter::registrar('cotizador', null, $ip);
-            $this->abort(429, 'Demasiados envios. Espera unos minutos e intenta de nuevo.');
+            $this->abort(429, 'Demasiados envíos. Espera unos minutos e intenta de nuevo.');
         }
         RateLimiter::registrar('cotizador', null, $ip);
 
@@ -64,7 +64,7 @@ class CotizadorController extends Controller
                 'paquete' => null,
                 'errores' => $validator->errores(),
                 'valores' => $datos,
-            ], ['title' => 'Cotiza tu viaje | Dream Go Operadora Turistica']);
+            ], ['title' => 'Cotiza tu viaje | Dream Go Operadora Turística']);
 
             return;
         }
@@ -104,6 +104,6 @@ class CotizadorController extends Controller
 
         $this->view('public/cotizador/gracias', [
             'whatsapp' => $whatsapp,
-        ], ['title' => 'Gracias por tu solicitud | Dream Go Operadora Turistica']);
+        ], ['title' => 'Gracias por tu solicitud | Dream Go Operadora Turística']);
     }
 }

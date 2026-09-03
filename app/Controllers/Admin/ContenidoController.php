@@ -50,7 +50,7 @@ class ContenidoController extends AdminController
     public function pagina(string $pagina): void
     {
         if (!isset(self::PAGINAS[$pagina])) {
-            $this->abort(404, 'Pagina no encontrada.');
+            $this->abort(404, 'Página no encontrada.');
         }
 
         $bloques = BloquePagina::porPagina($pagina);

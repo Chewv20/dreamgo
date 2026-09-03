@@ -174,7 +174,7 @@ class DestinoAdminController extends AdminController
         // todas formas; se corta antes para dar un mensaje claro. (articulos.categoria_id es
         // ON DELETE SET NULL, asi que un articulo enlazado solo pierde el destino, no se borra.)
         if (Categoria::tienePaquetes($id)) {
-            Flash::set('error', 'No puedes eliminar un destino con paquetes asignados. Muevelos a otro destino o archivalos primero.');
+            Flash::set('error', 'No puedes eliminar un destino con paquetes asignados. Muévelos a otro destino o archívalos primero.');
             $this->redirect('/admin/destinos');
         }
 
@@ -210,7 +210,7 @@ class DestinoAdminController extends AdminController
         }
 
         if (!array_key_exists($datos['tipo'] ?? '', self::TIPOS)) {
-            Flash::set('error', 'Selecciona un tipo de destino valido.');
+            Flash::set('error', 'Selecciona un tipo de destino válido.');
 
             return false;
         }
