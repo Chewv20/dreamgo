@@ -8,8 +8,10 @@ use App\Helpers\Auditoria;
 use App\Helpers\Flash;
 use App\Helpers\HtmlSanitizer;
 use App\Helpers\Slugify;
+use App\Helpers\UploadHelper;
 use App\Helpers\Validator;
 use App\Models\Categoria;
+use App\Models\ImagenPaquete;
 use App\Models\Paquete;
 use App\Services\ImageUploadService;
 use Core\Auth;
@@ -75,7 +77,7 @@ class PaqueteAdminController extends AdminController
             'creado_por' => Auth::id(),
         ]);
 
-        $this->procesarImagenPortada($id, $slug);
+        $this->procesarGaleria($id, $slug);
 
         Auditoria::registrar('paquete.crear', 'paquete', $id, $datos['titulo'] . ' (' . $datos['estado'] . ')');
 
@@ -136,12 +138,50 @@ class PaqueteAdminController extends AdminController
             'meta_description' => $datos['meta_description'] ?: null,
         ]);
 
-        $this->procesarImagenPortada($id, $slug);
+        $this->procesarGaleria($id, $slug);
 
         Auditoria::registrar('paquete.editar', 'paquete', $id, $datos['titulo'] . ' (' . $datos['estado'] . ')');
 
         Flash::set('exito', 'Paquete actualizado correctamente.');
         $this->redirect('/admin/paquetes');
+    }
+
+    public function eliminarImagen(int $id, int $imagenId): void
+    {
+        $this->verifyCsrf();
+
+        $paquete = $this->encontrarO404(Paquete::class, $id);
+
+        if (!ImagenPaquete::pertenece($imagenId, $id)) {
+            $this->abort(404);
+        }
+
+        $imagen = ImagenPaquete::find($imagenId);
+        ImagenPaquete::delete($imagenId);
+        // Best-effort: si el archivo ya no esta en disco no es un error, la fila igual se borra.
+        @unlink(BASE_PATH . '/public' . $imagen['ruta_original']);
+        @unlink(BASE_PATH . '/public' . $imagen['ruta_thumb']);
+
+        Paquete::sincronizarPortada($id);
+        Auditoria::registrar('paquete.imagen_eliminar', 'paquete', $id, (string) ($paquete['titulo'] ?? ''));
+
+        Flash::set('exito', 'Imagen eliminada.');
+        $this->redirect("/admin/paquetes/{$id}/editar");
+    }
+
+    public function moverImagen(int $id, int $imagenId): void
+    {
+        $this->verifyCsrf();
+
+        $this->encontrarO404(Paquete::class, $id);
+        $direccion = (string) $this->request->input('direccion', '');
+
+        if (ImagenPaquete::pertenece($imagenId, $id) && in_array($direccion, ['arriba', 'abajo'], true)) {
+            ImagenPaquete::mover($imagenId, $id, $direccion);
+            Paquete::sincronizarPortada($id);
+        }
+
+        $this->redirect("/admin/paquetes/{$id}/editar");
     }
 
     public function archivar(int $id): void
@@ -249,31 +289,32 @@ class PaqueteAdminController extends AdminController
         }
     }
 
-    private function procesarImagenPortada(int $paqueteId, string $slug): void
+    /**
+     * Sube todas las imagenes nuevas seleccionadas (name="imagenes[]") a la galeria del
+     * paquete y sincroniza imagen_portada. Si algun archivo del lote no se pudo procesar
+     * (formato invalido, etc.) se acumula el mensaje pero se sigue con los demas.
+     */
+    private function procesarGaleria(int $paqueteId, string $slug): void
     {
-        $archivo = $this->request->file('imagen');
-        if (!$archivo || ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        $archivos = UploadHelper::listaArchivos($this->request->file('imagenes'));
+        if ($archivos === []) {
             return;
         }
 
-        try {
-            $rutas = (new ImageUploadService())->procesar($archivo, $slug);
-        } catch (\RuntimeException $e) {
-            Flash::set('error', 'La imagen no se pudo procesar: ' . $e->getMessage());
-
-            return;
+        $errores = [];
+        foreach ($archivos as $archivo) {
+            try {
+                $rutas = (new ImageUploadService())->procesar($archivo, $slug);
+                ImagenPaquete::agregar($paqueteId, $rutas['original'], $rutas['thumb'], null);
+            } catch (\RuntimeException $e) {
+                $errores[] = $e->getMessage();
+            }
         }
 
-        Paquete::update($paqueteId, ['imagen_portada' => $rutas['original']]);
+        Paquete::sincronizarPortada($paqueteId);
 
-        $stmt = $this->db->prepare(
-            'INSERT INTO imagenes_paquete (paquete_id, ruta_original, ruta_thumb, alt_text, orden) VALUES (:pid, :ro, :rt, :alt, 0)'
-        );
-        $stmt->execute([
-            'pid' => $paqueteId,
-            'ro' => $rutas['original'],
-            'rt' => $rutas['thumb'],
-            'alt' => $slug,
-        ]);
+        if ($errores !== []) {
+            Flash::set('error', 'Algunas imagenes no se pudieron procesar: ' . implode(' ', $errores));
+        }
     }
 }

@@ -5,12 +5,10 @@
   </form>
 </div>
 
-<?php if (!empty($paquete['imagen_portada'])): ?>
-<div class="admin-panel">
-  <h2 class="mt-0">Portada actual</h2>
-  <img src="<?= htmlspecialchars($paquete['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="" class="img-preview">
-</div>
-<?php endif; ?>
+<?php
+$galeriaBase = '/admin/paquetes/' . (int) $paquete['id'];
+require __DIR__ . '/../partials/_galeria_manager.php';
+?>
 
 <div class="admin-panel">
   <div class="admin-acciones">

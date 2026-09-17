@@ -228,6 +228,13 @@ class Paquete extends Model
         return $stmt->fetchAll();
     }
 
+    /** imagen_portada siempre es la imagen con menor `orden` de la galeria (o NULL si no tiene). */
+    public static function sincronizarPortada(int $paqueteId): void
+    {
+        $imagenes = ImagenPaquete::paraPadre($paqueteId);
+        self::update($paqueteId, ['imagen_portada' => $imagenes[0]['ruta_original'] ?? null]);
+    }
+
     public static function adminListado(int $limite = 20, int $offset = 0): array
     {
         $stmt = self::db()->prepare(

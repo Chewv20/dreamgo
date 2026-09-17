@@ -7,6 +7,7 @@ namespace App\Controllers\Public;
 use App\Helpers\PaqueteJsonLd;
 use App\Models\BloquePagina;
 use App\Models\Categoria;
+use App\Models\ImagenPaquete;
 use App\Models\Paquete;
 use App\Models\Resena;
 use Core\Controller;
@@ -54,6 +55,7 @@ class PaqueteController extends Controller
         $this->view('public/paquetes/catalogo', [
             'paquetes' => $paquetes,
             'resumenes' => Resena::resumenPorPaquetes(array_column($paquetes, 'id')),
+            'galerias' => ImagenPaquete::paraPadres(array_column($paquetes, 'id')),
             'categorias' => Categoria::activas(),
             'categoriaActiva' => $categoriaSlug,
             'tipoActivo' => $tipo,
@@ -96,6 +98,7 @@ class PaqueteController extends Controller
             'resumen' => $resumen,
             'relacionados' => $relacionados,
             'resumenesRelacionados' => Resena::resumenPorPaquetes(array_column($relacionados, 'id')),
+            'galeriasRelacionados' => ImagenPaquete::paraPadres(array_column($relacionados, 'id')),
         ], [
             'title' => $paquete['meta_title'] ?: ($paquete['titulo'] . ' | Dream Go Operadora Turística'),
             'description' => $paquete['meta_description'] ?: $paquete['resumen'],

@@ -168,10 +168,28 @@
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .admin-acciones .btn {
   padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.admin-acciones form {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* select/textarea son width:100% por defecto (site.css), pensado para un <form> normal de
+   una sola columna. Dentro de una celda de acciones eso hace que un <select> con opciones
+   largas (p. ej. "Mover paquetes a..." en destinos) se estire y empuje/encime a los demas
+   botones de la fila. Aqui el ancho debe depender del contenido, no del contenedor. */
+.admin-acciones select {
+  width: auto;
+  max-width: 180px;
+  padding: 0.4rem 0.6rem;
   font-size: 0.85rem;
 }
 
@@ -419,6 +437,11 @@
     position: sticky;
     top: 0;
     height: 100vh;
+    /* Con muchos enlaces (Bitacora, Roles y permisos, etc.) la nav puede ser mas alta que
+       la ventana. Sin esto, lo que no cabe se desborda fuera de la caja oscura del sidebar
+       y queda flotando sobre el fondo claro de la pagina (items casi ilegibles, boton
+       "Cerrar sesion" fuera de lugar) en vez de quedarse dentro de su propio scroll. */
+    overflow-y: auto;
   }
 
   .admin-main {
@@ -431,3 +454,49 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* Gestor de galeria de imagenes (destinos y paquetes) */
+.galeria-admin {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.galeria-admin__item {
+  position: relative;
+  border: 1px solid var(--admin-borde, #e2e2e2);
+  border-radius: var(--radio);
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.galeria-admin__item img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radio);
+  display: block;
+}
+
+.galeria-admin__badge {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.65rem;
+  background: var(--color-primario);
+  color: var(--color-texto-oscuro, #222);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  z-index: 1;
+}
+
+.galeria-admin__acciones {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.galeria-admin__acciones form { margin: 0; }
+.galeria-admin__acciones .btn:disabled { opacity: 0.35; cursor: not-allowed; }

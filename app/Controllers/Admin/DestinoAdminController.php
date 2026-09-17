@@ -7,8 +7,10 @@ namespace App\Controllers\Admin;
 use App\Helpers\Auditoria;
 use App\Helpers\Flash;
 use App\Helpers\Slugify;
+use App\Helpers\UploadHelper;
 use App\Helpers\Validator;
 use App\Models\Categoria;
+use App\Models\ImagenDestino;
 use App\Models\Paquete;
 use App\Services\ImageUploadService;
 
@@ -56,7 +58,7 @@ class DestinoAdminController extends AdminController
             'activo' => $datos['activo'],
         ]);
 
-        $this->procesarImagen($id, $slug);
+        $this->procesarGaleria($id, $slug);
         Auditoria::registrar('destino.crear', 'destino', $id, $datos['nombre'] . ' (' . $datos['tipo'] . ')');
 
         Flash::set('exito', 'Destino creado correctamente.');
@@ -67,6 +69,7 @@ class DestinoAdminController extends AdminController
     {
         $this->view('admin/destinos/edit', [
             'destino' => $this->encontrarO404(Categoria::class, $id),
+            'imagenes' => Categoria::imagenes($id),
             'tipos' => self::TIPOS,
         ], ['title' => 'Editar destino | Dream Go', 'heading' => 'Editar destino']);
     }
@@ -94,11 +97,48 @@ class DestinoAdminController extends AdminController
             'activo' => $datos['activo'],
         ]);
 
-        $this->procesarImagen($id, $slug);
+        $this->procesarGaleria($id, $slug);
         Auditoria::registrar('destino.editar', 'destino', $id, $datos['nombre'] . ' (' . $datos['tipo'] . ')');
 
         Flash::set('exito', 'Destino actualizado correctamente.');
         $this->redirect('/admin/destinos');
+    }
+
+    public function eliminarImagen(int $id, int $imagenId): void
+    {
+        $this->verifyCsrf();
+
+        $destino = $this->encontrarO404(Categoria::class, $id);
+
+        if (!ImagenDestino::pertenece($imagenId, $id)) {
+            $this->abort(404);
+        }
+
+        $imagen = ImagenDestino::find($imagenId);
+        ImagenDestino::delete($imagenId);
+        @unlink(BASE_PATH . '/public' . $imagen['ruta_original']);
+        @unlink(BASE_PATH . '/public' . $imagen['ruta_thumb']);
+
+        Categoria::sincronizarPortada($id);
+        Auditoria::registrar('destino.imagen_eliminar', 'destino', $id, (string) ($destino['nombre'] ?? ''));
+
+        Flash::set('exito', 'Imagen eliminada.');
+        $this->redirect("/admin/destinos/{$id}/editar");
+    }
+
+    public function moverImagen(int $id, int $imagenId): void
+    {
+        $this->verifyCsrf();
+
+        $this->encontrarO404(Categoria::class, $id);
+        $direccion = (string) $this->request->input('direccion', '');
+
+        if (ImagenDestino::pertenece($imagenId, $id) && in_array($direccion, ['arriba', 'abajo'], true)) {
+            ImagenDestino::mover($imagenId, $id, $direccion);
+            Categoria::sincronizarPortada($id);
+        }
+
+        $this->redirect("/admin/destinos/{$id}/editar");
     }
 
     public function alternarActivo(int $id): void
@@ -234,21 +274,32 @@ class DestinoAdminController extends AdminController
         }
     }
 
-    private function procesarImagen(int $destinoId, string $slug): void
+    /**
+     * Sube todas las imagenes nuevas seleccionadas (name="imagenes[]") a la galeria del
+     * destino y sincroniza imagen_portada. Si algun archivo del lote no se pudo procesar
+     * (formato invalido, etc.) se acumula el mensaje pero se sigue con los demas.
+     */
+    private function procesarGaleria(int $destinoId, string $slug): void
     {
-        $archivo = $this->request->file('imagen');
-        if (!$archivo || ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        $archivos = UploadHelper::listaArchivos($this->request->file('imagenes'));
+        if ($archivos === []) {
             return;
         }
 
-        try {
-            $rutas = (new ImageUploadService())->procesar($archivo, $slug, 'destinos');
-        } catch (\RuntimeException $e) {
-            Flash::set('error', 'La imagen no se pudo procesar: ' . $e->getMessage());
-
-            return;
+        $errores = [];
+        foreach ($archivos as $archivo) {
+            try {
+                $rutas = (new ImageUploadService())->procesar($archivo, $slug, 'destinos');
+                ImagenDestino::agregar($destinoId, $rutas['original'], $rutas['thumb'], null);
+            } catch (\RuntimeException $e) {
+                $errores[] = $e->getMessage();
+            }
         }
 
-        Categoria::update($destinoId, ['imagen_portada' => $rutas['original']]);
+        Categoria::sincronizarPortada($destinoId);
+
+        if ($errores !== []) {
+            Flash::set('error', 'Algunas imagenes no se pudieron procesar: ' . implode(' ', $errores));
+        }
     }
 }

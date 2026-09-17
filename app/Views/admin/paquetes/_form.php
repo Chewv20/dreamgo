@@ -108,8 +108,9 @@ $paquete ??= [];
 </div>
 
 <div class="campo">
-  <label for="imagen">Imagen de portada (JPG, PNG o WEBP)</label>
-  <input type="file" id="imagen" name="imagen" accept="image/jpeg,image/png,image/webp">
+  <label for="imagenes">Imágenes (JPG, PNG o WEBP)</label>
+  <input type="file" id="imagenes" name="imagenes[]" multiple accept="image/jpeg,image/png,image/webp">
+  <small class="op-70">Puedes seleccionar varias. La primera imagen de la galería se usa como portada; se pueden reordenar después de guardar.</small>
 </div>
 
 <button type="submit" class="btn btn-primario">Guardar paquete</button>

@@ -1,18 +1,21 @@
 <?php
 /** @var array $paquete */
 /** @var array<int, array{promedio: float, total: int}> $resumenes */
+/** @var array<int, list<array{ruta_thumb: string}>> $galerias */
 $resumenPaquete = isset($resumenes) ? ($resumenes[$paquete['id']] ?? null) : null;
+$galeriaPaquete = isset($galerias) ? ($galerias[$paquete['id']] ?? []) : [];
 ?>
 <article class="tarjeta animar-entrada">
   <a href="/paquetes/<?= htmlspecialchars($paquete['slug'], ENT_QUOTES, 'UTF-8') ?>">
-    <img
-      class="tarjeta__img"
-      src="<?= htmlspecialchars($paquete['imagen_portada'] ?? '/assets/img/logo.avif', ENT_QUOTES, 'UTF-8') ?>"
-      alt="<?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?>"
-      loading="lazy"
-      width="480"
-      height="320"
-    >
+    <?php
+    $portada = $paquete['imagen_portada'] ?? '/assets/img/logo.avif';
+    $extra = array_slice($galeriaPaquete, 1);
+    $alt = $paquete['titulo'];
+    $variante = 'paquete';
+    $width = 480;
+    $height = 320;
+    require __DIR__ . '/../../partials/_tarjeta_media.php';
+    ?>
   </a>
   <div class="tarjeta__cuerpo">
     <p class="etiqueta-categoria">

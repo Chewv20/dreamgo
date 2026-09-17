@@ -429,15 +429,50 @@ summary:focus-visible {
   opacity: 0.8;
 }
 
-/* Imagen de portada de un destino (tarjetas de /destinos, bloque de Inicio y ficha del destino).
-   Se administra desde /admin/destinos; si el destino no tiene imagen no se renderiza nada. */
-.destino-portada {
+/* Imagen(es) de una tarjeta de destino o paquete (ver partials/_tarjeta_media.php). Si la
+   galeria tiene mas de una imagen, se apilan absolutas para poder ir cambiando cual esta
+   visible (.is-activa) sin recalcular layout; initCarruselesHover() (site.js) las cicla al
+   pasar el cursor por encima. */
+.tarjeta__media {
+  position: relative;
   display: block;
   width: 100%;
+  overflow: hidden;
+}
+
+.tarjeta__media--destino {
   aspect-ratio: 16 / 9;
-  object-fit: cover;
   border-radius: var(--radio);
   margin-bottom: 1rem;
+}
+
+.tarjeta__media--paquete {
+  aspect-ratio: 3 / 2;
+}
+
+.tarjeta__media-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.4s ease;
+}
+
+.tarjeta__media-img.is-activa {
+  opacity: 1;
+}
+
+.tarjeta:hover .tarjeta__media-img.is-activa,
+.tarjeta:focus-within .tarjeta__media-img.is-activa {
+  transform: scale(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta__media-img {
+    transition: none;
+  }
 }
 
 /* --- Testimonios (home) --- */

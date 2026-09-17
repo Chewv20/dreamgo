@@ -170,7 +170,7 @@ class Cotizacion extends Model
         )->fetchAll();
     }
 
-    public static function recientes(int $desde = null): array
+    public static function recientes(?int $desde = null): array
     {
         $sql = 'SELECT * FROM cotizaciones';
         $params = [];

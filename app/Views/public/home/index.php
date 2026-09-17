@@ -95,7 +95,16 @@ $bloquesColor = array_filter(
         <?php foreach ($categorias as $categoria): ?>
           <a href="/destinos/<?= htmlspecialchars($categoria['slug'], ENT_QUOTES, 'UTF-8') ?>" class="tarjeta tarjeta-destino animar-entrada">
             <?php if (!empty($categoria['imagen_portada'])): ?>
-              <img class="destino-portada" src="<?= htmlspecialchars($categoria['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($categoria['nombre'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy" width="480" height="270">
+              <?php
+              $galeriaDestino = isset($imagenesDestinos) ? ($imagenesDestinos[$categoria['id']] ?? []) : [];
+              $portada = $categoria['imagen_portada'];
+              $extra = array_slice($galeriaDestino, 1);
+              $alt = $categoria['nombre'];
+              $variante = 'destino';
+              $width = 480;
+              $height = 270;
+              require __DIR__ . '/../../partials/_tarjeta_media.php';
+              ?>
             <?php endif; ?>
             <p class="tarjeta-destino__etiqueta">
               <?= $categoria['tipo'] === 'internacional' ? 'Internacional' : 'Nacional' ?>

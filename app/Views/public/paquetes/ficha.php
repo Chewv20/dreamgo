@@ -174,6 +174,7 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     <?php
     $paqueteActual = $paquete;
     $resumenes = $resumenesRelacionados;
+    $galerias = $galeriasRelacionados;
     foreach ($relacionados as $paquete) { // _tarjeta.php lee $paquete
         require __DIR__ . '/_tarjeta.php';
     }

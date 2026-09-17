@@ -100,6 +100,8 @@ $router->post('/admin/paquetes', [PaqueteAdminController::class, 'crear'], ['aut
 $router->get('/admin/paquetes/{id}/editar', [PaqueteAdminController::class, 'editarForm'], ['auth' => true, 'permiso' => 'paquetes.editar']);
 $router->post('/admin/paquetes/{id}/editar', [PaqueteAdminController::class, 'editar'], ['auth' => true, 'permiso' => 'paquetes.editar']);
 $router->post('/admin/paquetes/{id}/archivar', [PaqueteAdminController::class, 'archivar'], ['auth' => true, 'permiso' => 'paquetes.eliminar']);
+$router->post('/admin/paquetes/{id}/imagenes/{imagenId}/eliminar', [PaqueteAdminController::class, 'eliminarImagen'], ['auth' => true, 'permiso' => 'paquetes.editar']);
+$router->post('/admin/paquetes/{id}/imagenes/{imagenId}/mover', [PaqueteAdminController::class, 'moverImagen'], ['auth' => true, 'permiso' => 'paquetes.editar']);
 
 $router->get('/admin/destinos', [DestinoAdminController::class, 'index'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
 $router->get('/admin/destinos/crear', [DestinoAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
@@ -110,6 +112,8 @@ $router->post('/admin/destinos/{id}/visible', [DestinoAdminController::class, 'a
 $router->post('/admin/destinos/{id}/mover', [DestinoAdminController::class, 'mover'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
 $router->post('/admin/destinos/{id}/reasignar', [DestinoAdminController::class, 'reasignar'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
 $router->post('/admin/destinos/{id}/eliminar', [DestinoAdminController::class, 'eliminar'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
+$router->post('/admin/destinos/{id}/imagenes/{imagenId}/eliminar', [DestinoAdminController::class, 'eliminarImagen'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
+$router->post('/admin/destinos/{id}/imagenes/{imagenId}/mover', [DestinoAdminController::class, 'moverImagen'], ['auth' => true, 'permiso' => 'destinos.gestionar']);
 
 $router->get('/admin/articulos', [ArticuloAdminController::class, 'index'], ['auth' => true, 'permiso' => 'articulos.ver']);
 $router->get('/admin/articulos/crear', [ArticuloAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'articulos.crear']);

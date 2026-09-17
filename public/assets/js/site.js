@@ -98,6 +98,40 @@
     }, 6000);
   }
 
+  function initCarruselesHover() {
+    var reducido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    document.querySelectorAll('[data-carrusel-hover]').forEach(function (media) {
+      var frames = media.querySelectorAll('.tarjeta__media-img');
+      if (frames.length < 2 || reducido) return;
+
+      var actual = 0;
+      var timer = null;
+
+      function mostrar(i) {
+        frames[actual].classList.remove('is-activa');
+        actual = i % frames.length;
+        frames[actual].classList.add('is-activa');
+      }
+
+      function iniciar() {
+        if (timer) return;
+        timer = window.setInterval(function () { mostrar(actual + 1); }, 1500);
+      }
+
+      function detener() {
+        window.clearInterval(timer);
+        timer = null;
+        mostrar(0);
+      }
+
+      media.addEventListener('mouseenter', iniciar);
+      media.addEventListener('mouseleave', detener);
+      media.addEventListener('focusin', iniciar);
+      media.addEventListener('focusout', detener);
+    });
+  }
+
   function initAutoSubmit() {
     document.querySelectorAll('[data-autosubmit]').forEach(function (control) {
       control.addEventListener('change', function () {
@@ -442,6 +476,7 @@
     initMenu();
     initGaleria();
     initHeroCarrusel();
+    initCarruselesHover();
     initAutoSubmit();
     initScrollReveal();
     initComparador();

@@ -7,6 +7,8 @@ namespace App\Controllers\Public;
 use App\Models\Articulo;
 use App\Models\BloquePagina;
 use App\Models\Categoria;
+use App\Models\ImagenDestino;
+use App\Models\ImagenPaquete;
 use App\Models\Paquete;
 use App\Models\Resena;
 use Core\Controller;
@@ -16,9 +18,11 @@ class DestinoController extends Controller
     public function index(): void
     {
         $bloques = BloquePagina::porPagina('destinos');
+        $categorias = Categoria::activas();
 
         $this->view('public/destinos/index', [
-            'categorias' => Categoria::activas(),
+            'categorias' => $categorias,
+            'imagenes' => ImagenDestino::paraPadres(array_column($categorias, 'id')),
             'intro' => $bloques[0] ?? null,
         ], [
             'title' => 'Destinos | Dream Go Operadora Turística',
@@ -42,6 +46,8 @@ class DestinoController extends Controller
             'categoria' => $categoria,
             'paquetes' => $paquetes,
             'resumenes' => Resena::resumenPorPaquetes(array_column($paquetes, 'id')),
+            'galerias' => ImagenPaquete::paraPadres(array_column($paquetes, 'id')),
+            'imagenesDestino' => Categoria::imagenes((int) $categoria['id']),
             'articulos' => Articulo::publicadosDeCategoria((int) $categoria['id']),
         ], [
             'title' => $categoria['nombre'] . ' | Dream Go Operadora Turística',

@@ -50,4 +50,16 @@ class Categoria extends Model
     {
         return (int) self::db()->query('SELECT COALESCE(MAX(orden), 0) + 1 FROM categorias')->fetchColumn();
     }
+
+    public static function imagenes(int $categoriaId): array
+    {
+        return ImagenDestino::paraPadre($categoriaId);
+    }
+
+    /** imagen_portada siempre es la imagen con menor `orden` de la galeria (o NULL si no tiene). */
+    public static function sincronizarPortada(int $categoriaId): void
+    {
+        $imagenes = ImagenDestino::paraPadre($categoriaId);
+        self::update($categoriaId, ['imagen_portada' => $imagenes[0]['ruta_original'] ?? null]);
+    }
 }

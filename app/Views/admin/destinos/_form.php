@@ -26,11 +26,9 @@ $destino ??= [];
 </div>
 
 <div class="campo">
-  <label for="imagen">Imagen de portada (JPG, PNG o WEBP)</label>
-  <input type="file" id="imagen" name="imagen" accept="image/jpeg,image/png,image/webp">
-  <?php if (!empty($destino['imagen_portada'])): ?>
-    <small class="op-70">Actual: <?= htmlspecialchars($destino['imagen_portada'], ENT_QUOTES, 'UTF-8') ?> — sube una nueva para reemplazarla.</small>
-  <?php endif; ?>
+  <label for="imagenes">Imágenes (JPG, PNG o WEBP)</label>
+  <input type="file" id="imagenes" name="imagenes[]" multiple accept="image/jpeg,image/png,image/webp">
+  <small class="op-70">Puedes seleccionar varias. La primera imagen de la galería se usa como portada; se pueden reordenar después de guardar.</small>
 </div>
 
 <div class="campo campo--check">

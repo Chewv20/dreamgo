@@ -93,6 +93,21 @@ CREATE TABLE IF NOT EXISTS categorias (
 CREATE INDEX idx_categorias_tipo ON categorias(tipo);
 
 -- ==========================================================
+-- IMAGENES DE DESTINO (galeria)
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS imagenes_destino (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  categoria_id INT UNSIGNED NOT NULL,
+  ruta_original VARCHAR(255) NOT NULL,
+  ruta_thumb VARCHAR(255) NOT NULL,
+  alt_text VARCHAR(180) NULL,
+  orden SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_img_destino FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE INDEX idx_imgdestino_categoria ON imagenes_destino(categoria_id);
+
+-- ==========================================================
 -- PAQUETES
 -- ==========================================================
 CREATE TABLE IF NOT EXISTS paquetes (

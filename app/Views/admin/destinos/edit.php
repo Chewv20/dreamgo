@@ -1,4 +1,4 @@
-<?php /** @var array $destino */ /** @var array $tipos */ ?>
+<?php /** @var array $destino */ /** @var array $tipos */ /** @var array $imagenes */ ?>
 <div class="admin-panel">
   <form method="post" action="/admin/destinos/<?= (int) $destino['id'] ?>/editar" enctype="multipart/form-data">
     <?php require __DIR__ . '/_form.php'; ?>
@@ -8,3 +8,8 @@
     <p class="mt-1"><a href="/destinos/<?= htmlspecialchars($destino['slug'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Ver en el sitio &rarr;</a></p>
   <?php endif; ?>
 </div>
+
+<?php
+$galeriaBase = '/admin/destinos/' . (int) $destino['id'];
+require __DIR__ . '/../partials/_galeria_manager.php';
+?>
