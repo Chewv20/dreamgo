@@ -16,6 +16,15 @@
 /public/uploads/destinos/thumbs/*
 !/public/uploads/destinos/original/.gitkeep
 !/public/uploads/destinos/thumbs/.gitkeep
+/public/uploads/hero/original/*
+/public/uploads/hero/thumbs/*
+!/public/uploads/hero/original/.gitkeep
+!/public/uploads/hero/thumbs/.gitkeep
+/public/uploads/modales/original/*
+/public/uploads/modales/thumbs/*
+!/public/uploads/modales/original/.gitkeep
+!/public/uploads/modales/thumbs/.gitkeep
+/vendor.zip
 .DS_Store
 Thumbs.db
 /.phpunit.cache/

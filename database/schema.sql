@@ -196,6 +196,28 @@ CREATE TABLE IF NOT EXISTS codigos_descuento (
 CREATE INDEX idx_descuento_activo_fechas ON codigos_descuento(activo, fecha_inicio, fecha_fin);
 
 -- ==========================================================
+-- MODALES PROMOCIONALES
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS modales_promocion (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  titulo VARCHAR(120) NOT NULL,
+  cuerpo VARCHAR(500) NULL,
+  texto_boton VARCHAR(40) NOT NULL DEFAULT 'Ver paquete',
+  paquete_id INT UNSIGNED NOT NULL,
+  imagen VARCHAR(255) NULL,
+  mostrar_en ENUM('inicio','todas') NOT NULL DEFAULT 'inicio',
+  fecha_inicio DATE NULL,
+  fecha_fin DATE NULL,
+  prioridad SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  activo TINYINT(1) NOT NULL DEFAULT 1,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_modal_paquete FOREIGN KEY (paquete_id) REFERENCES paquetes(id) ON DELETE CASCADE,
+  CONSTRAINT chk_modal_fechas CHECK (fecha_fin IS NULL OR fecha_inicio IS NULL OR fecha_fin >= fecha_inicio)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE INDEX idx_modales_activo ON modales_promocion(activo, prioridad);
+
+-- ==========================================================
 -- RESERVAS
 -- ==========================================================
 CREATE TABLE IF NOT EXISTS reservas (

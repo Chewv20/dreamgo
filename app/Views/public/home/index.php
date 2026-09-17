@@ -43,7 +43,15 @@ $bloquesColor = array_filter(
   <?php $contenido = BloquePagina::contenido($bloque); ?>
 
   <?php if ($bloque['clave'] === 'hero'): ?>
-    <section class="hero hero--inicio">
+    <?php $heroImagenes = array_values(array_filter($contenido['imagenes'] ?? [], 'is_string')); ?>
+    <section class="hero hero--inicio<?= $heroImagenes ? ' hero--con-slides' : '' ?>"<?= count($heroImagenes) > 1 ? ' data-hero-carrusel' : '' ?>>
+      <?php if ($heroImagenes): ?>
+        <div class="hero__slides" aria-hidden="true">
+          <?php foreach ($heroImagenes as $idx => $imagenHero): ?>
+            <img class="hero__slide<?= $idx === 0 ? ' is-activa' : '' ?>" src="<?= htmlspecialchars($imagenHero, ENT_QUOTES, 'UTF-8') ?>" alt="" width="1600" height="900"<?= $idx === 0 ? '' : ' loading="lazy"' ?>>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
       <div class="contenedor">
         <div class="hero__contenido animar-entrada">
           <h1><?= htmlspecialchars($bloque['titulo'] ?? '', ENT_QUOTES, 'UTF-8') ?></h1>

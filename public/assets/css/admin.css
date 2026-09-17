@@ -227,6 +227,12 @@
 .textarea-md { min-height: 140px; }
 .textarea-lg { min-height: 280px; }
 .img-preview { max-width: 320px; border-radius: var(--radio); }
+
+/* Ranuras de imagen del hero (carrusel) en el editor de contenido */
+.hero-img-fila { border-top: 1px solid var(--admin-borde, #e2e2e2); padding-top: 1rem; }
+.hero-img-fila:first-of-type { border-top: none; padding-top: 0; }
+.hero-img-preview { max-width: 240px; margin-bottom: 0.5rem; }
+.hero-img-fila .campo--check { margin-bottom: 0.5rem; }
 .btn--xs { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
 .btn--icono { padding: 0.4rem 0.7rem; }
 

@@ -30,6 +30,7 @@
       <?php if (Auth::hasPermission('articulos.ver')): ?><a href="/admin/articulos">Blog</a><?php endif; ?>
       <?php if (Auth::hasPermission('suscriptores.ver')): ?><a href="/admin/suscriptores">Suscriptores</a><?php endif; ?>
       <?php if (Auth::hasPermission('ofertas.gestionar')): ?><a href="/admin/ofertas">Ofertas</a><?php endif; ?>
+      <?php if (Auth::hasPermission('modales.gestionar')): ?><a href="/admin/modales">Modales</a><?php endif; ?>
       <?php if (Auth::hasPermission('usuarios.gestionar')): ?><a href="/admin/usuarios">Usuarios</a><?php endif; ?>
       <?php if (Auth::hasPermission('roles.gestionar')): ?><a href="/admin/roles">Roles y permisos</a><?php endif; ?>
       <?php if (Auth::hasPermission('contenido.gestionar')): ?><a href="/admin/contenido">Contenido del sitio</a><a href="/admin/colores">Colores del sitio</a><?php endif; ?>

@@ -316,6 +316,47 @@ summary:focus-visible {
   background-image: linear-gradient(180deg, rgba(47, 62, 70, 0.55), rgba(47, 62, 70, 0.82)), url('../img/placeholders/hero-inicio.png');
 }
 
+/* Carrusel del hero: las imagenes administrables se apilan como <img> absolutos detras
+   del texto; la CSS placeholder de arriba queda de fondo mientras cargan. */
+.hero__slides {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero__slides::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(47, 62, 70, 0.55), rgba(47, 62, 70, 0.82));
+}
+
+.hero__slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.hero__slide.is-activa {
+  opacity: 1;
+}
+
+.hero--con-slides > .contenedor {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__slide {
+    transition: none;
+  }
+}
+
 .hero__acciones {
   display: flex;
   flex-wrap: wrap;
@@ -1104,6 +1145,84 @@ summary:focus-visible {
   .lightbox__nav { transition: none; }
 }
 
+/* Modal promocional (aviso que se abre al entrar al sitio) */
+.modal-promo {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: rgba(20, 26, 30, 0.72);
+  animation: modal-promo-fade var(--transicion);
+}
+
+.modal-promo[hidden] { display: none; }
+
+.modal-promo__caja {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: var(--color-fondo);
+  color: var(--color-texto-oscuro);
+  border-radius: var(--radio);
+  box-shadow: 0 16px 56px rgba(0, 0, 0, 0.35);
+  padding: 1.75rem;
+  text-align: center;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+
+.modal-promo__img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: var(--radio);
+  margin-bottom: 1rem;
+}
+
+.modal-promo__titulo {
+  margin: 0 0 0.5rem;
+}
+
+.modal-promo__texto {
+  margin: 0 0 1.25rem;
+}
+
+.modal-promo__cerrar {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: var(--color-texto-oscuro);
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: background var(--transicion);
+}
+
+.modal-promo__cerrar:hover { background: rgba(47, 62, 70, 0.1); }
+
+.modal-promo__cerrar:focus-visible {
+  outline: 2px solid var(--color-primario-oscuro);
+  outline-offset: 2px;
+}
+
+@keyframes modal-promo-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-promo { animation: none; }
+  .modal-promo__cerrar { transition: none; }
+}
+
 .galeria__tira:focus-visible {
   outline: none;
   border-color: var(--color-primario-oscuro);
@@ -1404,6 +1523,18 @@ summary:focus-visible {
   display: block;
   padding: 1.5rem;
   text-decoration: none;
+}
+
+.tarjeta-contacto__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--color-fondo-alterno);
+  color: var(--color-primario-oscuro);
+  margin-bottom: 0.9rem;
 }
 
 /* Boton flotante de WhatsApp (todas las paginas publicas) */

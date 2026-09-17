@@ -16,7 +16,7 @@ $iconos = [
   <a href="/admin/contenido/home" class="btn btn-secundario">&larr; Volver a secciones</a>
 </div>
 
-<form method="post" action="/admin/contenido/<?= (int) $bloque['id'] ?>/editar">
+<form method="post" action="/admin/contenido/<?= (int) $bloque['id'] ?>/editar" enctype="multipart/form-data">
   <?= \App\Helpers\Csrf::field() ?>
 
   <div class="admin-panel ancho-760">
@@ -41,6 +41,33 @@ $iconos = [
   </div>
 
   <?php if ($bloque['clave'] === 'hero'): ?>
+    <div class="admin-panel ancho-760">
+      <h2 class="mt-0">Imágenes del hero</h2>
+      <p class="admin-nota mt-0">
+        Sube hasta <?= \App\Controllers\Admin\ContenidoController::MAX_IMAGENES_HERO ?> imágenes.
+        Con más de una, el hero las muestra en un carrusel automático. Se recomienda un tamaño
+        de 1600&times;900&nbsp;px o mayor (JPG, PNG o WEBP).
+      </p>
+      <?php $imagenesHero = $contenido['imagenes'] ?? []; ?>
+      <?php for ($i = 0; $i < \App\Controllers\Admin\ContenidoController::MAX_IMAGENES_HERO; $i++): ?>
+        <?php $imagenActual = $imagenesHero[$i] ?? null; ?>
+        <div class="campo hero-img-fila">
+          <label for="imagen_<?= $i ?>">Imagen <?= $i + 1 ?></label>
+          <?php if ($imagenActual): ?>
+            <img src="<?= $v($imagenActual) ?>" alt="" class="img-preview hero-img-preview" width="240" height="135">
+            <label class="campo--check m-0">
+              <input type="checkbox" name="quitar_imagen_<?= $i ?>" value="1">
+              <span>Quitar esta imagen</span>
+            </label>
+          <?php endif; ?>
+          <input type="file" id="imagen_<?= $i ?>" name="imagen_<?= $i ?>" accept="image/jpeg,image/png,image/webp">
+          <?php if ($imagenActual): ?>
+            <small class="op-70">Sube una nueva para reemplazar la actual.</small>
+          <?php endif; ?>
+        </div>
+      <?php endfor; ?>
+    </div>
+
     <div class="admin-panel ancho-760">
       <h2 class="mt-0">Botones</h2>
       <div class="admin-form-grid admin-form-grid--2">

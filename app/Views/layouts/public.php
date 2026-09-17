@@ -211,6 +211,12 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
 </a>
 <?php endif; ?>
 
+<?php
+$rutaModal = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$modalPromo = \App\Models\ModalPromocion::vigente($rutaModal === '/');
+require __DIR__ . '/../partials/_modal_promocion.php';
+?>
+
 <script src="<?= htmlspecialchars(\App\Helpers\Asset::url('/assets/js/site.js'), ENT_QUOTES, 'UTF-8') ?>" defer></script>
 </body>
 </html>

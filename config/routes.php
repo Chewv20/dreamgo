@@ -12,6 +12,7 @@ use App\Controllers\Admin\ContenidoController;
 use App\Controllers\Admin\CotizacionAdminController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\DestinoAdminController;
+use App\Controllers\Admin\ModalAdminController;
 use App\Controllers\Admin\OfertaAdminController;
 use App\Controllers\Admin\PaqueteAdminController;
 use App\Controllers\Admin\ResenaAdminController;
@@ -152,6 +153,14 @@ $router->get('/admin/ofertas/{id}/editar', [OfertaAdminController::class, 'edita
 $router->post('/admin/ofertas/{id}/editar', [OfertaAdminController::class, 'editar'], ['auth' => true, 'permiso' => 'ofertas.gestionar']);
 $router->post('/admin/ofertas/{id}/desactivar', [OfertaAdminController::class, 'desactivar'], ['auth' => true, 'permiso' => 'ofertas.gestionar']);
 $router->post('/admin/ofertas/{id}/enviar-suscriptores', [OfertaAdminController::class, 'enviarSuscriptores'], ['auth' => true, 'permiso' => 'ofertas.gestionar']);
+
+$router->get('/admin/modales', [ModalAdminController::class, 'index'], ['auth' => true, 'permiso' => 'modales.gestionar']);
+$router->get('/admin/modales/crear', [ModalAdminController::class, 'crearForm'], ['auth' => true, 'permiso' => 'modales.gestionar']);
+$router->post('/admin/modales', [ModalAdminController::class, 'crear'], ['auth' => true, 'permiso' => 'modales.gestionar']);
+$router->get('/admin/modales/{id}/editar', [ModalAdminController::class, 'editarForm'], ['auth' => true, 'permiso' => 'modales.gestionar']);
+$router->post('/admin/modales/{id}/editar', [ModalAdminController::class, 'editar'], ['auth' => true, 'permiso' => 'modales.gestionar']);
+$router->post('/admin/modales/{id}/visible', [ModalAdminController::class, 'alternarActivo'], ['auth' => true, 'permiso' => 'modales.gestionar']);
+$router->post('/admin/modales/{id}/eliminar', [ModalAdminController::class, 'eliminar'], ['auth' => true, 'permiso' => 'modales.gestionar']);
 
 $router->get('/admin/suscriptores', [SuscriptorAdminController::class, 'index'], ['auth' => true, 'permiso' => 'suscriptores.ver']);
 $router->get('/admin/suscriptores/exportar', [SuscriptorAdminController::class, 'exportarCsv'], ['auth' => true, 'permiso' => 'suscriptores.ver']);

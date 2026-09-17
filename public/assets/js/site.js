@@ -82,6 +82,22 @@
     if (btnNext) btnNext.addEventListener('click', function () { irLb(1); });
   }
 
+  function initHeroCarrusel() {
+    var hero = document.querySelector('[data-hero-carrusel]');
+    if (!hero) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var slides = hero.querySelectorAll('.hero__slide');
+    if (slides.length < 2) return;
+
+    var actual = 0;
+    window.setInterval(function () {
+      slides[actual].classList.remove('is-activa');
+      actual = (actual + 1) % slides.length;
+      slides[actual].classList.add('is-activa');
+    }, 6000);
+  }
+
   function initAutoSubmit() {
     document.querySelectorAll('[data-autosubmit]').forEach(function (control) {
       control.addEventListener('change', function () {
@@ -322,6 +338,70 @@
     if (rechazar) rechazar.addEventListener('click', function () { decidir('denied'); });
   }
 
+  function initModalPromocion() {
+    var modal = document.querySelector('[data-modal-promo]');
+    if (!modal) return;
+
+    var KEY = 'dreamgo_modal_' + (modal.getAttribute('data-modal-id') || '0');
+
+    // Una vez por sesion de navegador: si ya se mostro (o se cerro), no volver a abrirlo.
+    try {
+      if (sessionStorage.getItem(KEY)) return;
+    } catch (e) {
+      // sessionStorage no disponible (modo privado): el modal se mostrara en cada carga.
+    }
+
+    var cerrarBtns = modal.querySelectorAll('[data-modal-promo-cerrar], [data-modal-promo-cta]');
+    var opener = null;
+    var abierto = false;
+
+    function marcarVisto() {
+      try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+    }
+
+    function onKey(e) {
+      if (e.key === 'Escape') cerrar();
+    }
+
+    function abrir() {
+      opener = document.activeElement;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      abierto = true;
+      marcarVisto();
+      var cerrar0 = modal.querySelector('[data-modal-promo-cerrar]');
+      if (cerrar0) cerrar0.focus();
+      document.addEventListener('keydown', onKey);
+    }
+
+    function cerrar() {
+      if (!abierto) return;
+      abierto = false;
+      modal.hidden = true;
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKey);
+      if (opener && opener.focus) opener.focus();
+    }
+
+    Array.prototype.forEach.call(cerrarBtns, function (btn) {
+      // El CTA es un <a>: se deja navegar, solo restauramos el scroll del body.
+      btn.addEventListener('click', function () {
+        if (btn.hasAttribute('data-modal-promo-cta')) {
+          document.body.style.overflow = '';
+          marcarVisto();
+        } else {
+          cerrar();
+        }
+      });
+    });
+
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) cerrar();
+    });
+
+    window.setTimeout(abrir, 700);
+  }
+
   function baseHref() {
     var link = document.querySelector('link[rel="manifest"]');
     if (!link) return '/';
@@ -361,11 +441,13 @@
   document.addEventListener('DOMContentLoaded', function () {
     initMenu();
     initGaleria();
+    initHeroCarrusel();
     initAutoSubmit();
     initScrollReveal();
     initComparador();
     initAtribucion();
     initConsentimiento();
+    initModalPromocion();
   });
 
   initServiceWorker();

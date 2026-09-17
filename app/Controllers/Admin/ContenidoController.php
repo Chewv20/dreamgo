@@ -8,9 +8,13 @@ use App\Helpers\Flash;
 use App\Helpers\Url;
 use App\Models\BloquePagina;
 use App\Models\ConfiguracionSitio;
+use App\Services\ImageUploadService;
 
 class ContenidoController extends AdminController
 {
+    /** Tope de imagenes del carrusel del hero. */
+    public const MAX_IMAGENES_HERO = 5;
+
     public const PAGINAS = [
         'home' => 'Pagina de inicio',
         'nosotros' => 'Nosotros',
@@ -133,6 +137,9 @@ class ContenidoController extends AdminController
         ];
 
         $contenido = $this->construirContenido($bloque['pagina'], $bloque['clave']);
+        if ($bloque['clave'] === 'hero') {
+            $contenido['imagenes'] = $this->imagenesHero($bloque);
+        }
         if ($contenido !== null) {
             $datos['contenido'] = json_encode($contenido, JSON_UNESCAPED_UNICODE);
         }
@@ -173,6 +180,44 @@ class ContenidoController extends AdminController
     private static function esColorHexValido(string $valor): bool
     {
         return (bool) preg_match('/^#[0-9a-f]{6}$/i', $valor);
+    }
+
+    /**
+     * Reconstruye la lista ordenada de imagenes del hero a partir del formulario: conserva las
+     * actuales (guardadas en contenido.imagenes) salvo las marcadas para quitar, y suma las
+     * nuevas subidas en cada ranura. Se reindexa siempre, asi que queda como lista contigua.
+     *
+     * @param array<string, mixed> $bloque
+     * @return list<string> rutas publicas, p. ej. ['/uploads/hero/original/hero-ab12cd.jpg']
+     */
+    private function imagenesHero(array $bloque): array
+    {
+        $actuales = BloquePagina::contenido($bloque)['imagenes'] ?? [];
+        $servicio = new ImageUploadService();
+        $imagenes = [];
+
+        for ($i = 0; $i < self::MAX_IMAGENES_HERO; $i++) {
+            $ruta = is_string($actuales[$i] ?? null) ? $actuales[$i] : null;
+
+            if ($this->request->input("quitar_imagen_{$i}")) {
+                $ruta = null;
+            }
+
+            $archivo = $this->request->file("imagen_{$i}");
+            if ($archivo && ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                try {
+                    $ruta = $servicio->procesar($archivo, 'hero', 'hero')['original'];
+                } catch (\RuntimeException $e) {
+                    Flash::set('error', 'Una imagen del hero no se pudo procesar: ' . $e->getMessage());
+                }
+            }
+
+            if (is_string($ruta) && $ruta !== '') {
+                $imagenes[] = $ruta;
+            }
+        }
+
+        return $imagenes;
     }
 
     private function construirContenido(string $pagina, string $clave): ?array
