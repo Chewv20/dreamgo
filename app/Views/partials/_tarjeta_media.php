@@ -14,6 +14,8 @@
 $extra ??= [];
 ?>
 <span class="tarjeta__media tarjeta__media--<?= $variante ?>"<?= $extra !== [] ? ' data-carrusel-hover' : '' ?>>
+  <?php /* Copia desenfocada de la portada: rellena las franjas que deja object-fit: contain. */ ?>
+  <img class="media-fondo" src="<?= htmlspecialchars($portada, ENT_QUOTES, 'UTF-8') ?>" alt="" aria-hidden="true" loading="lazy">
   <img
     class="tarjeta__media-img is-activa"
     src="<?= htmlspecialchars($portada, ENT_QUOTES, 'UTF-8') ?>"

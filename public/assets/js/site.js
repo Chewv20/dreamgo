@@ -23,10 +23,12 @@
       ? tiras.map(function (t) { return { full: t.getAttribute('data-full'), alt: t.getAttribute('data-alt') || '' }; })
       : [{ full: principal.getAttribute('src'), alt: principal.getAttribute('alt') || '' }];
     var actual = 0;
+    var fondo = galeria.querySelector('[data-galeria-fondo]');
 
     function mostrar(i) {
       actual = (i + imagenes.length) % imagenes.length;
       principal.src = imagenes[actual].full;
+      if (fondo) fondo.src = imagenes[actual].full;
       principal.alt = imagenes[actual].alt;
       tiras.forEach(function (t, j) { t.classList.toggle('is-activa', j === actual); });
     }
@@ -105,6 +107,7 @@
       var frames = media.querySelectorAll('.tarjeta__media-img');
       if (frames.length < 2 || reducido) return;
 
+      var fondo = media.querySelector('.media-fondo');
       var actual = 0;
       var timer = null;
 
@@ -112,6 +115,7 @@
         frames[actual].classList.remove('is-activa');
         actual = i % frames.length;
         frames[actual].classList.add('is-activa');
+        if (fondo) fondo.src = frames[actual].currentSrc || frames[actual].src;
       }
 
       function iniciar() {
