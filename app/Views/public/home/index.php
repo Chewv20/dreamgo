@@ -105,6 +105,8 @@ $bloquesColor = array_filter(
               $height = 270;
               require __DIR__ . '/../../partials/_tarjeta_media.php';
               ?>
+            <?php else: ?>
+              <?php $variante = 'destino'; require __DIR__ . '/../../partials/_tarjeta_media_vacia.php'; ?>
             <?php endif; ?>
             <p class="tarjeta-destino__etiqueta">
               <?= $categoria['tipo'] === 'internacional' ? 'Internacional' : 'Nacional' ?>

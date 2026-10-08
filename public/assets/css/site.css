@@ -481,6 +481,26 @@ summary:focus-visible {
   opacity: 1;
 }
 
+/* Fotos horizontales (ver initOrientacionMedia en site.js): en el marco vertical 4:5 de
+   paquete, contain dejaba dos franjas desenfocadas enormes. Una foto apaisada no suele
+   llevar texto, asi que se recorta para llenar el marco; los flyers siguen en contain. */
+.tarjeta__media--paquete .tarjeta__media-img.is-apaisada {
+  object-fit: cover;
+}
+
+/* Sin imagen todavia: mismo marco que una tarjeta con foto, con un icono discreto. */
+.tarjeta__media--vacia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primario-oscuro);
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.55), transparent 60%),
+    linear-gradient(135deg, var(--color-fondo-alterno), var(--color-primario));
+}
+
+.tarjeta__media--vacia svg { opacity: 0.55; }
+
 .tarjeta:hover .tarjeta__media-img.is-activa,
 .tarjeta:focus-within .tarjeta__media-img.is-activa {
   transform: scale(1.04);
@@ -1399,17 +1419,34 @@ summary:focus-visible {
 
 /* Filtros del catalogo */
 .filtros {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
-  align-items: flex-end;
+  align-items: end;
   margin-block: 2rem 1rem;
 }
 
 .filtros .campo { margin-bottom: 0; }
-.filtros__q { flex: 2; min-width: 220px; }
-.filtros__campo { flex: 1; min-width: 200px; }
-.filtros__campo--chico { flex: 1; min-width: 130px; }
+
+/* .filtros__extra no genera caja propia: sus campos participan directo en la rejilla. */
+.filtros__extra { display: contents; }
+
+/* Movil (con JS): busqueda + "Mas filtros"; el resto se despliega bajo demanda.
+   display:none explicito porque .btn (inline-flex) le gana al atributo hidden. */
+.filtros__toggle { display: none; }
+.filtros.is-colapsable .filtros__toggle { display: inline-flex; }
+.filtros.is-colapsable:not(.is-abierto) .filtros__extra { display: none; }
+
+@media (min-width: 640px) {
+  .filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filtros__q { grid-column: 1 / -1; }
+}
+
+/* Escritorio: dos filas de cuatro (busqueda ancha + destino + tipo / precios + duracion + boton). */
+@media (min-width: 1024px) {
+  .filtros { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .filtros__q { grid-column: span 2; }
+}
 
 /* Barra de resultados: conteo + orden */
 .catalogo-barra {

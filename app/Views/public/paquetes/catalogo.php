@@ -84,11 +84,14 @@ if (!empty($filtrosActivos['duracion'])) {
     <p><?= htmlspecialchars($intro['subtitulo'], ENT_QUOTES, 'UTF-8') ?></p>
   <?php endif; ?>
 
-  <form method="get" action="/paquetes" class="filtros">
+  <?php $hayFiltroExtra = $categoriaActiva || $tipoActivo || (string) $precioMinActivo !== '' || (string) $precioMaxActivo !== '' || $duracionActiva; ?>
+  <form method="get" action="/paquetes" class="filtros" data-filtros<?= $hayFiltroExtra ? ' data-filtros-abiertos' : '' ?>>
     <div class="campo filtros__q">
       <label for="q">Buscar</label>
       <input type="search" name="q" id="q" placeholder="Ej. Cancún, playa, aventura..." value="<?= htmlspecialchars((string) $qActivo, ENT_QUOTES, 'UTF-8') ?>" maxlength="120">
     </div>
+    <button type="button" class="btn btn-secundario filtros__toggle" data-filtros-toggle aria-expanded="false" aria-controls="filtros-extra" hidden>Más filtros</button>
+    <div class="filtros__extra" id="filtros-extra">
     <div class="campo filtros__campo">
       <label for="categoria">Destino</label>
       <select name="categoria" id="categoria">
@@ -103,7 +106,7 @@ if (!empty($filtrosActivos['duracion'])) {
     <div class="campo filtros__campo">
       <label for="tipo">Tipo</label>
       <select name="tipo" id="tipo">
-        <option value="">Nacional e internacional</option>
+        <option value="">Todos</option>
         <option value="nacional" <?= $tipoActivo === 'nacional' ? 'selected' : '' ?>>Nacional</option>
         <option value="internacional" <?= $tipoActivo === 'internacional' ? 'selected' : '' ?>>Internacional</option>
       </select>
@@ -114,7 +117,7 @@ if (!empty($filtrosActivos['duracion'])) {
     </div>
     <div class="campo filtros__campo--chico">
       <label for="precio_max">Precio máx.</label>
-      <input type="number" name="precio_max" id="precio_max" min="0" step="1" placeholder="$" value="<?= htmlspecialchars((string) $precioMaxActivo, ENT_QUOTES, 'UTF-8') ?>">
+      <input type="number" name="precio_max" id="precio_max" min="0" step="1" placeholder="Sin límite" value="<?= htmlspecialchars((string) $precioMaxActivo, ENT_QUOTES, 'UTF-8') ?>">
     </div>
     <div class="campo filtros__campo">
       <label for="duracion">Duración</label>
@@ -125,8 +128,9 @@ if (!empty($filtrosActivos['duracion'])) {
         <?php endforeach; ?>
       </select>
     </div>
+    </div>
     <input type="hidden" name="orden" value="<?= htmlspecialchars($ordenActivo, ENT_QUOTES, 'UTF-8') ?>">
-    <button type="submit" class="btn btn-primario">Filtrar</button>
+    <button type="submit" class="btn btn-primario filtros__enviar">Filtrar</button>
   </form>
 
   <div class="catalogo-barra">

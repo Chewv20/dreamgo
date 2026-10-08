@@ -19,6 +19,8 @@
           $height = 270;
           require __DIR__ . '/../../partials/_tarjeta_media.php';
           ?>
+        <?php else: ?>
+          <?php $variante = 'destino'; require __DIR__ . '/../../partials/_tarjeta_media_vacia.php'; ?>
         <?php endif; ?>
         <p class="etiqueta-categoria">
           <?= $categoria['tipo'] === 'internacional' ? 'Internacional' : 'Nacional' ?>

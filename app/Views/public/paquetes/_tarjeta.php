@@ -8,13 +8,17 @@ $galeriaPaquete = isset($galerias) ? ($galerias[$paquete['id']] ?? []) : [];
 <article class="tarjeta tarjeta--paquete animar-entrada">
   <a href="/paquetes/<?= htmlspecialchars($paquete['slug'], ENT_QUOTES, 'UTF-8') ?>">
     <?php
-    $portada = $paquete['imagen_portada'] ?? '/assets/img/logo.avif';
-    $extra = array_slice($galeriaPaquete, 1);
-    $alt = $paquete['titulo'];
     $variante = 'paquete';
-    $width = 480;
-    $height = 320;
-    require __DIR__ . '/../../partials/_tarjeta_media.php';
+    if (!empty($paquete['imagen_portada'])) {
+        $portada = $paquete['imagen_portada'];
+        $extra = array_slice($galeriaPaquete, 1);
+        $alt = $paquete['titulo'];
+        $width = 480;
+        $height = 600;
+        require __DIR__ . '/../../partials/_tarjeta_media.php';
+    } else {
+        require __DIR__ . '/../../partials/_tarjeta_media_vacia.php';
+    }
     ?>
   </a>
   <div class="tarjeta__cuerpo">

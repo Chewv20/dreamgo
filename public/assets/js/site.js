@@ -101,6 +101,20 @@
     }, 6000);
   }
 
+  // Marca las imagenes horizontales de las tarjetas de paquete para que llenen el marco
+  // 4:5 (ver .is-apaisada en site.css). Se mide la imagen real: el ancho/alto declarado en
+  // el HTML es generico.
+  function initOrientacionMedia() {
+    document.querySelectorAll('.tarjeta__media--paquete .tarjeta__media-img').forEach(function (img) {
+      function medir() {
+        if (img.naturalWidth && img.naturalWidth / img.naturalHeight >= 1.15) {
+          img.classList.add('is-apaisada');
+        }
+      }
+      if (img.complete) medir(); else img.addEventListener('load', medir, { once: true });
+    });
+  }
+
   function initCarruselesHover() {
     var reducido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -409,6 +423,35 @@
     input.addEventListener('input', actualizar);
   }
 
+  // Filtros del catalogo en movil: deja visible la busqueda y pliega el resto tras
+  // "Mas filtros" (abierto de entrada si ya hay alguno aplicado). Sin JS se ve todo.
+  function initFiltrosCatalogo() {
+    var form = document.querySelector('[data-filtros]');
+    var toggle = form && form.querySelector('[data-filtros-toggle]');
+    if (!form || !toggle) return;
+    var movil = window.matchMedia('(max-width: 639px)');
+
+    function aplicar() {
+      form.classList.toggle('is-colapsable', movil.matches);
+      toggle.hidden = !movil.matches;
+    }
+
+    if (form.hasAttribute('data-filtros-abiertos')) {
+      form.classList.add('is-abierto');
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.textContent = 'Menos filtros';
+    }
+
+    toggle.addEventListener('click', function () {
+      var abierto = form.classList.toggle('is-abierto');
+      toggle.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+      toggle.textContent = abierto ? 'Menos filtros' : 'Más filtros';
+    });
+
+    aplicar();
+    if (movil.addEventListener) movil.addEventListener('change', aplicar);
+  }
+
   function initModalPromocion() {
     var modal = document.querySelector('[data-modal-promo]');
     if (!modal) return;
@@ -536,6 +579,7 @@
     initMenu();
     initGaleria();
     initHeroCarrusel();
+    initOrientacionMedia();
     initCarruselesHover();
     initAutoSubmit();
     initScrollReveal();
@@ -544,6 +588,7 @@
     initConsentimiento();
     initModalPromocion();
     initReservaResumen();
+    initFiltrosCatalogo();
   });
 
   initServiceWorker();
