@@ -474,9 +474,22 @@
 .matriz-grupo {
   background: var(--color-fondo-alterno);
   font-weight: 700;
-  text-transform: capitalize;
   text-align: left;
 }
+
+.matriz-todos {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-borde);
+  background: #fff;
+  color: var(--color-primario-oscuro);
+  cursor: pointer;
+}
+
+.matriz-todos:hover { border-color: var(--color-primario-oscuro); }
 
 .admin-subtitulo { margin: 1.25rem 0 0.35rem; }
 
@@ -836,3 +849,80 @@
 /* La accion destructiva va aparte, al final de la fila, lejos de "Confirmar". */
 .admin-acciones form:has(.btn-peligro) { margin-left: auto; }
 
+/* Formulario por secciones (paquetes) */
+.admin-seccion {
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  padding: 1rem 1.25rem 0.25rem;
+  margin: 0 0 1.25rem;
+  min-width: 0;
+}
+
+.admin-seccion > legend {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 0 0.4rem;
+}
+
+.admin-seccion--plegable { padding-bottom: 1rem; }
+.admin-seccion--plegable > summary { cursor: pointer; font-family: var(--fuente-titulos); font-weight: 700; }
+
+.admin-etiqueta { display: block; font-weight: 600; margin-bottom: 0.4rem; }
+
+.admin-campo-check { align-self: end; padding-bottom: 0.6rem; }
+
+@media (min-width: 900px) {
+  .admin-form-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* Editor de itinerario: una fila por día (título corto + descripción + quitar) */
+.itinerario-editor { display: grid; gap: 0.5rem; }
+
+.itinerario-dia {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.4rem;
+  align-items: start;
+}
+
+.itinerario-dia input { grid-column: 1; }
+.itinerario-dia textarea { grid-column: 1; min-height: 0; }
+.itinerario-dia [data-itinerario-quitar] { grid-column: 2; grid-row: 1; }
+
+@media (min-width: 900px) {
+  .itinerario-dia { grid-template-columns: 180px minmax(0, 1fr) auto; }
+  .itinerario-dia input,
+  .itinerario-dia textarea { grid-column: auto; }
+  .itinerario-dia [data-itinerario-quitar] { grid-column: auto; grid-row: auto; }
+}
+
+/* Guardar siempre a mano en formularios largos */
+.admin-barra-guardar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  margin-top: 0.5rem;
+  background: linear-gradient(to top, #fff 75%, rgba(255, 255, 255, 0));
+}
+
+.admin-filtros__fin { margin-left: auto; }
+
+.campo-password { display: flex; gap: 0.4rem; align-items: center; }
+.campo-password input { flex: 1; min-width: 0; }
+
+/* Dialogo de confirmacion (reemplaza window.confirm) */
+.admin-dialogo {
+  border: none;
+  border-radius: var(--radio);
+  padding: 1.5rem;
+  max-width: min(440px, calc(100vw - 2rem));
+  box-shadow: 0 20px 60px rgba(47, 62, 70, 0.3);
+}
+
+.admin-dialogo::backdrop { background: rgba(47, 62, 70, 0.45); }
+.admin-dialogo__texto { margin: 0 0 1.25rem; font-size: 1rem; line-height: 1.5; }
+.admin-dialogo__acciones { display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; }

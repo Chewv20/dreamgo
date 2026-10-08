@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Helpers\Auditoria;
+use App\Helpers\ContenidoPaquete;
 use App\Helpers\Flash;
 use App\Helpers\HtmlSanitizer;
 use App\Helpers\Slugify;
@@ -46,6 +47,7 @@ class PaqueteAdminController extends AdminController
     public function crearForm(): void
     {
         $this->view('admin/paquetes/create', [
+            'paquete' => $this->capturaPrevia([]),
             'categorias' => $this->categoriasSeleccionables(),
             'monedas' => self::MONEDAS,
             'monedaBloqueada' => false,
@@ -59,6 +61,7 @@ class PaqueteAdminController extends AdminController
         $datos = $this->datosFormulario();
 
         if (!$this->validar($datos)) {
+            $this->recordarCaptura($datos);
             $this->redirect('/admin/paquetes/crear');
         }
 
@@ -97,7 +100,7 @@ class PaqueteAdminController extends AdminController
         $paquete = $this->encontrarO404(Paquete::class, $id);
 
         $this->view('admin/paquetes/edit', [
-            'paquete' => $paquete,
+            'paquete' => $this->capturaPrevia($paquete),
             'categorias' => $this->categoriasSeleccionables($paquete),
             'imagenes' => Paquete::imagenes($id),
             'monedas' => self::MONEDAS,
@@ -121,6 +124,7 @@ class PaqueteAdminController extends AdminController
         }
 
         if (!$this->validar($datos)) {
+            $this->recordarCaptura($datos);
             $this->redirect("/admin/paquetes/{$id}/editar");
         }
 
@@ -240,7 +244,50 @@ class PaqueteAdminController extends AdminController
         ]);
         $datos['destacado'] = $this->request->input('destacado') ? 1 : 0;
 
+        // Los campos de contenido llegan estructurados (párrafos, días, una línea por
+        // elemento) salvo que el formulario los haya dejado en modo HTML porque su contenido
+        // no se puede representar así (ver ContenidoPaquete). En la BD se sigue guardando HTML.
+        $modos = (array) $this->request->input('modo', []);
+        if (($modos['descripcion_larga'] ?? '') === 'estructurado') {
+            $datos['descripcion_larga'] = ContenidoPaquete::textoAParrafos((string) $this->request->input('descripcion_texto', ''));
+        }
+        if (($modos['itinerario'] ?? '') === 'estructurado') {
+            $titulos = (array) $this->request->input('itinerario_titulo', []);
+            $textos = (array) $this->request->input('itinerario_texto', []);
+            $dias = [];
+            foreach ($titulos as $i => $titulo) {
+                $titulo = trim((string) $titulo);
+                $texto = trim((string) ($textos[$i] ?? ''));
+                if ($titulo === '' && $texto === '') {
+                    continue;
+                }
+                // Sin título se numera por posición entre los días con contenido.
+                $dias[] = ['titulo' => $titulo !== '' ? $titulo : 'Día ' . (count($dias) + 1), 'texto' => $texto];
+            }
+            $datos['itinerario'] = ContenidoPaquete::diasAItinerario($dias);
+        }
+        foreach (['incluye', 'no_incluye'] as $campo) {
+            if (($modos[$campo] ?? '') === 'estructurado') {
+                $datos[$campo] = ContenidoPaquete::lineasALista((string) $this->request->input($campo . '_lineas', ''));
+            }
+        }
+
         return $datos;
+    }
+
+    /** Guarda lo capturado para volver a pintarlo tras un error de validación. */
+    private function recordarCaptura(array $datos): void
+    {
+        $_SESSION['paquete_captura_previa'] = $datos;
+    }
+
+    /** Mezcla la captura previa (si la hay) sobre los datos del paquete, y la consume. */
+    private function capturaPrevia(array $paquete): array
+    {
+        $previa = $_SESSION['paquete_captura_previa'] ?? null;
+        unset($_SESSION['paquete_captura_previa']);
+
+        return is_array($previa) ? array_merge($paquete, $previa) : $paquete;
     }
 
     private function validar(array $datos): bool

@@ -42,7 +42,7 @@
               </form>
               <form method="post" action="/admin/modales/<?= (int) $m['id'] ?>/eliminar" data-confirm="¿Eliminar este modal? No se puede deshacer.">
                 <?= \App\Helpers\Csrf::field() ?>
-                <button type="submit" class="btn btn-secundario btn--xs">Eliminar</button>
+                <button type="submit" class="btn btn-peligro btn--xs">Eliminar</button>
               </form>
             </td>
           </tr>

@@ -37,7 +37,7 @@
               <?php if ((int) $rol['es_sistema'] !== 1): ?>
                 <form method="post" action="/admin/roles/<?= (int) $rol['id'] ?>/eliminar" data-confirm="¿Eliminar este rol?">
                   <?= \App\Helpers\Csrf::field() ?>
-                  <button type="submit" class="btn btn-secundario btn--xs">Eliminar</button>
+                  <button type="submit" class="btn btn-peligro btn--xs">Eliminar</button>
                 </form>
               <?php endif; ?>
             </td>
@@ -78,7 +78,18 @@
           ];
           ?>
           <?php foreach ($permisosPorModulo as $modulo => $permisos): ?>
-            <tr><td colspan="<?= count($roles) + 1 ?>" class="matriz-grupo"><?= htmlspecialchars($nombresModulo[$modulo] ?? ucfirst((string) $modulo), ENT_QUOTES, 'UTF-8') ?></td></tr>
+            <?php $nombreGrupo = $nombresModulo[$modulo] ?? ucfirst((string) $modulo); ?>
+            <tr class="matriz-grupo-fila">
+              <td class="matriz-grupo"><?= htmlspecialchars($nombreGrupo, ENT_QUOTES, 'UTF-8') ?></td>
+              <?php foreach ($roles as $rol): ?>
+                <td class="matriz-grupo">
+                  <?php if ((int) $rol['es_sistema'] !== 1): ?>
+                    <button type="button" class="matriz-todos" data-matriz-todos="<?= htmlspecialchars((string) $modulo, ENT_QUOTES, 'UTF-8') ?>" data-rol="<?= (int) $rol['id'] ?>"
+                            aria-label="Marcar o desmarcar todo <?= htmlspecialchars($nombreGrupo, ENT_QUOTES, 'UTF-8') ?> para <?= htmlspecialchars($rol['nombre'], ENT_QUOTES, 'UTF-8') ?>">Todo</button>
+                  <?php endif; ?>
+                </td>
+              <?php endforeach; ?>
+            </tr>
             <?php foreach ($permisos as $permiso): ?>
               <tr>
                 <td><?= htmlspecialchars($permiso['descripcion'] ?? $permiso['clave'], ENT_QUOTES, 'UTF-8') ?></td>
@@ -92,6 +103,9 @@
                       type="checkbox"
                       name="permisos[<?= (int) $rol['id'] ?>][]"
                       value="<?= (int) $permiso['id'] ?>"
+                      data-modulo="<?= htmlspecialchars((string) $modulo, ENT_QUOTES, 'UTF-8') ?>"
+                      data-rol="<?= (int) $rol['id'] ?>"
+                      aria-label="<?= htmlspecialchars(($permiso['descripcion'] ?? $permiso['clave']) . ' — ' . $rol['nombre'], ENT_QUOTES, 'UTF-8') ?>"
                       <?= (in_array((int) $permiso['id'], $permisosPorRol[$rol['id']] ?? [], true) || $esSistema) ? 'checked' : '' ?>
                       <?= ($esSistema || $fueraDeAlcance) ? 'disabled' : '' ?>
                     >

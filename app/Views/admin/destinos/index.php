@@ -41,7 +41,7 @@
               <?php if ((int) $d['total_paquetes'] === 0): ?>
                 <form method="post" action="/admin/destinos/<?= (int) $d['id'] ?>/eliminar" data-confirm="¿Eliminar este destino? No se puede deshacer.">
                   <?= \App\Helpers\Csrf::field() ?>
-                  <button type="submit" class="btn btn-secundario btn--xs">Eliminar</button>
+                  <button type="submit" class="btn btn-peligro btn--xs">Eliminar</button>
                 </form>
               <?php elseif (count($destinos) > 1): ?>
                 <form method="post" action="/admin/destinos/<?= (int) $d['id'] ?>/reasignar" data-confirm="¿Mover todos los paquetes de este destino al destino elegido?">

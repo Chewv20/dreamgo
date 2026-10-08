@@ -23,8 +23,13 @@ class UsuarioAdminController extends AdminController
 
     public function crearForm(): void
     {
+        // Lo capturado (sin la contraseña) vuelve al formulario si hubo un error.
+        $captura = $_SESSION['usuario_captura_previa'] ?? [];
+        unset($_SESSION['usuario_captura_previa']);
+
         $this->view('admin/usuarios/create', [
             'roles' => Rol::all('nombre ASC'),
+            'captura' => is_array($captura) ? $captura : [],
         ], ['title' => 'Nuevo usuario | Dream Go', 'heading' => 'Nuevo usuario']);
     }
 
@@ -33,11 +38,17 @@ class UsuarioAdminController extends AdminController
         $this->verifyCsrf();
 
         $datos = $this->request->only(['nombre', 'email', 'password', 'rol_id']);
+        $_SESSION['usuario_captura_previa'] = [
+            'nombre' => (string) ($datos['nombre'] ?? ''),
+            'email' => (string) ($datos['email'] ?? ''),
+            'rol_id' => (string) ($datos['rol_id'] ?? ''),
+            'debe_cambiar_password' => $this->request->input('debe_cambiar_password') ? '1' : '0',
+        ];
 
         $validator = new Validator($datos);
         $validator->requerido('nombre', 'El nombre')
             ->requerido('email', 'El correo')->email('email', 'El correo')
-            ->requerido('password', 'La contrasena')
+            ->requerido('password', 'La contraseña')
             ->requerido('rol_id', 'El rol');
 
         $this->redirigirSiInvalido($validator, '/admin/usuarios/crear');
@@ -61,9 +72,11 @@ class UsuarioAdminController extends AdminController
             'nombre' => $datos['nombre'],
             'email' => $datos['email'],
             'password_hash' => password_hash((string) $datos['password'], PASSWORD_DEFAULT),
+            'debe_cambiar_password' => $this->request->input('debe_cambiar_password') ? 1 : 0,
             'rol_id' => (int) $datos['rol_id'],
             'activo' => 1,
         ]);
+        unset($_SESSION['usuario_captura_previa']);
 
         Auditoria::registrar('usuario.crear', 'usuario', $usuarioId, $datos['email'] . ', rol #' . (int) $datos['rol_id']);
 
@@ -91,6 +104,7 @@ class UsuarioAdminController extends AdminController
             'nombre' => trim((string) $this->request->input('nombre', '')),
             'rol_id' => (int) $this->request->input('rol_id'),
             'activo' => $this->request->input('activo') ? 1 : 0,
+            'debe_cambiar_password' => $this->request->input('debe_cambiar_password') ? 1 : 0,
         ];
 
         if ($datos['nombre'] === '') {

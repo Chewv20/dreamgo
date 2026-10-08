@@ -25,7 +25,7 @@
           </form>
           <form method="post" action="<?= $galeriaBase ?>/imagenes/<?= (int) $img['id'] ?>/eliminar" data-confirm="¿Eliminar esta imagen de la galería?">
             <?= \App\Helpers\Csrf::field() ?>
-            <button type="submit" class="btn btn-secundario btn--xs" aria-label="Eliminar imagen">&times;</button>
+            <button type="submit" class="btn btn-peligro btn--xs" aria-label="Eliminar imagen">&times;</button>
           </form>
         </div>
       </div>

@@ -7,12 +7,13 @@
       <input type="text" id="nombre" name="nombre" required value="<?= htmlspecialchars($usuario['nombre'], ENT_QUOTES, 'UTF-8') ?>">
     </div>
     <div class="campo">
-      <label>Correo</label>
-      <input type="email" value="<?= htmlspecialchars($usuario['email'], ENT_QUOTES, 'UTF-8') ?>" disabled>
+      <label for="email_ro">Correo</label>
+      <input type="email" id="email_ro" value="<?= htmlspecialchars($usuario['email'], ENT_QUOTES, 'UTF-8') ?>" disabled>
     </div>
-    <div class="campo">
-      <label for="password">Nueva contraseña (dejar en blanco para no cambiar)</label>
-      <input type="password" id="password" name="password" minlength="8">
+    <?php $etiquetaPassword = 'Nueva contraseña (déjala en blanco para no cambiarla)'; $passwordRequerida = false; require __DIR__ . '/../partials/_campo_password.php'; ?>
+    <div class="campo campo--check">
+      <input type="checkbox" id="debe_cambiar_password" name="debe_cambiar_password" value="1" <?= (int) ($usuario['debe_cambiar_password'] ?? 0) === 1 ? 'checked' : '' ?>>
+      <label for="debe_cambiar_password" class="m-0">Pedir cambio de contraseña en el próximo inicio de sesión</label>
     </div>
     <div class="campo">
       <label for="rol_id">Rol</label>
