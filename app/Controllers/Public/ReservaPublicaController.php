@@ -174,9 +174,9 @@ class ReservaPublicaController extends Controller
         $esSaldo = $this->request->query('concepto') === 'saldo';
 
         $mensajes = $esSaldo ? [
-            'approved' => 'Tu pago del saldo fue aprobado. En unos minutos verás el saldo actualizado en Mi reserva.',
-            'pending' => 'Tu pago del saldo está en revisión. Te avisaremos por correo apenas se acredite.',
-            'failure' => 'El pago del saldo no se pudo completar. Puedes intentarlo de nuevo desde Mi reserva o contactarnos.',
+            'approved' => 'Tu pago al saldo fue aprobado. En unos minutos verás el saldo actualizado en Mi reserva.',
+            'pending' => 'Tu pago al saldo está en revisión. Te avisaremos por correo apenas se acredite.',
+            'failure' => 'El pago al saldo no se pudo completar. Puedes intentarlo de nuevo desde Mi reserva o contactarnos.',
         ] : [
             'approved' => 'Tu pago fue aprobado. En unos minutos tu reserva quedará confirmada.',
             'pending' => 'Tu pago está en revisión. Te avisaremos por correo apenas se confirme.',

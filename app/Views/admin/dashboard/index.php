@@ -4,95 +4,119 @@
  * @var int $totalPaquetesPublicados
  * @var string $periodoDesde
  * @var string $periodoHasta
+ * @var array<string, array{0: string, 1: string}> $atajos
  */
-?>
-<div class="admin-panel">
-  <form method="get" action="/admin" class="admin-form-grid admin-form-grid--2 admin-form-grid--end">
-    <div>
-      <label for="desde">Desde</label>
-      <input type="date" id="desde" name="desde" value="<?= htmlspecialchars($periodoDesde) ?>">
-    </div>
-    <div>
-      <label for="hasta">Hasta</label>
-      <input type="date" id="hasta" name="hasta" value="<?= htmlspecialchars($periodoHasta) ?>">
-    </div>
-    <div class="admin-acciones">
-      <button type="submit" class="btn btn-primario">Filtrar</button>
-      <a href="/admin" class="btn btn-secundario">Restablecer</a>
-    </div>
-  </form>
-</div>
+$atajos ??= [];
+$dinero = static fn (float $v): string => '$' . number_format($v, 0, '.', ',');
 
-<div class="grid-tarjetas">
-  <div class="admin-panel">
-    <p class="stat-label">Paquetes totales</p>
-    <p class="stat-num"><?= $totalPaquetes ?></p>
-  </div>
-  <div class="admin-panel">
-    <p class="stat-label">Paquetes publicados</p>
-    <p class="stat-num"><?= $totalPaquetesPublicados ?></p>
-  </div>
-  <?php if (isset($totalCotizacionesNuevas)): ?>
-  <div class="admin-panel">
-    <p class="stat-label">Cotizaciones nuevas</p>
-    <p class="stat-num"><?= $totalCotizacionesNuevas ?></p>
-  </div>
-  <?php endif; ?>
-  <?php if (isset($seguimientosVencidos)): ?>
-  <div class="admin-panel">
-    <p class="stat-label">Seguimientos vencidos</p>
-    <p class="stat-num"><?= (int) $seguimientosVencidos ?></p>
-    <?php if ((int) $seguimientosVencidos > 0): ?>
-      <p class="stat-sub"><a href="/admin/cotizaciones?seguimiento=vencidos">Ver cotizaciones</a></p>
+// Variación contra el periodo anterior de igual duración. Sin base (0 → algo) no hay %.
+$variacion = static function (float $actual, float $anterior): string {
+    if ($anterior <= 0) {
+        return $actual > 0 ? '<span class="kpi__var kpi__var--sube">Nuevo vs. periodo anterior</span>' : '<span class="kpi__var">Sin movimiento</span>';
+    }
+    $pct = ($actual - $anterior) / $anterior * 100;
+    $clase = $pct > 0.5 ? 'sube' : ($pct < -0.5 ? 'baja' : 'igual');
+    $flecha = ['sube' => '▲', 'baja' => '▼', 'igual' => '='][$clase];
+
+    return '<span class="kpi__var kpi__var--' . $clase . '">' . $flecha . ' ' . number_format(abs($pct), 0) . '% vs. periodo anterior</span>';
+};
+$rangoActivo = null;
+foreach ($atajos as $etiqueta => [$d, $h]) {
+    if ($d === $periodoDesde && $h === $periodoHasta) {
+        $rangoActivo = $etiqueta;
+    }
+}
+$hayPendientes = isset($totalCotizacionesNuevas) || isset($totalReservasPendientes);
+?>
+
+<?php if ($hayPendientes): ?>
+<section aria-labelledby="titulo-atender">
+  <h2 id="titulo-atender" class="dashboard__titulo">Por atender</h2>
+  <div class="dashboard__kpis">
+    <?php if (isset($totalCotizacionesNuevas)): ?>
+      <a class="admin-panel kpi kpi--enlace<?= $totalCotizacionesNuevas > 0 ? ' kpi--alerta' : '' ?>" href="/admin/cotizaciones">
+        <span class="kpi__etiqueta">Cotizaciones nuevas</span>
+        <span class="kpi__valor"><?= (int) $totalCotizacionesNuevas ?></span>
+        <span class="kpi__pie">Sin contactar todavía</span>
+      </a>
+      <a class="admin-panel kpi kpi--enlace<?= (int) $seguimientosVencidos > 0 ? ' kpi--alerta' : '' ?>" href="/admin/cotizaciones?seguimiento=vencidos">
+        <span class="kpi__etiqueta">Seguimientos vencidos</span>
+        <span class="kpi__valor"><?= (int) $seguimientosVencidos ?></span>
+        <span class="kpi__pie">Fecha de contacto ya pasó</span>
+      </a>
+    <?php endif; ?>
+    <?php if (isset($totalReservasPendientes)): ?>
+      <a class="admin-panel kpi kpi--enlace<?= $totalReservasPendientes > 0 ? ' kpi--alerta' : '' ?>" href="/admin/reservas?estado=pendiente">
+        <span class="kpi__etiqueta">Reservas pendientes</span>
+        <span class="kpi__valor"><?= (int) $totalReservasPendientes ?></span>
+        <span class="kpi__pie">Esperando el anticipo</span>
+      </a>
+      <a class="admin-panel kpi kpi--enlace" href="/admin/reservas?estado=confirmada&amp;salida=proximas">
+        <span class="kpi__etiqueta">Saldos por cobrar</span>
+        <span class="kpi__valor"><?= $dinero($saldosPorCobrar['monto']) ?></span>
+        <span class="kpi__pie"><?= (int) $saldosPorCobrar['reservas'] ?> <?= $saldosPorCobrar['reservas'] === 1 ? 'reserva' : 'reservas' ?> con salida próxima</span>
+      </a>
     <?php endif; ?>
   </div>
-  <?php endif; ?>
-  <?php if (isset($conversion)): ?>
-  <div class="admin-panel">
-    <p class="stat-label">Tasa de conversión (periodo)</p>
-    <p class="stat-num"><?= number_format($conversion['tasa'], 1) ?>%</p>
-    <p class="stat-sub"><?= $conversion['convertidas'] ?> de <?= $conversion['total'] ?> cotizaciones</p>
-  </div>
-  <?php endif; ?>
-  <?php if (isset($totalReservasPendientes)): ?>
-  <div class="admin-panel">
-    <p class="stat-label">Reservas pendientes</p>
-    <p class="stat-num"><?= $totalReservasPendientes ?></p>
-  </div>
-  <div class="admin-panel">
-    <p class="stat-label">Reservas confirmadas</p>
-    <p class="stat-num"><?= $totalReservasConfirmadas ?></p>
-  </div>
-  <div class="admin-panel">
-    <p class="stat-label">Ingresos del periodo</p>
-    <p class="stat-num">$<?= number_format($ingresosPeriodo, 2) ?></p>
-  </div>
-  <?php endif; ?>
-</div>
-
-<?php if (isset($cotizacionesPorOrigen)): ?>
-<div class="admin-panel">
-  <h2 class="mt-0">Cotizaciones por origen (periodo)</h2>
-  <?php if ($cotizacionesPorOrigen === []): ?>
-    <p class="op-70">No hay cotizaciones en el periodo seleccionado.</p>
-  <?php else: ?>
-  <div class="admin-tabla-wrap">
-    <table class="admin-tabla">
-      <thead><tr><th>Origen</th><th>Cotizaciones</th></tr></thead>
-      <tbody>
-        <?php foreach ($cotizacionesPorOrigen as $fila): ?>
-          <tr>
-            <td><?= htmlspecialchars($fila['origen'], ENT_QUOTES, 'UTF-8') ?></td>
-            <td><?= (int) $fila['total'] ?></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
-  <?php endif; ?>
-</div>
+</section>
 <?php endif; ?>
 
+<section aria-labelledby="titulo-periodo">
+  <div class="dashboard__cabecera">
+    <h2 id="titulo-periodo" class="dashboard__titulo">Resultados del periodo</h2>
+    <form method="get" action="/admin" class="dashboard__periodo">
+      <div class="dashboard__atajos" role="group" aria-label="Periodo">
+        <?php foreach ($atajos as $etiqueta => [$d, $h]): ?>
+          <a href="/admin?desde=<?= $d ?>&amp;hasta=<?= $h ?>" class="chip-periodo<?= $rangoActivo === $etiqueta ? ' is-activo' : '' ?>"<?= $rangoActivo === $etiqueta ? ' aria-current="true"' : '' ?>><?= htmlspecialchars($etiqueta, ENT_QUOTES, 'UTF-8') ?></a>
+        <?php endforeach; ?>
+      </div>
+      <details class="dashboard__rango"<?= $rangoActivo === null ? ' open' : '' ?>>
+        <summary>Otro rango</summary>
+        <div class="dashboard__rango-campos">
+          <label for="desde" class="sr-only">Desde</label>
+          <input type="date" id="desde" name="desde" value="<?= htmlspecialchars($periodoDesde) ?>">
+          <span aria-hidden="true">–</span>
+          <label for="hasta" class="sr-only">Hasta</label>
+          <input type="date" id="hasta" name="hasta" value="<?= htmlspecialchars($periodoHasta) ?>">
+          <button type="submit" class="btn btn-secundario">Aplicar</button>
+        </div>
+      </details>
+    </form>
+  </div>
+  <p class="dashboard__rango-texto"><?= \App\Helpers\Fecha::corta($periodoDesde) ?> – <?= \App\Helpers\Fecha::corta($periodoHasta) ?></p>
+
+  <div class="dashboard__kpis">
+    <?php if (isset($cobradoPeriodo)): ?>
+      <div class="admin-panel kpi">
+        <span class="kpi__etiqueta">Cobrado</span>
+        <span class="kpi__valor"><?= $dinero($cobradoPeriodo) ?></span>
+        <?= $variacion($cobradoPeriodo, $cobradoAnterior) ?>
+        <span class="kpi__pie">Anticipos, abonos y pagos manuales recibidos</span>
+      </div>
+      <div class="admin-panel kpi">
+        <span class="kpi__etiqueta">Ventas confirmadas</span>
+        <span class="kpi__valor"><?= $dinero($ingresosPeriodo) ?></span>
+        <?= $variacion($ingresosPeriodo, $ingresosAnterior) ?>
+        <span class="kpi__pie">Valor total de las reservas confirmadas</span>
+      </div>
+      <div class="admin-panel kpi">
+        <span class="kpi__etiqueta">Reservas confirmadas</span>
+        <span class="kpi__valor"><?= (int) $confirmadasPeriodo ?></span>
+        <?= $variacion((float) $confirmadasPeriodo, (float) $confirmadasAnterior) ?>
+      </div>
+    <?php endif; ?>
+    <?php if (isset($conversion)): ?>
+      <div class="admin-panel kpi">
+        <span class="kpi__etiqueta">Conversión de cotizaciones</span>
+        <span class="kpi__valor"><?= number_format($conversion['tasa'], 1) ?>%</span>
+        <?= $variacion((float) $conversion['tasa'], (float) $conversionAnterior['tasa']) ?>
+        <span class="kpi__pie"><?= (int) $conversion['convertidas'] ?> de <?= (int) $conversion['total'] ?> cotizaciones recibidas</span>
+      </div>
+    <?php endif; ?>
+  </div>
+</section>
+
+<div class="dashboard__columnas">
 <?php if (isset($proximasSalidas)): ?>
 <div class="admin-panel">
   <h2 class="mt-0">Ocupación de próximas salidas</h2>
@@ -100,11 +124,11 @@
     <p class="op-70">No hay salidas futuras registradas.</p>
   <?php else: ?>
   <div class="admin-tabla-wrap">
-    <table class="admin-tabla">
+    <table class="admin-tabla admin-tabla--compacta">
       <thead>
         <tr>
           <th>Paquete</th>
-          <th>Fecha de salida</th>
+          <th>Salida</th>
           <th>Cupo</th>
           <th>Ocupación</th>
         </tr>
@@ -137,10 +161,36 @@
 </div>
 <?php endif; ?>
 
+<?php if (isset($cotizacionesPorOrigen)): ?>
+<div class="admin-panel">
+  <h2 class="mt-0">Cotizaciones por origen</h2>
+  <?php if ($cotizacionesPorOrigen === []): ?>
+    <p class="op-70">No hay cotizaciones en el periodo seleccionado.</p>
+  <?php else: ?>
+  <div class="admin-tabla-wrap">
+    <table class="admin-tabla admin-tabla--compacta">
+      <thead><tr><th>Origen</th><th>Cotizaciones</th></tr></thead>
+      <tbody>
+        <?php foreach ($cotizacionesPorOrigen as $fila): ?>
+          <tr>
+            <td><?= htmlspecialchars($fila['origen'], ENT_QUOTES, 'UTF-8') ?></td>
+            <td><?= (int) $fila['total'] ?></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+  <?php endif; ?>
+</div>
+<?php endif; ?>
+</div>
+
 <div class="admin-panel">
   <h2 class="mt-0">Accesos rápidos</h2>
+  <p class="op-70">Catálogo: <?= (int) $totalPaquetesPublicados ?> de <?= (int) $totalPaquetes ?> paquetes publicados.</p>
   <div class="admin-acciones">
-    <a href="/admin/paquetes/crear" class="btn btn-primario">Nuevo paquete</a>
-    <a href="/admin/paquetes" class="btn btn-secundario">Ver paquetes</a>
+    <?php if (\Core\Auth::hasPermission('reservas.crear')): ?><a href="/admin/reservas/crear" class="btn btn-primario">Nueva reserva</a><?php endif; ?>
+    <?php if (\Core\Auth::hasPermission('paquetes.crear')): ?><a href="/admin/paquetes/crear" class="btn btn-secundario">Nuevo paquete</a><?php endif; ?>
+    <?php if (\Core\Auth::hasPermission('paquetes.ver')): ?><a href="/admin/paquetes" class="btn btn-secundario">Ver paquetes</a><?php endif; ?>
   </div>
 </div>

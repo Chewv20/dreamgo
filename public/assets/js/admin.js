@@ -79,7 +79,30 @@
     });
   }
 
+  // Boton "Copiar" junto a un campo de solo lectura (link de pago del cliente).
+  function initCopiar() {
+    document.querySelectorAll('[data-copiar]').forEach(function (btn) {
+      var campo = document.querySelector(btn.getAttribute('data-copiar'));
+      if (!campo) return;
+      btn.addEventListener('click', function () {
+        campo.select();
+        var hecho = function () {
+          var texto = btn.textContent;
+          btn.textContent = 'Copiado';
+          window.setTimeout(function () { btn.textContent = texto; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(campo.value).then(hecho, function () { document.execCommand('copy'); hecho(); });
+        } else {
+          document.execCommand('copy');
+          hecho();
+        }
+      });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
+    initCopiar();
     initFlash();
     initMenuUsuario();
     initSidebarToggle();

@@ -36,15 +36,16 @@ final class MercadoPagoService
      *   y el back_url de retorno.
      * @return array<string, mixed> respuesta decodificada de Mercado Pago (incluye init_point)
      */
-    public function crearPreferencia(array $reserva, float $monto, string $moneda, string $appUrl, string $concepto = 'anticipo'): array
+    public function crearPreferencia(array $reserva, float $monto, string $moneda, string $appUrl, string $concepto = 'anticipo', bool $esAbono = false): array
     {
         $esSaldo = $concepto === 'saldo';
+        $etiqueta = $esSaldo ? ($esAbono ? 'Abono al saldo' : 'Saldo') : 'Anticipo';
         $backUrl = rtrim($appUrl, '/') . '/reservar/' . $reserva['codigo_reserva'] . '/gracias';
         $sep = $esSaldo ? '?concepto=saldo&' : '?';
 
         $body = [
             'items' => [[
-                'title' => ($esSaldo ? 'Saldo' : 'Anticipo') . ' reserva ' . $reserva['codigo_reserva'] . ' - ' . $reserva['paquete_titulo'],
+                'title' => $etiqueta . ' reserva ' . $reserva['codigo_reserva'] . ' - ' . $reserva['paquete_titulo'],
                 'quantity' => 1,
                 'currency_id' => $moneda,
                 'unit_price' => $monto,

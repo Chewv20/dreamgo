@@ -72,6 +72,7 @@ final class MailerService
         $html = $this->renderPlantilla('pago_recibido', [
             'reserva' => $reserva,
             'urlComprobante' => $this->linkReserva($reserva, '/comprobante'),
+            'urlPagarSaldo' => $this->linkReserva($reserva, '/pagar-saldo'),
         ]);
 
         return $this->enviar(

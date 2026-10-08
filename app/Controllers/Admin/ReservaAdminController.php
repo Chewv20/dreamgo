@@ -9,10 +9,12 @@ use App\Helpers\Flash;
 use App\Helpers\Validator;
 use App\Models\PagoReserva;
 use App\Models\Reserva;
+use App\Models\ReservaNota;
 use App\Models\Salida;
 use App\Services\ComprobanteReservaService;
 use App\Services\MailerService;
 use App\Services\ReservaService;
+use Core\Auth;
 use Core\Response;
 use PDOException;
 use RuntimeException;
@@ -81,6 +83,9 @@ class ReservaAdminController extends AdminController
         $this->view('admin/reservas/detalle', [
             'reserva' => $reserva,
             'pagos' => PagoReserva::historialDeReserva($id),
+            'notas' => ReservaNota::porReserva($id),
+            'metodosPago' => ReservaService::METODOS_MANUALES,
+            'linkPagoSaldo' => $this->linkPagoSaldo($reserva),
         ], ['title' => 'Reserva ' . $reserva['codigo_reserva'] . ' | Dream Go', 'heading' => 'Reserva ' . $reserva['codigo_reserva']]);
     }
 
@@ -195,5 +200,89 @@ class ReservaAdminController extends AdminController
 
         Flash::set('exito', 'Reserva cancelada y cupo liberado.');
         $this->redirect('/admin/reservas/' . $id);
+    }
+
+    public function registrarPago(int $id): void
+    {
+        $this->verifyCsrf();
+
+        $reserva = Reserva::conDetalle($id);
+        if (!$reserva) {
+            $this->abort(404);
+        }
+
+        $montoTexto = str_replace([',', '$', ' '], '', (string) $this->request->input('monto', ''));
+        $metodo = (string) $this->request->input('metodo', '');
+        $referencia = trim((string) $this->request->input('referencia', ''));
+        $nota = trim((string) $this->request->input('nota', ''));
+
+        if (!is_numeric($montoTexto)) {
+            Flash::set('error', 'Escribe un monto válido.');
+            $this->redirect('/admin/reservas/' . $id);
+        }
+
+        try {
+            $resultado = (new ReservaService($this->db))->registrarPagoManual($id, (float) $montoTexto, $metodo, $referencia, $nota, Auth::id());
+        } catch (RuntimeException $e) {
+            Flash::set('error', $e->getMessage());
+            $this->redirect('/admin/reservas/' . $id);
+        }
+
+        if ($resultado === ReservaService::PAGO_DUPLICADO) {
+            Flash::set('error', 'Ya hay un pago registrado con esa referencia. Revisa el historial de pagos.');
+            $this->redirect('/admin/reservas/' . $id);
+        }
+
+        $monto = number_format((float) $montoTexto, 2);
+        Auditoria::registrar('reserva.pago_manual', 'reserva', $id, 'Código ' . $reserva['codigo_reserva'] . ', $' . $monto . ' (' . $metodo . ')');
+
+        $mensaje = match ($resultado) {
+            ReservaService::PAGO_CONFIRMO => 'Pago registrado: cubre el anticipo y la reserva quedó confirmada.',
+            ReservaService::PAGO_INSUFICIENTE => 'Pago registrado. Todavía no cubre el anticipo: la reserva sigue pendiente.',
+            default => 'Pago de $' . $monto . ' registrado.',
+        };
+
+        if ($this->request->input('avisar_cliente') === '1') {
+            $actualizada = Reserva::conDetalle($id);
+            $mailer = new MailerService($this->db);
+            $enviado = $resultado === ReservaService::PAGO_CONFIRMO
+                ? $mailer->enviarConfirmacionReserva($actualizada)
+                : $mailer->enviarPagoRecibido($actualizada);
+            $mensaje .= $enviado ? ' Se avisó al cliente por correo.' : ' No se pudo enviar el correo al cliente.';
+        }
+
+        Flash::set('exito', $mensaje);
+        $this->redirect('/admin/reservas/' . $id);
+    }
+
+    public function agregarNota(int $id): void
+    {
+        $this->verifyCsrf();
+        $this->encontrarO404(Reserva::class, $id);
+
+        $nota = trim((string) $this->request->input('nota', ''));
+        if ($nota === '' || mb_strlen($nota) > 2000) {
+            Flash::set('error', 'La nota no puede estar vacía ni superar 2000 caracteres.');
+            $this->redirect('/admin/reservas/' . $id . '#notas');
+        }
+
+        ReservaNota::agregar($id, $nota);
+        Flash::set('exito', 'Nota agregada.');
+        $this->redirect('/admin/reservas/' . $id . '#notas');
+    }
+
+    /**
+     * Link público para que el cliente abone o liquide el saldo con Mercado Pago (el mismo
+     * que llega en los correos). Vacío si la reserva no tiene saldo por cobrar.
+     */
+    private function linkPagoSaldo(array $reserva): string
+    {
+        $saldo = (float) $reserva['precio_total'] - (float) $reserva['monto_pagado'];
+        if ($reserva['estado'] !== 'confirmada' || $saldo <= 0 || empty($reserva['token_publico'])) {
+            return '';
+        }
+
+        return rtrim((string) ($_ENV['APP_URL'] ?? ''), '/') . '/reserva/' . rawurlencode((string) $reserva['codigo_reserva'])
+            . '/pagar-saldo?t=' . rawurlencode((string) $reserva['token_publico']);
     }
 }

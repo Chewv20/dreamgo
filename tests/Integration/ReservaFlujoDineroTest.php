@@ -167,6 +167,77 @@ final class ReservaFlujoDineroTest extends IntegrationTestCase
         );
     }
 
+    public function testAbonosParcialesAlSaldoSeAcumulanHastaLiquidar(): void
+    {
+        $id = $this->servicio()->crear($this->datos(2)); // total 2000
+        $this->servicio()->registrarPagoAprobado($id, 'MP-ANT', 1000.0, 'anticipo');
+
+        self::assertSame(ReservaService::PAGO_REGISTRADO, $this->servicio()->registrarPagoAprobado($id, 'MP-AB1', 300.0, 'saldo'));
+        self::assertSame(ReservaService::PAGO_REGISTRADO, $this->servicio()->registrarPagoAprobado($id, 'MP-AB2', 700.0, 'saldo'));
+
+        $reserva = $this->reserva($id);
+        self::assertSame('confirmada', $reserva['estado']);
+        self::assertEqualsWithDelta(2000.0, (float) $reserva['monto_pagado'], 0.001);
+        self::assertSame(2, $this->contar('pagos_reserva', "reserva_id = {$id} AND concepto = 'saldo'"));
+    }
+
+    // --- pagos manuales (panel) ------------------------------------------------------
+
+    public function testPagoManualQueCubreElAnticipoConfirma(): void
+    {
+        $id = $this->servicio()->crear($this->datos(2)); // anticipo 1000
+
+        $resultado = $this->servicio()->registrarPagoManual($id, 1000.0, 'transferencia', 'SPEI-123', 'Banorte');
+
+        self::assertSame(ReservaService::PAGO_CONFIRMO, $resultado);
+        $reserva = $this->reserva($id);
+        self::assertSame('confirmada', $reserva['estado']);
+        self::assertSame('transferencia', $reserva['metodo_pago']);
+        $pago = self::$db->query("SELECT * FROM pagos_reserva WHERE reserva_id = {$id}")->fetch();
+        self::assertSame('manual:transferencia:SPEI-123', $pago['referencia_pago']);
+        self::assertSame('anticipo', $pago['concepto']);
+        self::assertSame('Banorte', $pago['nota']);
+    }
+
+    public function testPagoManualConLaMismaReferenciaNoSeSumaDosVeces(): void
+    {
+        $id = $this->servicio()->crear($this->datos(2));
+        $this->servicio()->registrarPagoManual($id, 500.0, 'transferencia', 'SPEI-9');
+
+        self::assertSame(ReservaService::PAGO_DUPLICADO, $this->servicio()->registrarPagoManual($id, 500.0, 'transferencia', 'SPEI-9'));
+        self::assertEqualsWithDelta(500.0, (float) $this->reserva($id)['monto_pagado'], 0.001);
+    }
+
+    public function testPagosManualesEnEfectivoSinReferenciaSonIndependientes(): void
+    {
+        $id = $this->servicio()->crear($this->datos(2));
+        $this->servicio()->registrarPagoManual($id, 1000.0, 'efectivo'); // confirma
+
+        self::assertSame(ReservaService::PAGO_REGISTRADO, $this->servicio()->registrarPagoManual($id, 250.0, 'efectivo'));
+        self::assertSame(ReservaService::PAGO_REGISTRADO, $this->servicio()->registrarPagoManual($id, 250.0, 'efectivo'));
+        self::assertEqualsWithDelta(1500.0, (float) $this->reserva($id)['monto_pagado'], 0.001);
+        self::assertSame(2, $this->contar('pagos_reserva', "reserva_id = {$id} AND concepto = 'saldo'"));
+    }
+
+    public function testPagoManualRechazaReservaCanceladaYDatosInvalidos(): void
+    {
+        $id = $this->servicio()->crear($this->datos(1));
+        $this->servicio()->cancelar($id);
+
+        foreach ([[$id, 100.0, 'efectivo'], [$id, 0.0, 'efectivo']] as [$rid, $monto, $metodo]) {
+            try {
+                $this->servicio()->registrarPagoManual($rid, $monto, $metodo);
+                self::fail('Se esperaba RuntimeException');
+            } catch (RuntimeException $e) {
+                self::assertNotSame('', $e->getMessage());
+            }
+        }
+
+        $otra = $this->servicio()->crear($this->datos(1));
+        $this->expectException(RuntimeException::class);
+        $this->servicio()->registrarPagoManual($otra, 100.0, 'bitcoin');
+    }
+
     // --- reposicion de cupo --------------------------------------------------------
 
     public function testCancelarReponeElCupo(): void

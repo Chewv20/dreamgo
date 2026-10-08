@@ -226,4 +226,57 @@ class Reserva extends Model
 
         return (float) $stmt->fetchColumn();
     }
+
+    /** Reservas confirmadas dentro del periodo (por confirmada_en). */
+    public static function confirmadasPeriodo(string $desde, string $hasta): int
+    {
+        $stmt = self::db()->prepare(
+            "SELECT COUNT(*) FROM reservas
+             WHERE estado = 'confirmada' AND confirmada_en >= :desde AND confirmada_en < :hasta"
+        );
+        $stmt->execute(self::limitesPeriodo($desde, $hasta));
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * Dinero efectivamente recibido en el periodo: suma de pagos_reserva (anticipos, abonos
+     * y pagos manuales) por fecha de pago. Distinto de ingresosPeriodo(), que suma el
+     * precio total de las reservas confirmadas aunque aún deban saldo.
+     */
+    public static function cobradoPeriodo(string $desde, string $hasta): float
+    {
+        $stmt = self::db()->prepare(
+            'SELECT COALESCE(SUM(monto), 0) FROM pagos_reserva WHERE creado_en >= :desde AND creado_en < :hasta'
+        );
+        $stmt->execute(self::limitesPeriodo($desde, $hasta));
+
+        return (float) $stmt->fetchColumn();
+    }
+
+    /**
+     * Reservas confirmadas con salida próxima que todavía deben saldo.
+     *
+     * @return array{reservas: int, monto: float}
+     */
+    public static function saldosPorCobrar(): array
+    {
+        $fila = self::db()->query(
+            "SELECT COUNT(*) AS reservas, COALESCE(SUM(r.precio_total - r.monto_pagado), 0) AS monto
+             FROM reservas r
+             INNER JOIN salidas s ON s.id = r.salida_id
+             WHERE r.estado = 'confirmada' AND r.precio_total > r.monto_pagado AND s.fecha_salida >= CURDATE()"
+        )->fetch();
+
+        return ['reservas' => (int) $fila['reservas'], 'monto' => (float) $fila['monto']];
+    }
+
+    /** @return array{desde: string, hasta: string} */
+    private static function limitesPeriodo(string $desde, string $hasta): array
+    {
+        return [
+            'desde' => $desde . ' 00:00:00',
+            'hasta' => date('Y-m-d', strtotime($hasta . ' +1 day')) . ' 00:00:00',
+        ];
+    }
 }

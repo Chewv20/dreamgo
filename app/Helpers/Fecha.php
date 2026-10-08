@@ -65,4 +65,22 @@ final class Fecha
 
         return $ts === false ? null : $ts;
     }
+
+    /**
+     * Periodo inmediatamente anterior con la misma cantidad de días, para comparar métricas
+     * del dashboard (1–15 oct → 16–30 sep). Fechas en formato Y-m-d, ambos extremos incluidos.
+     *
+     * @return array{0: string, 1: string} [desde, hasta]
+     */
+    public static function periodoAnterior(string $desde, string $hasta): array
+    {
+        $inicio = new \DateTimeImmutable($desde);
+        $fin = new \DateTimeImmutable($hasta);
+        $dias = (int) $inicio->diff($fin)->days + 1;
+
+        $finAnterior = $inicio->modify('-1 day');
+        $inicioAnterior = $finAnterior->modify('-' . ($dias - 1) . ' days');
+
+        return [$inicioAnterior->format('Y-m-d'), $finAnterior->format('Y-m-d')];
+    }
 }

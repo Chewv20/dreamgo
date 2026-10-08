@@ -138,6 +138,8 @@ $router->get('/admin/reservas/{id}', [ReservaAdminController::class, 'detalle'],
 $router->get('/admin/reservas/{id}/comprobante', [ReservaAdminController::class, 'comprobante'], ['auth' => true, 'permiso' => 'reservas.ver']);
 $router->post('/admin/reservas/{id}/confirmar', [ReservaAdminController::class, 'confirmar'], ['auth' => true, 'permiso' => 'reservas.confirmar']);
 $router->post('/admin/reservas/{id}/cancelar', [ReservaAdminController::class, 'cancelar'], ['auth' => true, 'permiso' => 'reservas.cancelar']);
+$router->post('/admin/reservas/{id}/pago', [ReservaAdminController::class, 'registrarPago'], ['auth' => true, 'permiso' => 'reservas.registrar_pago']);
+$router->post('/admin/reservas/{id}/nota', [ReservaAdminController::class, 'agregarNota'], ['auth' => true, 'permiso' => 'reservas.ver']);
 
 $router->get('/admin/cotizaciones', [CotizacionAdminController::class, 'index'], ['auth' => true, 'permiso' => 'cotizaciones.ver']);
 $router->get('/admin/cotizaciones/exportar', [CotizacionAdminController::class, 'exportarCsv'], ['auth' => true, 'permiso' => 'cotizaciones.ver']);

@@ -72,6 +72,11 @@
         <label for="porcentaje_anticipo_reserva">Porcentaje de anticipo al reservar en línea (1-100)</label>
         <input type="number" min="1" max="100" id="porcentaje_anticipo_reserva" name="porcentaje_anticipo_reserva" value="<?= htmlspecialchars($valores['porcentaje_anticipo_reserva'], ENT_QUOTES, 'UTF-8') ?>">
       </div>
+      <div class="campo">
+        <label for="abono_minimo_saldo">Abono mínimo al saldo en línea</label>
+        <input type="number" min="0" step="0.01" id="abono_minimo_saldo" name="abono_minimo_saldo" aria-describedby="ayuda-abono" value="<?= htmlspecialchars((string) $valores['abono_minimo_saldo'], ENT_QUOTES, 'UTF-8') ?>">
+        <small class="op-70" id="ayuda-abono">El cliente puede pagar su saldo en partes desde su link de pago; cada abono debe ser de al menos este monto. Si el saldo es menor, se cobra completo.</small>
+      </div>
     </div>
 
     <div class="campo">

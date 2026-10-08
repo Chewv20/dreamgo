@@ -18,7 +18,11 @@ class PagoReserva extends Model
     public static function historialDeReserva(int $reservaId): array
     {
         $stmt = self::db()->prepare(
-            'SELECT * FROM pagos_reserva WHERE reserva_id = :id ORDER BY creado_en DESC, id DESC'
+            'SELECT pr.*, u.nombre AS registrado_por_nombre
+             FROM pagos_reserva pr
+             LEFT JOIN usuarios_admin u ON u.id = pr.registrado_por
+             WHERE pr.reserva_id = :id
+             ORDER BY pr.creado_en DESC, pr.id DESC'
         );
         $stmt->execute(['id' => $reservaId]);
 

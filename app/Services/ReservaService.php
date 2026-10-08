@@ -231,7 +231,98 @@ final class ReservaService
      */
     public function registrarPagoAprobado(int $reservaId, string $referenciaPago, float $montoPagado, string $concepto = 'otro'): string
     {
-        return Database::transaction($this->db, function () use ($reservaId, $referenciaPago, $montoPagado, $concepto): string {
+        return $this->registrarPago($reservaId, $referenciaPago, $montoPagado, $concepto, 'mercadopago');
+    }
+
+    /**
+     * Monto que el cliente paga desde su link de saldo. El monto nunca se toma tal cual del
+     * formulario: se valida contra el saldo real calculado en el servidor.
+     *
+     * - modo "total" (o saldo menor/igual al mínimo): el saldo completo.
+     * - modo "abono": lo que escribió el cliente, entre $minimo y el saldo. Si escribe el
+     *   saldo completo o más, se cobra exactamente el saldo.
+     *
+     * @throws RuntimeException con un mensaje listo para mostrar al cliente
+     */
+    public static function resolverMontoSaldo(float $saldo, float $minimo, string $modo, string $montoTexto): float
+    {
+        $saldo = round($saldo, 2);
+        if ($saldo <= 0) {
+            throw new RuntimeException('Esta reserva no tiene saldo pendiente.');
+        }
+
+        if ($modo !== 'abono' || $saldo <= $minimo) {
+            return $saldo;
+        }
+
+        $limpio = str_replace([',', '$', ' '], '', trim($montoTexto));
+        if ($limpio === '' || !is_numeric($limpio)) {
+            throw new RuntimeException('Escribe cuánto quieres abonar.');
+        }
+
+        $monto = round((float) $limpio, 2);
+        if ($monto <= 0) {
+            throw new RuntimeException('Escribe cuánto quieres abonar.');
+        }
+        if ($monto >= $saldo) {
+            return $saldo;
+        }
+        if ($monto < $minimo) {
+            throw new RuntimeException('El abono mínimo es de $' . number_format($minimo, 2) . '.');
+        }
+
+        return $monto;
+    }
+
+    /** Medios de pago que el panel permite registrar a mano. */
+    public const METODOS_MANUALES = [
+        'transferencia' => 'Transferencia',
+        'deposito' => 'Depósito bancario',
+        'efectivo' => 'Efectivo',
+        'terminal' => 'Tarjeta en terminal',
+        'otro' => 'Otro',
+    ];
+
+    /**
+     * Pago recibido fuera de Mercado Pago (transferencia, efectivo...) y capturado por el
+     * equipo desde el detalle de la reserva. Reutiliza registrarPago(): mismo modelo aditivo,
+     * misma confirmación automática si cubre el anticipo de una reserva pendiente.
+     *
+     * Si se captura la referencia del banco, forma parte de referencia_pago: registrar dos
+     * veces la misma transferencia devuelve PAGO_DUPLICADO en vez de sumarla otra vez. Sin
+     * referencia (efectivo) se genera una única.
+     *
+     * @throws RuntimeException si la reserva no admite pagos o los datos no son válidos
+     */
+    public function registrarPagoManual(int $reservaId, float $monto, string $metodo, string $referencia = '', string $nota = '', ?int $usuarioId = null): string
+    {
+        $monto = round($monto, 2);
+        if ($monto <= 0) {
+            throw new RuntimeException('El monto debe ser mayor a cero.');
+        }
+        if (!isset(self::METODOS_MANUALES[$metodo])) {
+            throw new RuntimeException('Selecciona un método de pago válido.');
+        }
+
+        $stmt = $this->db->prepare('SELECT estado FROM reservas WHERE id = :id');
+        $stmt->execute(['id' => $reservaId]);
+        $estado = $stmt->fetchColumn();
+        if (!in_array($estado, ['pendiente', 'confirmada'], true)) {
+            throw new RuntimeException('Sólo se pueden registrar pagos en reservas pendientes o confirmadas.');
+        }
+
+        $referencia = trim($referencia);
+        $referenciaPago = $referencia !== ''
+            ? mb_substr('manual:' . $metodo . ':' . $referencia, 0, 100)
+            : 'manual:' . $metodo . ':auto-' . bin2hex(random_bytes(8));
+        $concepto = $estado === 'pendiente' ? 'anticipo' : 'saldo';
+
+        return $this->registrarPago($reservaId, $referenciaPago, $monto, $concepto, $metodo, $nota !== '' ? mb_substr($nota, 0, 255) : null, $usuarioId);
+    }
+
+    private function registrarPago(int $reservaId, string $referenciaPago, float $montoPagado, string $concepto, string $metodo, ?string $nota = null, ?int $usuarioId = null): string
+    {
+        return Database::transaction($this->db, function () use ($reservaId, $referenciaPago, $montoPagado, $concepto, $metodo, $nota, $usuarioId): string {
             $stmt = $this->db->prepare('SELECT estado, precio_total FROM reservas WHERE id = :id FOR UPDATE');
             $stmt->execute(['id' => $reservaId]);
             $reserva = $stmt->fetch();
@@ -241,14 +332,17 @@ final class ReservaService
             }
 
             $ins = $this->db->prepare(
-                'INSERT IGNORE INTO pagos_reserva (reserva_id, referencia_pago, metodo_pago, concepto, monto)
-                 VALUES (:rid, :ref, "mercadopago", :concepto, :monto)'
+                'INSERT IGNORE INTO pagos_reserva (reserva_id, referencia_pago, metodo_pago, concepto, monto, nota, registrado_por)
+                 VALUES (:rid, :ref, :metodo, :concepto, :monto, :nota, :usuario)'
             );
             $ins->execute([
                 'rid' => $reservaId,
                 'ref' => $referenciaPago,
+                'metodo' => $metodo,
                 'concepto' => in_array($concepto, ['anticipo', 'saldo'], true) ? $concepto : 'otro',
                 'monto' => $montoPagado,
+                'nota' => $nota,
+                'usuario' => $usuarioId,
             ]);
 
             if ($ins->rowCount() === 0) {
@@ -260,8 +354,8 @@ final class ReservaService
             $totalPagado = (float) $sum->fetchColumn();
 
             $this->db->prepare(
-                'UPDATE reservas SET metodo_pago = "mercadopago", referencia_pago = :ref, monto_pagado = :monto WHERE id = :id'
-            )->execute(['ref' => $referenciaPago, 'monto' => $totalPagado, 'id' => $reservaId]);
+                'UPDATE reservas SET metodo_pago = :metodo, referencia_pago = :ref, monto_pagado = :monto WHERE id = :id'
+            )->execute(['metodo' => $metodo, 'ref' => $referenciaPago, 'monto' => $totalPagado, 'id' => $reservaId]);
 
             if ($reserva['estado'] !== 'pendiente') {
                 return self::PAGO_REGISTRADO;

@@ -685,3 +685,154 @@
   font-weight: 600;
 }
 
+/* Detalle de reserva: contenido + columna lateral (cliente, link de pago) */
+.admin-detalle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1100px) {
+  .admin-detalle { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+}
+
+.admin-detalle__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.admin-resumen-pago {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-resumen-pago > div {
+  background: var(--color-fondo-alterno);
+  border-radius: var(--radio);
+  padding: 0.75rem 1rem;
+}
+
+.admin-resumen-pago span { display: block; font-size: 0.8rem; opacity: 0.75; }
+.admin-resumen-pago strong { font-family: var(--fuente-titulos); font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.admin-resumen-pago .is-pendiente { background: #fdf1df; color: #7a520c; }
+
+.admin-desplegable > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-primario-oscuro);
+}
+
+.admin-nota-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.admin-nota-form textarea { flex: 1 1 260px; min-height: 0; }
+
+.admin-contacto {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 1rem;
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-contacto li { padding: 0.15rem 0; }
+
+.admin-copiar { display: flex; gap: 0.5rem; }
+.admin-copiar input { flex: 1; min-width: 0; font-size: 0.85rem; }
+
+/* Dashboard: "Por atender" (accionables, enlazados) + "Resultados del periodo" */
+.dashboard__titulo {
+  font-size: 0.8rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+  margin: 0 0 0.75rem;
+}
+
+.dashboard__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.dashboard__kpis > .admin-panel { margin-bottom: 0; }
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.kpi__etiqueta { font-size: 0.85rem; opacity: 0.75; }
+.kpi__valor { font-family: var(--fuente-titulos); font-size: 1.9rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.kpi__pie { font-size: 0.8rem; opacity: 0.65; }
+.kpi__var { font-size: 0.8rem; font-weight: 600; opacity: 0.75; }
+.kpi__var--sube { color: var(--color-exito); opacity: 1; }
+.kpi__var--baja { color: var(--color-error); opacity: 1; }
+
+.kpi--enlace { transition: box-shadow var(--transicion), transform var(--transicion); }
+.kpi--enlace:hover { box-shadow: var(--sombra); transform: translateY(-2px); }
+.kpi--alerta { box-shadow: inset 4px 0 0 #c98a1b; }
+.kpi--alerta:hover { box-shadow: inset 4px 0 0 #c98a1b, var(--sombra); }
+
+.dashboard__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.dashboard__periodo { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
+.dashboard__atajos { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+
+.chip-periodo {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-borde);
+  background: #fff;
+  color: var(--color-texto-oscuro);
+}
+
+.chip-periodo.is-activo {
+  background: var(--color-texto-oscuro);
+  border-color: var(--color-texto-oscuro);
+  color: #fff;
+}
+
+.dashboard__rango > summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--color-primario-oscuro); }
+.dashboard__rango-campos { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-top: 0.4rem; }
+.dashboard__rango-campos input { width: auto; padding: 0.4rem 0.5rem; }
+.dashboard__rango-texto { font-size: 0.85rem; opacity: 0.7; margin: 0 0 0.75rem; }
+
+.dashboard__columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 1.5rem;
+}
+
+@media (min-width: 1100px) {
+  .dashboard__columnas { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kpi--enlace { transition: none; }
+}
+
+/* La accion destructiva va aparte, al final de la fila, lejos de "Confirmar". */
+.admin-acciones form:has(.btn-peligro) { margin-left: auto; }
+

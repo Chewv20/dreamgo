@@ -282,11 +282,27 @@ CREATE TABLE IF NOT EXISTS pagos_reserva (
   metodo_pago VARCHAR(30) NOT NULL DEFAULT 'mercadopago',
   concepto ENUM('anticipo','saldo','otro') NOT NULL DEFAULT 'otro',
   monto DECIMAL(10,2) NOT NULL,
+  nota VARCHAR(255) NULL,
+  registrado_por INT UNSIGNED NULL,
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_pago_referencia (referencia_pago),
   INDEX idx_pagos_reserva (reserva_id),
   CONSTRAINT fk_pago_reserva FOREIGN KEY (reserva_id) REFERENCES reservas(id) ON DELETE CASCADE,
+  CONSTRAINT fk_pago_registrado_por FOREIGN KEY (registrado_por) REFERENCES usuarios_admin(id) ON DELETE SET NULL,
   CONSTRAINT chk_pago_monto CHECK (monto >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Notas internas de seguimiento de una reserva (mismo diseño que cotizacion_notas).
+CREATE TABLE IF NOT EXISTS reserva_notas (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  reserva_id INT UNSIGNED NOT NULL,
+  usuario_id INT UNSIGNED NULL,
+  usuario_nombre VARCHAR(150) NULL,
+  nota TEXT NOT NULL,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_resnotas_reserva (reserva_id),
+  CONSTRAINT fk_resnota_reserva FOREIGN KEY (reserva_id) REFERENCES reservas(id) ON DELETE CASCADE,
+  CONSTRAINT fk_resnota_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios_admin(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ==========================================================

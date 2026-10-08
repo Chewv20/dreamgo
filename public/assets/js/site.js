@@ -452,6 +452,46 @@
     if (movil.addEventListener) movil.addEventListener('change', aplicar);
   }
 
+  // Pago de saldo: muestra el campo de monto solo al elegir "Abonar otra cantidad" y
+  // mantiene el texto del boton con el monto que se va a cobrar. El servidor vuelve a
+  // validar el monto (ReservaService::resolverMontoSaldo).
+  function initPagoSaldo() {
+    var form = document.querySelector('[data-pago-saldo]');
+    if (!form) return;
+    var radios = form.querySelectorAll('[data-pago-modo]');
+    var campo = form.querySelector('[data-pago-monto-campo]');
+    var input = form.querySelector('[data-pago-monto]');
+    var boton = form.querySelector('[data-pago-boton]');
+    if (!radios.length || !campo || !input || !boton) return;
+
+    var saldo = parseFloat(boton.getAttribute('data-saldo')) || 0;
+    var moneda = boton.getAttribute('data-moneda') || '';
+    var fmt = new Intl.NumberFormat('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function modo() {
+      var elegido = form.querySelector('[data-pago-modo]:checked');
+      return elegido ? elegido.value : 'total';
+    }
+
+    function actualizar() {
+      var abono = modo() === 'abono';
+      campo.hidden = !abono;
+      input.required = abono;
+      var monto = abono ? Math.min(parseFloat(input.value) || 0, saldo) : saldo;
+      boton.textContent = monto > 0
+        ? (abono && monto < saldo ? 'Abonar $' : 'Pagar $') + fmt.format(monto) + ' ' + moneda + ' en línea'
+        : 'Escribe el monto del abono';
+      boton.disabled = monto <= 0;
+    }
+
+    Array.prototype.forEach.call(radios, function (r) { r.addEventListener('change', function () {
+      actualizar();
+      if (modo() === 'abono') input.focus();
+    }); });
+    input.addEventListener('input', actualizar);
+    actualizar();
+  }
+
   function initModalPromocion() {
     var modal = document.querySelector('[data-modal-promo]');
     if (!modal) return;
@@ -589,6 +629,7 @@
     initModalPromocion();
     initReservaResumen();
     initFiltrosCatalogo();
+    initPagoSaldo();
   });
 
   initServiceWorker();

@@ -25,6 +25,7 @@ class ConfiguracionController extends AdminController
         'youtube_url',
         'horas_expiracion_reserva',
         'porcentaje_anticipo_reserva',
+        'abono_minimo_saldo',
         'dias_recordatorio_viaje',
         'dias_recordatorio_saldo',
         'email_equipo_reportes',
@@ -41,7 +42,7 @@ class ConfiguracionController extends AdminController
 
         $this->view('admin/configuracion/index', [
             'valores' => $valores,
-        ], ['title' => 'Configuracion | Dream Go', 'heading' => 'Configuracion del sitio']);
+        ], ['title' => 'Configuración | Dream Go', 'heading' => 'Configuración del sitio']);
     }
 
     public function guardar(): void
@@ -53,6 +54,10 @@ class ConfiguracionController extends AdminController
             $valor = (string) $this->request->input($clave, '');
             if (in_array($clave, self::CLAVES_URL, true)) {
                 $valor = Url::segura($valor);
+            }
+            if ($clave === 'abono_minimo_saldo') {
+                // Monto en dinero: no negativo, dos decimales; vacío o inválido vuelve al default.
+                $valor = is_numeric($valor) && (float) $valor >= 0 ? (string) round((float) $valor, 2) : '500';
             }
             if ($valor !== (string) ConfiguracionSitio::get($clave, '')) {
                 $cambiadas[] = $clave;

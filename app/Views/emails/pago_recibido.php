@@ -1,7 +1,9 @@
 <?php
 /** @var array $reserva */
 /** @var string $urlComprobante */
+/** @var string $urlPagarSaldo */
 $urlComprobante ??= '';
+$urlPagarSaldo ??= '';
 $moneda = htmlspecialchars((string) ($reserva['paquete_moneda'] ?? ''), ENT_QUOTES, 'UTF-8');
 $total = (float) $reserva['precio_total'];
 $pagado = (float) $reserva['monto_pagado'];
@@ -19,7 +21,10 @@ reserva <strong><?= htmlspecialchars($reserva['codigo_reserva'], ENT_QUOTES, 'UT
 <?php if ($saldo <= 0): ?>
   <p>Con esto tu reserva queda totalmente pagada. ¡Nos vemos pronto!</p>
 <?php else: ?>
-  <p>Aún queda un saldo por liquidar antes de la salida.</p>
+  <p>Aún queda un saldo por liquidar antes de la salida. Puedes pagarlo completo o en abonos.</p>
+  <?php if ($urlPagarSaldo !== ''): ?>
+    <p><a href="<?= htmlspecialchars($urlPagarSaldo, ENT_QUOTES, 'UTF-8') ?>" style="display:inline-block;background:#a85f4d;color:#ffffff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:bold;">Abonar o liquidar saldo</a></p>
+  <?php endif; ?>
 <?php endif; ?>
 <p>Adjuntamos tu comprobante actualizado en PDF<?php if ($urlComprobante !== ''): ?>. También puedes
 <a href="<?= htmlspecialchars($urlComprobante, ENT_QUOTES, 'UTF-8') ?>" style="color:#a85f4d;">descargarlo desde aquí</a><?php endif; ?>.</p>
