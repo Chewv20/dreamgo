@@ -44,7 +44,7 @@ final class ReservaService
     {
         if ($datos['num_personas'] < 1 || $datos['num_personas'] > self::MAX_PERSONAS_POR_RESERVA) {
             throw new RuntimeException(
-                'El numero de personas debe estar entre 1 y ' . self::MAX_PERSONAS_POR_RESERVA . '.'
+                'El número de personas debe estar entre 1 y ' . self::MAX_PERSONAS_POR_RESERVA . '.'
             );
         }
 

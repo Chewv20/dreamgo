@@ -34,7 +34,7 @@ class ResenaPublicaController extends Controller
 
         $validator = new Validator($valores);
         $validator->requerido('email', 'El correo')->email('email', 'El correo')
-            ->requerido('calificacion', 'La calificacion')->entero('calificacion', 'La calificacion')->enRango('calificacion', 1, 5, 'La calificacion')
+            ->requerido('calificacion', 'La calificación')->entero('calificacion', 'La calificación')->enRango('calificacion', 1, 5, 'La calificación')
             ->requerido('comentario', 'El comentario')->maxLength('comentario', 1000, 'El comentario');
 
         if (!$validator->pasa()) {

@@ -20,6 +20,6 @@ class BitacoraController extends AdminController
             'paginador' => $paginador,
             'acciones' => Bitacora::accionesDistintas(),
             'accionActiva' => $accion,
-        ], ['title' => 'Bitacora | Dream Go', 'heading' => 'Bitacora de acciones']);
+        ], ['title' => 'Bitácora | Dream Go', 'heading' => 'Bitácora de acciones']);
     }
 }

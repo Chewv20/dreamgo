@@ -79,9 +79,9 @@ class ReservaPublicaController extends Controller
         $validator = new Validator($datos);
         $validator->requerido('nombre', 'El nombre')->maxLength('nombre', 150, 'El nombre')
             ->requerido('email', 'El correo')->email('email', 'El correo')
-            ->requerido('telefono', 'El telefono')->telefono('telefono', 'El telefono')
-            ->requerido('num_personas', 'El numero de personas')->entero('num_personas', 'El numero de personas')
-            ->enRango('num_personas', 1, 30, 'El numero de personas');
+            ->requerido('telefono', 'El teléfono')->telefono('telefono', 'El teléfono')
+            ->requerido('num_personas', 'El número de personas')->entero('num_personas', 'El número de personas')
+            ->enRango('num_personas', 1, 30, 'El número de personas');
 
         $precioUnitario = $salida['precio_override'] !== null
             ? (float) $salida['precio_override']

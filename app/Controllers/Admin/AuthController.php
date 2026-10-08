@@ -19,7 +19,7 @@ class AuthController extends Controller
             $this->redirect('/admin');
         }
 
-        $this->view('admin/auth/login', [], ['title' => 'Iniciar sesion | Dream Go'], 'blank');
+        $this->view('admin/auth/login', [], ['title' => 'Iniciar sesión | Dream Go'], 'blank');
     }
 
     public function login(): void
@@ -38,10 +38,10 @@ class AuthController extends Controller
 
         $mensaje = $bloqueadoAntes
             ? 'Demasiados intentos fallidos. Espera unos minutos antes de volver a intentar.'
-            : 'Correo o contrasena incorrectos.';
+            : 'Correo o contraseña incorrectos.';
 
         Flash::set('error', $mensaje);
-        $this->view('admin/auth/login', ['email' => $email], ['title' => 'Iniciar sesion | Dream Go'], 'blank');
+        $this->view('admin/auth/login', ['email' => $email], ['title' => 'Iniciar sesión | Dream Go'], 'blank');
     }
 
     public function logout(): void

@@ -30,7 +30,7 @@ abstract class Controller
         $content = ob_get_clean();
 
         $meta = array_merge([
-            'title' => 'Dream Go Operadora Turistica',
+            'title' => 'Dream Go Operadora Turística',
             'description' => 'Excursiones y paquetes de viaje nacionales e internacionales.',
             'ogImage' => '/assets/img/logo.avif',
         ], $meta);
@@ -69,7 +69,7 @@ abstract class Controller
     protected function verifyCsrf(): void
     {
         if (!\App\Helpers\Csrf::verify($this->request->input('_csrf'))) {
-            $this->abort(403, 'Token de seguridad invalido. Actualiza la pagina e intenta de nuevo.');
+            $this->abort(403, 'Token de seguridad inválido. Actualiza la página e intenta de nuevo.');
         }
     }
 }

@@ -47,7 +47,7 @@ class CotizacionAdminController extends AdminController
             'notas' => CotizacionNota::porCotizacion($id),
             'asesores' => Usuario::conRol(),
             'estados' => self::ESTADOS,
-        ], ['title' => 'Cotizacion de ' . $cotizacion['nombre'] . ' | Dream Go', 'heading' => 'Cotizacion de ' . $cotizacion['nombre']]);
+        ], ['title' => 'Cotización de ' . $cotizacion['nombre'] . ' | Dream Go', 'heading' => 'Cotización de ' . $cotizacion['nombre']]);
     }
 
     public function exportarCsv(): void

@@ -124,8 +124,8 @@ class SalidaAdminController extends AdminController
         $validator = new Validator($datos);
         $validator->requerido('fecha_salida', 'La fecha de salida')->fecha('fecha_salida', 'La fecha de salida')
             ->fecha('fecha_regreso', 'La fecha de regreso')
-            ->requerido('cupo_maximo', 'El cupo maximo')->entero('cupo_maximo', 'El cupo maximo')
-            ->enRango('cupo_maximo', 1, 65535, 'El cupo maximo');
+            ->requerido('cupo_maximo', 'El cupo máximo')->entero('cupo_maximo', 'El cupo máximo')
+            ->enRango('cupo_maximo', 1, 65535, 'El cupo máximo');
 
         if (!$validator->pasa()) {
             Flash::set('error', 'Revisa los datos del formulario.');

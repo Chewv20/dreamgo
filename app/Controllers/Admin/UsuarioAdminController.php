@@ -134,7 +134,7 @@ class UsuarioAdminController extends AdminController
 
         $cambios = 'rol #' . $datos['rol_id'] . ', ' . ($datos['activo'] ? 'activo' : 'inactivo');
         if (isset($datos['password_hash'])) {
-            $cambios .= ', contrasena restablecida';
+            $cambios .= ', contraseña restablecida';
         }
         Auditoria::registrar('usuario.editar', 'usuario', $id, $cambios);
 

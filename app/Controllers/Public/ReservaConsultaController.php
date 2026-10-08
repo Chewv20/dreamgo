@@ -33,7 +33,7 @@ class ReservaConsultaController extends Controller
         $valores['email'] = trim((string) ($valores['email'] ?? ''));
 
         $validator = new Validator($valores);
-        $validator->requerido('codigo', 'El codigo de reserva')->maxLength('codigo', 20, 'El codigo de reserva')
+        $validator->requerido('codigo', 'El código de reserva')->maxLength('codigo', 20, 'El código de reserva')
             ->requerido('email', 'El correo')->email('email', 'El correo');
 
         if (!$validator->pasa()) {

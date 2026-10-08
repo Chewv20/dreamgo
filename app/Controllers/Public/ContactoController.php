@@ -48,7 +48,7 @@ class ContactoController extends Controller
         $validator = new Validator($datos);
         $validator->requerido('nombre', 'El nombre')->maxLength('nombre', 150, 'El nombre')
             ->requerido('email', 'El correo')->email('email', 'El correo')
-            ->requerido('telefono', 'El telefono')->telefono('telefono', 'El telefono')
+            ->requerido('telefono', 'El teléfono')->telefono('telefono', 'El teléfono')
             ->requerido('mensaje', 'El mensaje')->maxLength('mensaje', 2000, 'El mensaje');
 
         if (!$validator->pasa()) {
@@ -95,7 +95,7 @@ class ContactoController extends Controller
     {
         $whatsapp = (new WhatsAppLinkService())->generarLink(
             ConfiguracionSitio::get('whatsapp_numero', ''),
-            'Hola, me gustaria mas informacion sobre sus paquetes de viaje.'
+            'Hola, me gustaría más información sobre sus paquetes de viaje.'
         );
 
         $bloques = BloquePagina::porPagina('contacto');

@@ -259,7 +259,7 @@ final class ReservaFlujoDineroTest extends IntegrationTestCase
             $this->servicio()->crear($this->datos(1, 'SOLOUNO'));
             self::fail('Se esperaba RuntimeException por limite de usos');
         } catch (RuntimeException $e) {
-            self::assertStringContainsStringIgnoringCase('limite', $e->getMessage());
+            self::assertStringContainsStringIgnoringCase('límite', $e->getMessage());
         }
 
         // La segunda reserva no debe existir; el cupo solo bajo por la primera.

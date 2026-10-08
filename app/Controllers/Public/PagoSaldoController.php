@@ -47,7 +47,7 @@ class PagoSaldoController extends Controller
 
         $accessToken = $_ENV['MP_ACCESS_TOKEN'] ?? '';
         if ($accessToken === '') {
-            $this->render($reserva, 'El pago en linea no esta disponible en este momento. Escribenos y coordinamos el pago del saldo por otro medio.');
+            $this->render($reserva, 'El pago en línea no está disponible en este momento. Escríbenos y coordinamos el pago del saldo por otro medio.');
 
             return;
         }
@@ -62,7 +62,7 @@ class PagoSaldoController extends Controller
             );
         } catch (RuntimeException $e) {
             error_log('[PagoSaldoController] No se pudo crear la preferencia de saldo: ' . $e->getMessage());
-            $this->render($reserva, 'No pudimos iniciar el pago en linea en este momento. Intenta mas tarde o contactanos.');
+            $this->render($reserva, 'No pudimos iniciar el pago en línea en este momento. Intenta más tarde o contáctanos.');
 
             return;
         }

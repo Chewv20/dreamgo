@@ -17,7 +17,7 @@ class ResenaAdminController extends AdminController
         $this->view('admin/resenas/index', [
             'resenas' => Resena::adminListado($paginador->porPagina, $paginador->offset()),
             'paginador' => $paginador,
-        ], ['title' => 'Resenas | Dream Go', 'heading' => 'Resenas de clientes']);
+        ], ['title' => 'Reseñas | Dream Go', 'heading' => 'Reseñas de clientes']);
     }
 
     public function cambiarEstado(int $id): void

@@ -53,8 +53,8 @@ class CotizadorController extends Controller
         $validator = new Validator($datos);
         $validator->requerido('nombre', 'El nombre')->maxLength('nombre', 150, 'El nombre')
             ->requerido('email', 'El correo')->email('email', 'El correo')
-            ->requerido('telefono', 'El telefono')->telefono('telefono', 'El telefono')
-            ->entero('num_personas', 'El numero de personas')->enRango('num_personas', 1, 60, 'El numero de personas')
+            ->requerido('telefono', 'El teléfono')->telefono('telefono', 'El teléfono')
+            ->entero('num_personas', 'El número de personas')->enRango('num_personas', 1, 60, 'El número de personas')
             ->fecha('fecha_tentativa', 'La fecha tentativa')
             ->maxLength('mensaje', 2000, 'El mensaje');
 

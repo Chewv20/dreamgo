@@ -21,14 +21,14 @@ class OfertaAdminController extends AdminController
     {
         $this->view('admin/ofertas/index', [
             'ofertas' => CodigoDescuento::adminListado(),
-        ], ['title' => 'Ofertas | Dream Go', 'heading' => 'Ofertas y codigos de descuento']);
+        ], ['title' => 'Ofertas | Dream Go', 'heading' => 'Ofertas y códigos de descuento']);
     }
 
     public function crearForm(): void
     {
         $this->view('admin/ofertas/create', [
             'paquetes' => Paquete::all('titulo ASC'),
-        ], ['title' => 'Nueva oferta | Dream Go', 'heading' => 'Nuevo codigo de descuento']);
+        ], ['title' => 'Nueva oferta | Dream Go', 'heading' => 'Nuevo código de descuento']);
     }
 
     public function crear(): void
@@ -65,7 +65,7 @@ class OfertaAdminController extends AdminController
         $this->view('admin/ofertas/edit', [
             'oferta' => $oferta,
             'paquetes' => Paquete::all('titulo ASC'),
-        ], ['title' => 'Editar oferta | Dream Go', 'heading' => 'Editar codigo de descuento']);
+        ], ['title' => 'Editar oferta | Dream Go', 'heading' => 'Editar código de descuento']);
     }
 
     public function editar(int $id): void
@@ -162,7 +162,7 @@ class OfertaAdminController extends AdminController
     private function validar(array $datos): bool
     {
         $validator = new Validator($datos);
-        $validator->requerido('codigo', 'El codigo')->maxLength('codigo', 40, 'El codigo')
+        $validator->requerido('codigo', 'El código')->maxLength('codigo', 40, 'El código')
             ->requerido('valor', 'El valor')
             ->requerido('fecha_inicio', 'La fecha de inicio')->fecha('fecha_inicio', 'La fecha de inicio')
             ->requerido('fecha_fin', 'La fecha de fin')->fecha('fecha_fin', 'La fecha de fin');

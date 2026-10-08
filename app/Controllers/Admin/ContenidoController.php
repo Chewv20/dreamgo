@@ -16,22 +16,22 @@ class ContenidoController extends AdminController
     public const MAX_IMAGENES_HERO = 5;
 
     public const PAGINAS = [
-        'home' => 'Pagina de inicio',
+        'home' => 'Página de inicio',
         'nosotros' => 'Nosotros',
         'contacto' => 'Contacto',
         'destinos' => 'Destinos (listado)',
-        'paquetes' => 'Paquetes (catalogo)',
+        'paquetes' => 'Paquetes (catálogo)',
     ];
 
     public const ETIQUETAS_BLOQUE = [
         'hero' => 'Hero (encabezado principal)',
-        'ventajas' => 'Por que viajar con nosotros',
+        'ventajas' => 'Por qué viajar con nosotros',
         'destinos' => 'Explora por destino',
         'paquetes_destacados' => 'Paquetes destacados',
         'testimonios' => 'Testimonios',
-        'cta_final' => 'Llamado a la accion final',
-        'intro' => 'Introduccion',
-        'estadisticas' => 'Cifras / estadisticas',
+        'cta_final' => 'Llamado a la acción final',
+        'intro' => 'Introducción',
+        'estadisticas' => 'Cifras / estadísticas',
     ];
 
     private const CLAVES_COLOR = [

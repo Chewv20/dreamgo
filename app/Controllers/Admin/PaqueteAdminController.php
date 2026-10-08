@@ -20,7 +20,7 @@ class PaqueteAdminController extends AdminController
 {
     private const MONEDAS = [
         'MXN' => 'Peso mexicano (MXN)',
-        'USD' => 'Dolar estadounidense (USD)',
+        'USD' => 'Dólar estadounidense (USD)',
         'EUR' => 'Euro (EUR)',
         'CAD' => 'Dolar canadiense (CAD)',
         'GBP' => 'Libra esterlina (GBP)',

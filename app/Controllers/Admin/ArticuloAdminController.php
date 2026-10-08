@@ -25,7 +25,7 @@ class ArticuloAdminController extends AdminController
         $this->view('admin/articulos/index', [
             'articulos' => Articulo::adminListado($paginador->porPagina, $paginador->offset()),
             'paginador' => $paginador,
-        ], ['title' => 'Blog | Dream Go', 'heading' => 'Articulos del blog']);
+        ], ['title' => 'Blog | Dream Go', 'heading' => 'Artículos del blog']);
     }
 
     public function crearForm(): void
@@ -33,7 +33,7 @@ class ArticuloAdminController extends AdminController
         $this->view('admin/articulos/create', [
             'categorias' => Categoria::all('nombre ASC'),
             'estados' => self::ESTADOS,
-        ], ['title' => 'Nuevo articulo | Dream Go', 'heading' => 'Nuevo articulo']);
+        ], ['title' => 'Nuevo artículo | Dream Go', 'heading' => 'Nuevo artículo']);
     }
 
     public function crear(): void
@@ -75,7 +75,7 @@ class ArticuloAdminController extends AdminController
             'articulo' => $articulo,
             'categorias' => Categoria::all('nombre ASC'),
             'estados' => self::ESTADOS,
-        ], ['title' => 'Editar articulo | Dream Go', 'heading' => 'Editar articulo']);
+        ], ['title' => 'Editar artículo | Dream Go', 'heading' => 'Editar artículo']);
     }
 
     public function editar(int $id): void
@@ -140,7 +140,7 @@ class ArticuloAdminController extends AdminController
     private function validar(array $datos): bool
     {
         $validator = new Validator($datos);
-        $validator->requerido('titulo', 'El titulo')->maxLength('titulo', 180, 'El titulo')
+        $validator->requerido('titulo', 'El título')->maxLength('titulo', 180, 'El título')
             ->maxLength('resumen', 300, 'El resumen')
             ->requerido('estado', 'El estado');
 

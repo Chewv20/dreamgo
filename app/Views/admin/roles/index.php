@@ -67,8 +67,18 @@
           </tr>
         </thead>
         <tbody>
+          <?php
+          // permisos.modulo es una clave técnica; aquí se muestra su nombre legible.
+          $nombresModulo = [
+              'bitacora' => 'Bitácora', 'blog' => 'Blog', 'configuracion' => 'Configuración',
+              'contenido' => 'Contenido del sitio', 'cotizaciones' => 'Cotizaciones', 'destinos' => 'Destinos',
+              'modales' => 'Modales promocionales', 'ofertas' => 'Ofertas', 'paquetes' => 'Paquetes',
+              'reportes' => 'Reportes', 'resenas' => 'Reseñas', 'reservas' => 'Reservas', 'roles' => 'Roles y permisos',
+              'salidas' => 'Fechas de salida', 'suscriptores' => 'Suscriptores', 'usuarios' => 'Usuarios',
+          ];
+          ?>
           <?php foreach ($permisosPorModulo as $modulo => $permisos): ?>
-            <tr><td colspan="<?= count($roles) + 1 ?>" class="matriz-grupo"><?= htmlspecialchars($modulo, ENT_QUOTES, 'UTF-8') ?></td></tr>
+            <tr><td colspan="<?= count($roles) + 1 ?>" class="matriz-grupo"><?= htmlspecialchars($nombresModulo[$modulo] ?? ucfirst((string) $modulo), ENT_QUOTES, 'UTF-8') ?></td></tr>
             <?php foreach ($permisos as $permiso): ?>
               <tr>
                 <td><?= htmlspecialchars($permiso['descripcion'] ?? $permiso['clave'], ENT_QUOTES, 'UTF-8') ?></td>

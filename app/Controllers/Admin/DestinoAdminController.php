@@ -241,7 +241,7 @@ class DestinoAdminController extends AdminController
     {
         $validator = new Validator($datos);
         $validator->requerido('nombre', 'El nombre')->maxLength('nombre', 100, 'El nombre')
-            ->maxLength('descripcion', 1000, 'La descripcion');
+            ->maxLength('descripcion', 1000, 'La descripción');
 
         if (!$validator->pasa()) {
             Flash::set('error', 'Revisa los datos del formulario.');
