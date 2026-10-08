@@ -252,7 +252,7 @@ summary:focus-visible {
 }
 
 .header__logo img {
-  height: 42px;
+  height: 52px;
   width: auto;
 }
 
@@ -716,7 +716,7 @@ summary:focus-visible {
 }
 
 .footer__logo {
-  height: 56px;
+  height: 104px;
   width: auto;
   border-radius: var(--radio);
   margin-bottom: 1.25rem;
@@ -829,6 +829,10 @@ summary:focus-visible {
 
   .nav-toggle {
     display: none;
+  }
+
+  .header__logo img {
+    height: 64px;
   }
 
   .grid-tarjetas {
