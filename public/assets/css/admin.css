@@ -144,10 +144,82 @@
 }
 
 .admin-flash {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
   padding: 0.85rem 1.1rem;
   border-radius: var(--radio);
   margin-bottom: 1.25rem;
   font-weight: 500;
+  transition: opacity 0.4s ease;
+}
+
+.admin-flash.is-saliendo { opacity: 0; }
+
+.admin-flash__cerrar {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.7;
+  padding: 0 0.25rem;
+}
+
+.admin-flash__cerrar:hover { opacity: 1; }
+
+/* Menu de usuario en la barra superior */
+.admin-usuario { position: relative; }
+
+.admin-usuario__boton {
+  list-style: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-borde);
+  background: #fff;
+}
+
+.admin-usuario__boton::-webkit-details-marker { display: none; }
+.admin-usuario__boton::after { content: " ▾"; opacity: 0.6; }
+
+.admin-usuario__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: 0.35rem;
+  z-index: 20;
+}
+
+.admin-usuario__menu a,
+.admin-usuario__menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--color-texto-oscuro);
+  cursor: pointer;
+}
+
+.admin-usuario__menu a:hover,
+.admin-usuario__menu button:hover { background: var(--color-fondo-alterno); }
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-flash { transition: none; }
 }
 
 .admin-flash--exito {
@@ -230,6 +302,20 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+/* En una celda, display:flex saca al <td> del modelo de tabla: pierde el alto de la fila
+   y su borde inferior queda desfasado del resto. La celda sigue siendo celda y los botones
+   se alinean en linea. */
+.admin-tabla td.admin-acciones {
+  display: table-cell;
+  white-space: nowrap;
+}
+
+.admin-tabla td.admin-acciones > * {
+  display: inline-flex;
+  vertical-align: middle;
+  margin: 0.15rem 0.3rem 0.15rem 0;
 }
 
 /* select/textarea son width:100% por defecto (site.css), pensado para un <form> normal de
@@ -554,3 +640,48 @@
 
 .galeria-admin__acciones form { margin: 0; }
 .galeria-admin__acciones .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Buscador sobre un listado (reservas, paquetes): busqueda ancha + selects + botones. */
+.admin-buscador {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem 1rem;
+  align-items: end;
+}
+
+.admin-buscador .campo { margin-bottom: 0; }
+
+@media (min-width: 900px) {
+  .admin-buscador { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) auto; }
+}
+
+.admin-conteo {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.admin-tabla td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.admin-miniatura-celda { width: 64px; }
+
+.admin-miniatura {
+  display: block;
+  width: 48px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--color-fondo-alterno);
+}
+
+.admin-miniatura--vacia {
+  background: linear-gradient(135deg, var(--color-fondo-alterno), var(--color-primario));
+}
+
+.admin-volver {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+

@@ -21,11 +21,17 @@ class ReservaAdminController extends AdminController
 {
     public function index(): void
     {
-        $paginador = $this->paginar(Reserva::contarTotal());
+        $filtros = [
+            'q' => trim((string) $this->request->query('q', '')),
+            'estado' => (string) $this->request->query('estado', ''),
+            'salida' => (string) $this->request->query('salida', ''),
+        ];
+        $paginador = $this->paginar(Reserva::contarTotal($filtros));
 
         $this->view('admin/reservas/index', [
-            'reservas' => Reserva::adminListado($paginador->porPagina, $paginador->offset()),
+            'reservas' => Reserva::adminListado($paginador->porPagina, $paginador->offset(), $filtros),
             'paginador' => $paginador,
+            'filtros' => $filtros,
         ], ['title' => 'Reservas | Dream Go', 'heading' => 'Reservas']);
     }
 
@@ -99,13 +105,18 @@ class ReservaAdminController extends AdminController
         $salidaId = (int) $this->request->query('salida_id', 0);
         $salida = $salidaId ? Salida::find($salidaId) : null;
 
+        // Sin salida elegida (p. ej. desde el botón del listado): primero se elige la fecha.
         if (!$salida) {
-            Flash::set('error', 'Selecciona una fecha de salida desde el paquete correspondiente para crear una reserva.');
-            $this->redirect('/admin/paquetes');
+            $this->view('admin/reservas/elegir_salida', [
+                'salidas' => Salida::abiertasParaReservar(),
+            ], ['title' => 'Nueva reserva | Dream Go', 'heading' => 'Nueva reserva']);
+
+            return;
         }
 
         $this->view('admin/reservas/create', [
             'salida' => $salida,
+            'paquete' => \App\Models\Paquete::find((int) $salida['paquete_id']),
         ], ['title' => 'Nueva reserva | Dream Go', 'heading' => 'Nueva reserva']);
     }
 
@@ -119,9 +130,9 @@ class ReservaAdminController extends AdminController
         $validator->requerido('salida_id', 'La fecha de salida')
             ->requerido('nombre', 'El nombre')->maxLength('nombre', 150, 'El nombre')
             ->requerido('email', 'El correo')->email('email', 'El correo')
-            ->requerido('telefono', 'El telefono')->telefono('telefono', 'El telefono')
-            ->requerido('num_personas', 'El numero de personas')->entero('num_personas', 'El numero de personas')
-            ->enRango('num_personas', 1, 30, 'El numero de personas');
+            ->requerido('telefono', 'El teléfono')->telefono('telefono', 'El teléfono')
+            ->requerido('num_personas', 'El número de personas')->entero('num_personas', 'El número de personas')
+            ->enRango('num_personas', 1, 30, 'El número de personas');
 
         $this->redirigirSiInvalido($validator, '/admin/reservas/crear?salida_id=' . (int) $datos['salida_id']);
 

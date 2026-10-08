@@ -34,4 +34,20 @@ class Salida extends Model
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * Salidas futuras abiertas y con cupo, con su paquete: opciones para crear una reserva
+     * manual desde el listado de reservas sin tener que entrar al paquete.
+     */
+    public static function abiertasParaReservar(): array
+    {
+        return self::db()->query(
+            'SELECT s.id, s.fecha_salida, s.fecha_regreso, s.cupo_disponible, p.titulo AS paquete_titulo
+             FROM salidas s
+             INNER JOIN paquetes p ON p.id = s.paquete_id
+             WHERE s.fecha_salida >= CURDATE() AND s.estado = "abierta" AND s.cupo_disponible > 0
+               AND p.estado = "publicado"
+             ORDER BY p.titulo ASC, s.fecha_salida ASC'
+        )->fetchAll();
+    }
 }

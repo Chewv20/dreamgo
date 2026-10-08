@@ -10,18 +10,28 @@ class Reserva extends Model
 {
     protected static string $table = 'reservas';
 
-    public static function adminListado(int $limite = 20, int $offset = 0): array
+    public const ESTADOS = ['pendiente', 'confirmada', 'cancelada', 'expirada'];
+
+    /**
+     * @param array{q?:?string, estado?:?string, salida?:?string} $filtros
+     */
+    public static function adminListado(int $limite = 20, int $offset = 0, array $filtros = []): array
     {
+        [$where, $params] = self::clausulaFiltros($filtros);
         $stmt = self::db()->prepare(
-            'SELECT r.*, c.nombre AS cliente_nombre, c.email AS cliente_email, c.telefono AS cliente_telefono,
-                    s.fecha_salida, p.titulo AS paquete_titulo, p.id AS paquete_id
+            "SELECT r.*, c.nombre AS cliente_nombre, c.email AS cliente_email, c.telefono AS cliente_telefono,
+                    s.fecha_salida, p.titulo AS paquete_titulo, p.id AS paquete_id, p.moneda AS paquete_moneda
              FROM reservas r
              INNER JOIN clientes c ON c.id = r.cliente_id
              INNER JOIN salidas s ON s.id = r.salida_id
              INNER JOIN paquetes p ON p.id = s.paquete_id
+             {$where}
              ORDER BY r.creado_en DESC
-             LIMIT :limite OFFSET :offset'
+             LIMIT :limite OFFSET :offset"
         );
+        foreach ($params as $clave => $valor) {
+            $stmt->bindValue(':' . $clave, $valor);
+        }
         $stmt->bindValue(':limite', $limite, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
@@ -29,9 +39,66 @@ class Reserva extends Model
         return $stmt->fetchAll();
     }
 
-    public static function contarTotal(): int
+    /**
+     * @param array{q?:?string, estado?:?string, salida?:?string} $filtros
+     */
+    public static function contarTotal(array $filtros = []): int
     {
-        return (int) self::db()->query('SELECT COUNT(*) FROM reservas')->fetchColumn();
+        [$where, $params] = self::clausulaFiltros($filtros);
+        $stmt = self::db()->prepare(
+            "SELECT COUNT(*)
+             FROM reservas r
+             INNER JOIN clientes c ON c.id = r.cliente_id
+             INNER JOIN salidas s ON s.id = r.salida_id
+             {$where}"
+        );
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * Traduce los filtros del listado del panel a un WHERE parametrizado. Público para
+     * probar el armado del SQL sin base de datos (mismo patrón que Cotizacion).
+     *
+     * - q: código de reserva, nombre o correo del cliente (búsqueda parcial).
+     * - estado: uno de self::ESTADOS (otro valor se ignora).
+     * - salida: "proximas" (hoy en adelante) o "pasadas".
+     *
+     * @param array{q?:?string, estado?:?string, salida?:?string} $filtros
+     * @return array{0:string, 1:array<string,string>}
+     */
+    public static function clausulaFiltros(array $filtros): array
+    {
+        $condiciones = [];
+        $params = [];
+
+        $q = trim((string) ($filtros['q'] ?? ''));
+        if ($q !== '') {
+            // Sin emulación de prepares un mismo marcador no puede repetirse: uno por columna.
+            $condiciones[] = '(r.codigo_reserva LIKE :q_codigo OR c.nombre LIKE :q_nombre OR c.email LIKE :q_email)';
+            $like = '%' . addcslashes(mb_substr($q, 0, 100), '%_\\') . '%';
+            $params['q_codigo'] = $like;
+            $params['q_nombre'] = $like;
+            $params['q_email'] = $like;
+        }
+
+        $estado = $filtros['estado'] ?? null;
+        if (in_array($estado, self::ESTADOS, true)) {
+            $condiciones[] = 'r.estado = :estado';
+            $params['estado'] = $estado;
+        }
+
+        $salida = $filtros['salida'] ?? null;
+        if ($salida === 'proximas') {
+            $condiciones[] = 's.fecha_salida >= CURDATE()';
+        } elseif ($salida === 'pasadas') {
+            $condiciones[] = 's.fecha_salida < CURDATE()';
+        }
+
+        $where = $condiciones === [] ? '' : 'WHERE ' . implode(' AND ', $condiciones);
+
+        return [$where, $params];
     }
 
     /**

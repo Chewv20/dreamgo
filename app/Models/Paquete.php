@@ -252,15 +252,26 @@ class Paquete extends Model
         self::update($paqueteId, ['imagen_portada' => $imagenes[0]['ruta_original'] ?? null]);
     }
 
-    public static function adminListado(int $limite = 20, int $offset = 0): array
+    public const ESTADOS = ['publicado', 'borrador', 'archivado'];
+
+    /**
+     * @param array{q?:?string, estado?:?string, categoria?:?string} $filtros
+     */
+    public static function adminListado(int $limite = 20, int $offset = 0, array $filtros = []): array
     {
+        [$where, $params] = self::clausulaFiltrosAdmin($filtros);
         $stmt = self::db()->prepare(
-            'SELECT p.*, c.nombre AS categoria_nombre
+            "SELECT p.*, c.nombre AS categoria_nombre,
+                    (SELECT COUNT(*) FROM salidas s WHERE s.paquete_id = p.id AND s.fecha_salida >= CURDATE()) AS salidas_futuras
              FROM paquetes p
              INNER JOIN categorias c ON c.id = p.categoria_id
+             {$where}
              ORDER BY p.creado_en DESC
-             LIMIT :limite OFFSET :offset'
+             LIMIT :limite OFFSET :offset"
         );
+        foreach ($params as $clave => $valor) {
+            $stmt->bindValue(':' . $clave, $valor);
+        }
         $stmt->bindValue(':limite', $limite, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
@@ -268,9 +279,51 @@ class Paquete extends Model
         return $stmt->fetchAll();
     }
 
-    public static function contarTotal(): int
+    /**
+     * @param array{q?:?string, estado?:?string, categoria?:?string} $filtros
+     */
+    public static function contarTotal(array $filtros = []): int
     {
-        return (int) self::db()->query('SELECT COUNT(*) FROM paquetes')->fetchColumn();
+        [$where, $params] = self::clausulaFiltrosAdmin($filtros);
+        $stmt = self::db()->prepare("SELECT COUNT(*) FROM paquetes p {$where}");
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * WHERE parametrizado del listado de paquetes del panel (título, estado, destino).
+     * Público para probarlo sin base de datos.
+     *
+     * @param array{q?:?string, estado?:?string, categoria?:?string} $filtros
+     * @return array{0:string, 1:array<string,string>}
+     */
+    public static function clausulaFiltrosAdmin(array $filtros): array
+    {
+        $condiciones = [];
+        $params = [];
+
+        $q = trim((string) ($filtros['q'] ?? ''));
+        if ($q !== '') {
+            $condiciones[] = 'p.titulo LIKE :q';
+            $params['q'] = '%' . addcslashes(mb_substr($q, 0, 100), '%_\\') . '%';
+        }
+
+        $estado = $filtros['estado'] ?? null;
+        if (in_array($estado, self::ESTADOS, true)) {
+            $condiciones[] = 'p.estado = :estado';
+            $params['estado'] = $estado;
+        }
+
+        $categoria = (string) ($filtros['categoria'] ?? '');
+        if ($categoria !== '' && ctype_digit($categoria)) {
+            $condiciones[] = 'p.categoria_id = :categoria';
+            $params['categoria'] = $categoria;
+        }
+
+        $where = $condiciones === [] ? '' : 'WHERE ' . implode(' AND ', $condiciones);
+
+        return [$where, $params];
     }
 
     /**

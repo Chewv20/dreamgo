@@ -1,5 +1,9 @@
-<?php /** @var array $salida */ ?>
+<?php /** @var array $salida */ /** @var array|false|null $paquete */ ?>
 <div class="admin-panel ancho-520">
+  <a href="/admin/reservas/crear" class="admin-volver">&larr; Elegir otra fecha</a>
+  <?php if (!empty($paquete)): ?>
+    <p class="m-0"><strong><?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?></strong></p>
+  <?php endif; ?>
   <p>Fecha de salida: <strong><?= \App\Helpers\Fecha::corta($salida['fecha_salida']) ?></strong> &mdash; Cupo disponible: <strong><?= (int) $salida['cupo_disponible'] ?></strong></p>
   <form method="post" action="/admin/reservas" class="admin-form-grid">
     <?= \App\Helpers\Csrf::field() ?>

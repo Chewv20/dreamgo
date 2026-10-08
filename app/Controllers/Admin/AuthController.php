@@ -53,7 +53,12 @@ class AuthController extends Controller
 
     public function cambiarPasswordForm(): void
     {
-        $this->view('admin/auth/cambiar_password', [], ['title' => 'Cambiar contrasena | Dream Go'], 'blank');
+        // También se llega desde el menú de usuario: ahí el cambio es voluntario y se puede cancelar.
+        $usuario = Usuario::find((int) Auth::id());
+        $this->view('admin/auth/cambiar_password', [
+            'forzado' => $usuario !== false && (int) $usuario['debe_cambiar_password'] === 1,
+            'politica' => PasswordPolicy::mensaje(),
+        ], ['title' => 'Cambiar contraseña | Dream Go'], 'blank');
     }
 
     public function cambiarPassword(): void

@@ -48,7 +48,40 @@
     });
   }
 
+  // Mensajes flash: boton de cerrar en todos; los de exito/info se desvanecen solos a los
+  // 6 s (los de error se quedan hasta que el usuario los cierre).
+  function initFlash() {
+    document.querySelectorAll('[data-admin-flash]').forEach(function (flash) {
+      function cerrar() { flash.remove(); }
+      var btn = flash.querySelector('[data-admin-flash-cerrar]');
+      if (btn) btn.addEventListener('click', cerrar);
+      if (!flash.classList.contains('admin-flash--error')) {
+        window.setTimeout(function () {
+          flash.classList.add('is-saliendo');
+          window.setTimeout(cerrar, 400);
+        }, 6000);
+      }
+    });
+  }
+
+  // Menu de usuario (<details>): se cierra al hacer clic fuera o con Escape.
+  function initMenuUsuario() {
+    var menu = document.querySelector('[data-admin-usuario]');
+    if (!menu) return;
+    document.addEventListener('click', function (e) {
+      if (menu.open && !menu.contains(e.target)) menu.open = false;
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menu.open) {
+        menu.open = false;
+        menu.querySelector('summary').focus();
+      }
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
+    initFlash();
+    initMenuUsuario();
     initSidebarToggle();
     initConfirmForms();
     initAutosubmit();

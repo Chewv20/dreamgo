@@ -28,11 +28,18 @@ class PaqueteAdminController extends AdminController
 
     public function index(): void
     {
-        $paginador = $this->paginar(Paquete::contarTotal());
+        $filtros = [
+            'q' => trim((string) $this->request->query('q', '')),
+            'estado' => (string) $this->request->query('estado', ''),
+            'categoria' => (string) $this->request->query('categoria', ''),
+        ];
+        $paginador = $this->paginar(Paquete::contarTotal($filtros));
 
         $this->view('admin/paquetes/index', [
-            'paquetes' => Paquete::adminListado($paginador->porPagina, $paginador->offset()),
+            'paquetes' => Paquete::adminListado($paginador->porPagina, $paginador->offset(), $filtros),
             'paginador' => $paginador,
+            'filtros' => $filtros,
+            'categorias' => Categoria::all('orden ASC'),
         ], ['title' => 'Paquetes | Dream Go', 'heading' => 'Paquetes']);
     }
 
@@ -239,8 +246,8 @@ class PaqueteAdminController extends AdminController
     private function validar(array $datos): bool
     {
         $validator = new Validator($datos);
-        $validator->requerido('categoria_id', 'La categoria')
-            ->requerido('titulo', 'El titulo')->maxLength('titulo', 180, 'El titulo')
+        $validator->requerido('categoria_id', 'La categoría')
+            ->requerido('titulo', 'El título')->maxLength('titulo', 180, 'El título')
             ->requerido('precio_desde', 'El precio')
             ->requerido('estado', 'El estado');
 

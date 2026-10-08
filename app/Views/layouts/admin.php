@@ -75,22 +75,28 @@
     </nav>
     <div class="admin-sidebar__pie">
       <a href="/" target="_blank" rel="noopener" class="admin-sidebar__enlace">Ver sitio <span aria-hidden="true">↗</span></a>
-      <form method="post" action="/admin/logout">
-        <?= \App\Helpers\Csrf::field() ?>
-        <button type="submit" class="admin-sidebar__enlace">Cerrar sesión</button>
-      </form>
     </div>
   </aside>
 
   <div class="admin-main">
     <header class="admin-topbar">
       <h1><?= htmlspecialchars($meta['heading'] ?? ($meta['title'] ?? 'Panel'), ENT_QUOTES, 'UTF-8') ?></h1>
-      <span class="admin-topbar__usuario"><?= htmlspecialchars($adminNombre ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+      <details class="admin-usuario" data-admin-usuario>
+        <summary class="admin-usuario__boton"><?= htmlspecialchars($adminNombre ?? 'Mi cuenta', ENT_QUOTES, 'UTF-8') ?></summary>
+        <div class="admin-usuario__menu">
+          <a href="/admin/cambiar-password">Cambiar contraseña</a>
+          <form method="post" action="/admin/logout">
+            <?= \App\Helpers\Csrf::field() ?>
+            <button type="submit">Cerrar sesión</button>
+          </form>
+        </div>
+      </details>
     </header>
 
     <?php foreach (\App\Helpers\Flash::pull() as $flash): ?>
-      <div class="admin-flash admin-flash--<?= htmlspecialchars($flash['tipo'], ENT_QUOTES, 'UTF-8') ?>" role="<?= $flash['tipo'] === 'error' ? 'alert' : 'status' ?>">
-        <?= htmlspecialchars($flash['mensaje'], ENT_QUOTES, 'UTF-8') ?>
+      <div class="admin-flash admin-flash--<?= htmlspecialchars($flash['tipo'], ENT_QUOTES, 'UTF-8') ?>" role="<?= $flash['tipo'] === 'error' ? 'alert' : 'status' ?>" data-admin-flash>
+        <span><?= htmlspecialchars($flash['mensaje'], ENT_QUOTES, 'UTF-8') ?></span>
+        <button type="button" class="admin-flash__cerrar" data-admin-flash-cerrar aria-label="Cerrar mensaje">&times;</button>
       </div>
     <?php endforeach; ?>
 
