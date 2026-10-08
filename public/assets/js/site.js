@@ -377,17 +377,52 @@
     if (rechazar) rechazar.addEventListener('click', function () { decidir('denied'); });
   }
 
+  // Formulario de reserva: recalcula total, anticipo y saldo al cambiar el numero de
+  // personas. Es solo una vista previa: el servidor vuelve a calcular todo al reservar.
+  function initReservaResumen() {
+    var resumen = document.querySelector('[data-reserva-resumen]');
+    var input = document.querySelector('[data-reserva-personas]');
+    if (!resumen || !input) return;
+
+    var precio = parseFloat(resumen.getAttribute('data-precio')) || 0;
+    var pct = parseInt(resumen.getAttribute('data-anticipo'), 10) || 0;
+    var fmt = new Intl.NumberFormat('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    var campos = {
+      num: resumen.querySelector('[data-reserva-num]'),
+      total: resumen.querySelector('[data-reserva-total]'),
+      anticipo: resumen.querySelector('[data-reserva-anticipo]'),
+      saldo: resumen.querySelector('[data-reserva-saldo]')
+    };
+
+    function actualizar() {
+      var n = parseInt(input.value, 10);
+      var max = parseInt(input.getAttribute('max'), 10) || n;
+      if (!n || n < 1 || n > max) return;
+      var total = precio * n;
+      var anticipo = Math.round(total * pct) / 100;
+      campos.num.textContent = n;
+      campos.total.textContent = '$' + fmt.format(total);
+      campos.anticipo.textContent = '$' + fmt.format(anticipo);
+      campos.saldo.textContent = '$' + fmt.format(total - anticipo);
+    }
+
+    input.addEventListener('input', actualizar);
+  }
+
   function initModalPromocion() {
     var modal = document.querySelector('[data-modal-promo]');
     if (!modal) return;
 
     var KEY = 'dreamgo_modal_' + (modal.getAttribute('data-modal-id') || '0');
+    var DIAS_SILENCIO = 7;
 
-    // Una vez por sesion de navegador: si ya se mostro (o se cerro), no volver a abrirlo.
+    // Tras mostrarse, el mismo modal no vuelve a aparecer en 7 dias (antes: por sesion, lo
+    // que lo repetia en cada visita nueva).
     try {
-      if (sessionStorage.getItem(KEY)) return;
+      var visto = parseInt(localStorage.getItem(KEY), 10);
+      if (visto && Date.now() - visto < DIAS_SILENCIO * 864e5) return;
     } catch (e) {
-      // sessionStorage no disponible (modo privado): el modal se mostrara en cada carga.
+      // localStorage no disponible (modo privado): se mostrara una vez por carga.
     }
 
     var cerrarBtns = modal.querySelectorAll('[data-modal-promo-cerrar], [data-modal-promo-cta]');
@@ -395,7 +430,7 @@
     var abierto = false;
 
     function marcarVisto() {
-      try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+      try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {}
     }
 
     function onKey(e) {
@@ -438,7 +473,27 @@
       if (e.target === modal) cerrar();
     });
 
-    window.setTimeout(abrir, 700);
+    // Se abre por intencion, no al cargar: cuando el visitante ya recorrio la mitad de la
+    // pagina, tras 20 s, o (escritorio) cuando el cursor sale por arriba de la ventana.
+    var disparado = false;
+    function disparar() {
+      if (disparado) return;
+      disparado = true;
+      window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('mouseout', onSalida);
+      window.clearTimeout(temporizador);
+      abrir();
+    }
+    function onScroll() {
+      var alto = document.documentElement.scrollHeight - window.innerHeight;
+      if (alto > 0 && window.scrollY / alto >= 0.5) disparar();
+    }
+    function onSalida(e) {
+      if (!e.relatedTarget && e.clientY <= 0) disparar();
+    }
+    var temporizador = window.setTimeout(disparar, 20000);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('mouseout', onSalida);
   }
 
   function baseHref() {
@@ -488,6 +543,7 @@
     initAtribucion();
     initConsentimiento();
     initModalPromocion();
+    initReservaResumen();
   });
 
   initServiceWorker();

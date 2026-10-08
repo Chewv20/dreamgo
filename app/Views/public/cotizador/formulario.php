@@ -1,9 +1,12 @@
 <?php
 /** @var array|null $paquete */
+/** @var list<array{slug: string, titulo: string, categoria_nombre: string}> $opcionesPaquete */
 /** @var array $errores */
 /** @var array $valores */
 $errores ??= [];
 $valores ??= [];
+$opcionesPaquete ??= [];
+$slugElegido = (string) ($valores['paquete_slug'] ?? '');
 ?>
 <section class="seccion contenedor bloque-medio">
   <h1>Cotiza tu viaje</h1>
@@ -16,7 +19,27 @@ $valores ??= [];
 
   <form method="post" action="/cotizador" data-atribucion>
     <?= \App\Helpers\Csrf::field() ?>
-    <input type="hidden" name="paquete_slug" value="<?= htmlspecialchars($paquete['slug'] ?? ($valores['paquete_slug'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+    <?php if ($paquete): ?>
+      <input type="hidden" name="paquete_slug" value="<?= htmlspecialchars($paquete['slug'], ENT_QUOTES, 'UTF-8') ?>">
+      <input type="hidden" name="paquete_desde_ficha" value="1">
+    <?php elseif ($opcionesPaquete !== []): ?>
+      <div class="campo">
+        <label for="paquete_slug">Paquete de interés (opcional)</label>
+        <select id="paquete_slug" name="paquete_slug">
+          <option value="">Aún no lo sé / otro destino</option>
+          <?php $grupoActual = null; ?>
+          <?php foreach ($opcionesPaquete as $op): ?>
+            <?php if ($op['categoria_nombre'] !== $grupoActual): ?>
+              <?php if ($grupoActual !== null): ?></optgroup><?php endif; ?>
+              <optgroup label="<?= htmlspecialchars($op['categoria_nombre'], ENT_QUOTES, 'UTF-8') ?>">
+              <?php $grupoActual = $op['categoria_nombre']; ?>
+            <?php endif; ?>
+            <option value="<?= htmlspecialchars($op['slug'], ENT_QUOTES, 'UTF-8') ?>" <?= $slugElegido === $op['slug'] ? 'selected' : '' ?>><?= htmlspecialchars($op['titulo'], ENT_QUOTES, 'UTF-8') ?></option>
+          <?php endforeach; ?>
+          <?php if ($grupoActual !== null): ?></optgroup><?php endif; ?>
+        </select>
+      </div>
+    <?php endif; ?>
 
     <div class="campo">
       <label for="nombre">Nombre completo</label>
@@ -48,7 +71,7 @@ $valores ??= [];
 
     <div class="campo">
       <label for="mensaje">Cuéntanos más sobre tu viaje (opcional)</label>
-      <textarea id="mensaje" name="mensaje"><?= htmlspecialchars($valores['mensaje'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+      <textarea id="mensaje" name="mensaje" placeholder="Destino que te interesa, presupuesto aproximado, tipo de hospedaje, si viajan niños…"><?= htmlspecialchars($valores['mensaje'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
     </div>
 
     <button type="submit" class="btn btn-primario btn--bloque">Enviar solicitud</button>

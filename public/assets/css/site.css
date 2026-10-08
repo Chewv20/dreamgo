@@ -1339,6 +1339,7 @@ summary:focus-visible {
 .paquete-aside {
   padding: 1.5rem;
   align-self: start;
+  scroll-margin-top: 6rem;
 }
 
 .paquete-aside h3 { font-size: 1.1rem; }
@@ -1652,4 +1653,113 @@ summary:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .whatsapp-fab { transition: none; }
+}
+
+/* Formulario de reserva: datos a la izquierda, resumen con total/anticipo a la derecha
+   (arriba en movil, para que el monto se vea antes de llenar el formulario). */
+.reserva-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+}
+
+.reserva-resumen { order: -1; padding: 1.5rem; align-self: start; }
+
+@media (min-width: 900px) {
+  .reserva-layout { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 3rem; }
+  .reserva-resumen { order: 0; position: sticky; top: 6rem; }
+}
+
+.enlace-volver {
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.reserva-paso {
+  margin: 0 0 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-primario-oscuro);
+}
+
+.reserva-legal {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.reserva-resumen h2 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+.reserva-resumen__paquete { font-weight: 700; margin-bottom: 0.25rem; }
+
+.reserva-resumen__lineas { margin: 1rem 0; }
+
+.reserva-resumen__lineas > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.reserva-resumen__lineas dt { opacity: 0.8; }
+.reserva-resumen__lineas dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.reserva-resumen__total dd { font-weight: 700; }
+
+.reserva-resumen__destacado {
+  background: var(--color-fondo-alterno);
+  margin-inline: -0.5rem;
+  padding-inline: 0.5rem !important;
+  border-radius: 8px;
+  font-weight: 700;
+  color: var(--color-primario-oscuro);
+}
+
+.reserva-resumen__destacado dt { opacity: 1; }
+.reserva-resumen__nota { font-size: 0.85rem; opacity: 0.75; margin: 0; }
+
+/* Barra fija de la ficha en movil: precio + CTA siempre a mano (en escritorio el panel
+   lateral ya es sticky). */
+.barra-reserva-movil {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: var(--color-blanco);
+  border-top: 1px solid var(--color-borde);
+  box-shadow: 0 -4px 16px rgba(47, 62, 70, 0.08);
+}
+
+.barra-reserva-movil__precio {
+  font-family: var(--fuente-titulos);
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.barra-reserva-movil__precio small {
+  display: block;
+  font-family: var(--fuente-texto);
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+body:has(.barra-reserva-movil) .footer { padding-bottom: 6rem; }
+body:has(.barra-reserva-movil) .whatsapp-fab { bottom: 5.5rem; }
+
+/* El comparador usa la misma franja inferior: si esta abierto, cede el lugar. */
+body:has(.barra-comparador:not([hidden])) .barra-reserva-movil { display: none; }
+
+@media (min-width: 900px) {
+  .barra-reserva-movil { display: none; }
+  body:has(.barra-reserva-movil) .footer { padding-bottom: 1.5rem; }
+  body:has(.barra-reserva-movil) .whatsapp-fab { bottom: 1.25rem; }
 }

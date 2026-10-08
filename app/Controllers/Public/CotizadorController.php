@@ -25,6 +25,7 @@ class CotizadorController extends Controller
 
         $this->view('public/cotizador/formulario', [
             'paquete' => $paquete,
+            'opcionesPaquete' => $paquete ? [] : Paquete::opcionesPublicadas(),
         ], [
             'title' => 'Cotiza tu viaje | Dream Go Operadora Turística',
             'description' => 'Solicita una cotización personalizada para tu próximo viaje con Dream Go.',
@@ -60,8 +61,13 @@ class CotizadorController extends Controller
 
         if (!$validator->pasa()) {
             Flash::set('error', 'Revisa los datos del formulario e intenta de nuevo.');
+            // Si venía de una ficha se conserva el aviso "Estás cotizando"; si no, el selector.
+            $paqueteError = $datos['paquete_slug'] !== '' && $this->request->input('paquete_desde_ficha') === '1'
+                ? Paquete::porSlugPublicado($datos['paquete_slug'])
+                : null;
             $this->view('public/cotizador/formulario', [
-                'paquete' => null,
+                'paquete' => $paqueteError ?: null,
+                'opcionesPaquete' => $paqueteError ? [] : Paquete::opcionesPublicadas(),
                 'errores' => $validator->errores(),
                 'valores' => $datos,
             ], ['title' => 'Cotiza tu viaje | Dream Go Operadora Turística']);

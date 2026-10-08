@@ -105,7 +105,7 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     </div>
   </div>
 
-  <aside class="tarjeta paquete-aside">
+  <aside class="tarjeta paquete-aside" id="reservar">
     <span class="precio precio--grande">
       Desde $<?= number_format((float) $paquete['precio_desde'], 0, '.', ',') ?> <?= htmlspecialchars($paquete['moneda'], ENT_QUOTES, 'UTF-8') ?>
     </span>
@@ -139,6 +139,27 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     </label>
   </aside>
 </section>
+
+<?php
+$haySalidaAbierta = false;
+foreach ($salidas as $salida) {
+    if ($salida['estado'] === 'abierta' && (int) $salida['cupo_disponible'] > 0) {
+        $haySalidaAbierta = true;
+        break;
+    }
+}
+?>
+<div class="barra-reserva-movil" aria-label="Reservar este paquete">
+  <span class="barra-reserva-movil__precio">
+    <small>Desde</small>
+    $<?= number_format((float) $paquete['precio_desde'], 0, '.', ',') ?> <?= htmlspecialchars($paquete['moneda'], ENT_QUOTES, 'UTF-8') ?>
+  </span>
+  <?php if ($haySalidaAbierta): ?>
+    <a href="#reservar" class="btn btn-primario">Ver fechas</a>
+  <?php else: ?>
+    <a href="/cotizador?paquete=<?= urlencode($paquete['slug']) ?>" class="btn btn-primario">Cotizar</a>
+  <?php endif; ?>
+</div>
 
 <?php if (!empty($resenas)): ?>
 <section class="seccion contenedor" id="resenas">

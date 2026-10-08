@@ -174,6 +174,23 @@ class Paquete extends Model
     }
 
     /**
+     * Paquetes publicados agrupados por destino, para el selector "Paquete de interés" del
+     * cotizador cuando el visitante no llega desde una ficha.
+     *
+     * @return list<array{slug: string, titulo: string, categoria_nombre: string}>
+     */
+    public static function opcionesPublicadas(): array
+    {
+        return self::db()->query(
+            'SELECT p.slug, p.titulo, c.nombre AS categoria_nombre
+             FROM paquetes p
+             INNER JOIN categorias c ON c.id = p.categoria_id
+             WHERE p.estado = "publicado" AND c.activo = 1
+             ORDER BY c.orden, c.nombre, p.titulo'
+        )->fetchAll();
+    }
+
+    /**
      * Trae varios paquetes publicados por slug de golpe, para el comparador. El orden del
      * resultado no sigue necesariamente el de $slugs (limitacion de SQL IN); el controller
      * reordena segun el orden pedido.

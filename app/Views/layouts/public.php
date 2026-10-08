@@ -58,6 +58,10 @@ foreach ($coloresClaves as $claveColor) {
 <body data-comparar-max="<?= \App\Controllers\Public\PaqueteController::MAX_COMPARAR ?>">
 <a href="#contenido-principal" class="sr-only-focusable">Saltar al contenido principal</a>
 
+<?php
+// El blog sólo aparece en el menú cuando tiene algo que leer: una sección vacía resta confianza.
+$hayBlog = \App\Models\Articulo::contarPublicados() > 0;
+?>
 <header class="header">
   <div class="contenedor header__contenido">
     <a href="/" class="header__logo" aria-label="Dream Go - Inicio">
@@ -68,7 +72,7 @@ foreach ($coloresClaves as $claveColor) {
       <a href="/">Inicio</a>
       <a href="/destinos">Destinos</a>
       <a href="/paquetes">Paquetes</a>
-      <a href="/blog">Blog</a>
+      <?php if ($hayBlog): ?><a href="/blog">Blog</a><?php endif; ?>
       <a href="/nosotros">Nosotros</a>
       <a href="/cotizador" class="btn btn-primario">Cotizar</a>
       <a href="/contacto">Contacto</a>
@@ -155,7 +159,7 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
       <ul class="footer__lista footer__lista--enlaces">
         <li><a href="/paquetes">Paquetes</a></li>
         <li><a href="/destinos">Destinos</a></li>
-        <li><a href="/blog">Blog</a></li>
+        <?php if ($hayBlog): ?><li><a href="/blog">Blog</a></li><?php endif; ?>
         <li><a href="/cotizador">Cotizar</a></li>
         <li><a href="/nosotros">Nosotros</a></li>
         <li><a href="/mi-reserva">Mi reserva</a></li>
@@ -212,8 +216,12 @@ $footerTieneRedes = array_filter($footerRedes) !== [];
 <?php endif; ?>
 
 <?php
-$rutaModal = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-$modalPromo = \App\Models\ModalPromocion::vigente($rutaModal === '/');
+// uri() ya descuenta BASE_URL_PATH: con la URI cruda, en una instalación en subcarpeta el
+// inicio nunca era "/" y los modales "solo inicio" no se mostraban.
+$rutaModal = $this->request->uri();
+// En los flujos de conversión el modal sólo estorba: no se imprime.
+$enFlujo = preg_match('#^/(cotizador|contacto|mi-reserva|reservar/|reserva/|resena/|paquetes/[^/]+/reservar/)#', $rutaModal) === 1;
+$modalPromo = $enFlujo ? false : \App\Models\ModalPromocion::vigente($rutaModal === '/');
 require __DIR__ . '/../partials/_modal_promocion.php';
 ?>
 

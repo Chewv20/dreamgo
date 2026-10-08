@@ -2,7 +2,7 @@
 /**
  * Modal promocional del sitio publico. $modalPromo lo arma el layout con
  * \App\Models\ModalPromocion::vigente(); si no hay ninguno vigente no se imprime nada.
- * La visibilidad real (mostrar una vez por sesion, cerrar con Esc / clic fuera) la maneja
+ * La visibilidad real (abrir por scroll/tiempo/salida, silencio de 7 dias, cerrar con Esc / clic fuera) la maneja
  * initModalPromocion() en /assets/js/site.js.
  *
  * @var array|false|null $modalPromo
