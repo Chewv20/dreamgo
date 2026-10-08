@@ -50,6 +50,22 @@ CREATE TABLE IF NOT EXISTS usuarios_admin (
 CREATE INDEX idx_usuarios_rol ON usuarios_admin(rol_id);
 
 -- ==========================================================
+-- RECUPERACION DE CONTRASENA DEL PANEL (solo se guarda el SHA-256 del token)
+-- ==========================================================
+CREATE TABLE IF NOT EXISTS password_resets (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT UNSIGNED NOT NULL,
+  token_hash CHAR(64) NOT NULL,
+  expira_en DATETIME NOT NULL,
+  usado_en DATETIME NULL,
+  ip VARCHAR(45) NULL,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_password_resets_token (token_hash),
+  INDEX idx_password_resets_usuario (usuario_id),
+  CONSTRAINT fk_password_reset_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios_admin(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ==========================================================
 -- INTENTOS DE LOGIN (rate limiting + auditoria del panel admin)
 -- ==========================================================
 CREATE TABLE IF NOT EXISTS intentos_login (
@@ -434,7 +450,7 @@ CREATE TABLE IF NOT EXISTS bloques_pagina (
 -- ==========================================================
 CREATE TABLE IF NOT EXISTS log_correos_enviados (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  tipo ENUM('cotizacion_equipo','confirmacion_reserva','reserva_pendiente','recordatorio_viaje','reporte_periodico','solicitud_resena','confirmacion_suscripcion','aviso_oferta','recordatorio_saldo','pago_recibido','otro') NOT NULL,
+  tipo ENUM('cotizacion_equipo','confirmacion_reserva','reserva_pendiente','recordatorio_viaje','reporte_periodico','solicitud_resena','confirmacion_suscripcion','aviso_oferta','recordatorio_saldo','pago_recibido','recuperar_password','otro') NOT NULL,
   destinatario VARCHAR(150) NOT NULL,
   asunto VARCHAR(200) NOT NULL,
   referencia_tipo VARCHAR(30) NULL,

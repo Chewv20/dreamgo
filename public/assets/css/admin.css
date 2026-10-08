@@ -926,3 +926,12 @@
 .admin-dialogo::backdrop { background: rgba(47, 62, 70, 0.45); }
 .admin-dialogo__texto { margin: 0 0 1.25rem; font-size: 1rem; line-height: 1.5; }
 .admin-dialogo__acciones { display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; }
+
+.admin-login__enlaces {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 1rem 0 0;
+  font-size: 0.88rem;
+}

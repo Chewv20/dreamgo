@@ -56,6 +56,39 @@ final class Response
         }
     }
 
+    /**
+     * Igual que redirect(), pero NO corta el proceso: manda la redirección al navegador,
+     * cierra la sesión (para que el Flash ya quede guardado) y devuelve el control para hacer
+     * trabajo diferido. Lo usa "¿Olvidaste tu contraseña?": así la respuesta tarda lo mismo
+     * exista o no el correo (el envío SMTP, que es lo lento, ocurre después).
+     */
+    public static function redirectYContinuar(string $path): void
+    {
+        if (defined('BASE_URL_PATH') && BASE_URL_PATH !== '' && str_starts_with($path, '/')) {
+            $path = BASE_URL_PATH . $path;
+        }
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        http_response_code(303);
+        header('Location: ' . $path);
+        header('Content-Length: 0');
+        header('Connection: close');
+        flush();
+
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } elseif (function_exists('litespeed_finish_request')) {
+            litespeed_finish_request();
+        }
+    }
+
     public static function status(int $status): void
     {
         http_response_code($status);

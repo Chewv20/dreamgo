@@ -41,6 +41,7 @@ final class RateLimiter
         'cotizador' => [null, 10, 30],
         'contacto' => [null, 10, 30],
         'comprobante' => [null, 30, 10],
+        'recuperar_password' => [3, 10, 30],
     ];
 
     public static function demasiados(string $accion, ?string $identificador, string $ip): bool

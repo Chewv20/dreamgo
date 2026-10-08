@@ -118,6 +118,29 @@ final class MailerService
         }
     }
 
+    /**
+     * Enlace para restablecer la contraseña del panel.
+     *
+     * @param array{id: int|string, nombre: string, email: string} $usuario
+     */
+    public function enviarRecuperacionPassword(array $usuario, string $url, int $vigenciaMinutos): bool
+    {
+        $html = $this->renderPlantilla('recuperar_password', [
+            'nombre' => $usuario['nombre'],
+            'url' => $url,
+            'vigenciaMinutos' => $vigenciaMinutos,
+        ]);
+
+        return $this->enviar(
+            $usuario['email'],
+            'Restablece tu contraseña del panel de Dream Go',
+            $html,
+            'recuperar_password',
+            'usuario',
+            (int) $usuario['id']
+        );
+    }
+
     public function enviarRecordatorioViaje(array $reserva): bool
     {
         $asunto = 'Tu viaje se acerca: ' . $reserva['paquete_titulo'];

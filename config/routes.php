@@ -86,6 +86,10 @@ $router->post('/webhooks/mercadopago', [MercadoPagoWebhookController::class, 'no
 $router->get('/admin/login', [AuthController::class, 'mostrarLogin']);
 $router->post('/admin/login', [AuthController::class, 'login']);
 $router->post('/admin/logout', [AuthController::class, 'logout'], ['auth' => true]);
+$router->get('/admin/recuperar', [AuthController::class, 'recuperarForm']);
+$router->post('/admin/recuperar', [AuthController::class, 'recuperar']);
+$router->get('/admin/restablecer/{token}', [AuthController::class, 'restablecerForm']);
+$router->post('/admin/restablecer/{token}', [AuthController::class, 'restablecer']);
 
 $router->get('/admin/cambiar-password', [AuthController::class, 'cambiarPasswordForm'], ['auth' => true]);
 $router->post('/admin/cambiar-password', [AuthController::class, 'cambiarPassword'], ['auth' => true]);
