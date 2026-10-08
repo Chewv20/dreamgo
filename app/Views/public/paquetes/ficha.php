@@ -111,11 +111,6 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
     </span>
     <p class="paquete-aside__sub"><?= (int) $paquete['duracion_dias'] ?> días / <?= (int) $paquete['duracion_noches'] ?> noches</p>
 
-    <label class="tarjeta__comparar tarjeta__comparar--bloque">
-      <input type="checkbox" data-comparar-slug="<?= htmlspecialchars($paquete['slug'], ENT_QUOTES, 'UTF-8') ?>" data-comparar-titulo="<?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?>">
-      Agregar a comparar
-    </label>
-
     <h3>Próximas salidas</h3>
     <?php if (empty($salidas)): ?>
       <p>Consulta disponibilidad con nuestro equipo.</p>
@@ -137,6 +132,11 @@ $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionPaquete(
       <a href="/cotizador?paquete=<?= urlencode($paquete['slug']) ?>" class="btn btn-primario btn--bloque">Solicitar cotización</a>
       <a href="<?= htmlspecialchars($whatsapp, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-whatsapp btn--bloque" target="_blank" rel="noopener">Cotizar por WhatsApp</a>
     </div>
+
+    <label class="tarjeta__comparar tarjeta__comparar--bloque">
+      <input type="checkbox" data-comparar-slug="<?= htmlspecialchars($paquete['slug'], ENT_QUOTES, 'UTF-8') ?>" data-comparar-titulo="<?= htmlspecialchars($paquete['titulo'], ENT_QUOTES, 'UTF-8') ?>">
+      Agregar a comparar
+    </label>
   </aside>
 </section>
 

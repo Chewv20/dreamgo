@@ -20,27 +20,66 @@
     <div class="admin-sidebar__logo">
       <img src="/assets/img/logo.avif" alt="Dream Go">
     </div>
-    <nav class="admin-nav">
-      <a href="/admin">Panel</a>
-      <?php if (Auth::hasPermission('paquetes.ver')): ?><a href="/admin/paquetes">Paquetes</a><?php endif; ?>
-      <?php if (Auth::hasPermission('destinos.gestionar')): ?><a href="/admin/destinos">Destinos</a><?php endif; ?>
-      <?php if (Auth::hasPermission('reservas.ver')): ?><a href="/admin/reservas">Reservas</a><?php endif; ?>
-      <?php if (Auth::hasPermission('cotizaciones.ver')): ?><a href="/admin/cotizaciones">Cotizaciones</a><?php endif; ?>
-      <?php if (Auth::hasPermission('resenas.ver')): ?><a href="/admin/resenas">Reseñas</a><?php endif; ?>
-      <?php if (Auth::hasPermission('articulos.ver')): ?><a href="/admin/articulos">Blog</a><?php endif; ?>
-      <?php if (Auth::hasPermission('suscriptores.ver')): ?><a href="/admin/suscriptores">Suscriptores</a><?php endif; ?>
-      <?php if (Auth::hasPermission('ofertas.gestionar')): ?><a href="/admin/ofertas">Ofertas</a><?php endif; ?>
-      <?php if (Auth::hasPermission('modales.gestionar')): ?><a href="/admin/modales">Modales</a><?php endif; ?>
-      <?php if (Auth::hasPermission('usuarios.gestionar')): ?><a href="/admin/usuarios">Usuarios</a><?php endif; ?>
-      <?php if (Auth::hasPermission('roles.gestionar')): ?><a href="/admin/roles">Roles y permisos</a><?php endif; ?>
-      <?php if (Auth::hasPermission('contenido.gestionar')): ?><a href="/admin/contenido">Contenido del sitio</a><a href="/admin/colores">Colores del sitio</a><?php endif; ?>
-      <?php if (Auth::hasPermission('configuracion.gestionar')): ?><a href="/admin/configuracion">Configuración</a><?php endif; ?>
-      <?php if (Auth::hasPermission('bitacora.ver')): ?><a href="/admin/bitacora">Bitácora</a><?php endif; ?>
+    <?php
+    $rutaActual = $this->request->uri();
+    // [etiqueta del grupo|null, [[ruta, texto, permiso|null, rutas extra que la marcan activa]]]
+    $gruposNav = [
+        [null, [['/admin', 'Panel', null, []]]],
+        ['Ventas', [
+            ['/admin/reservas', 'Reservas', 'reservas.ver', []],
+            ['/admin/cotizaciones', 'Cotizaciones', 'cotizaciones.ver', []],
+        ]],
+        ['Catálogo', [
+            ['/admin/paquetes', 'Paquetes', 'paquetes.ver', []],
+            ['/admin/destinos', 'Destinos', 'destinos.gestionar', []],
+        ]],
+        ['Marketing', [
+            ['/admin/ofertas', 'Ofertas', 'ofertas.gestionar', []],
+            ['/admin/modales', 'Modales', 'modales.gestionar', []],
+            ['/admin/suscriptores', 'Suscriptores', 'suscriptores.ver', []],
+            ['/admin/resenas', 'Reseñas', 'resenas.ver', []],
+            ['/admin/articulos', 'Blog', 'articulos.ver', []],
+        ]],
+        ['Sitio', [
+            ['/admin/contenido', 'Contenido y colores', 'contenido.gestionar', ['/admin/colores']],
+            ['/admin/configuracion', 'Configuración', 'configuracion.gestionar', []],
+        ]],
+        ['Sistema', [
+            ['/admin/usuarios', 'Usuarios', 'usuarios.gestionar', []],
+            ['/admin/roles', 'Roles y permisos', 'roles.gestionar', []],
+            ['/admin/bitacora', 'Bitácora', 'bitacora.ver', []],
+        ]],
+    ];
+    $esActiva = static function (string $ruta, array $extra) use ($rutaActual): bool {
+        if ($ruta === '/admin') {
+            return $rutaActual === '/admin';
+        }
+        foreach (array_merge([$ruta], $extra) as $r) {
+            if ($rutaActual === $r || str_starts_with($rutaActual, $r . '/')) {
+                return true;
+            }
+        }
+        return false;
+    };
+    ?>
+    <nav class="admin-nav" aria-label="Secciones del panel">
+      <?php foreach ($gruposNav as [$etiqueta, $enlaces]): ?>
+        <?php $visibles = array_filter($enlaces, static fn (array $e): bool => $e[2] === null || Auth::hasPermission($e[2])); ?>
+        <?php if ($visibles === []) { continue; } ?>
+        <?php if ($etiqueta !== null): ?><p class="admin-nav__grupo"><?= $etiqueta ?></p><?php endif; ?>
+        <?php foreach ($visibles as [$ruta, $texto, , $extra]): ?>
+          <?php $activa = $esActiva($ruta, $extra); ?>
+          <a href="<?= $ruta ?>"<?= $activa ? ' class="is-active" aria-current="page"' : '' ?>><?= $texto ?></a>
+        <?php endforeach; ?>
+      <?php endforeach; ?>
     </nav>
-    <form method="post" action="/admin/logout" class="admin-sidebar__logout">
-      <?= \App\Helpers\Csrf::field() ?>
-      <button type="submit" class="btn btn-secundario w-100">Cerrar sesión</button>
-    </form>
+    <div class="admin-sidebar__pie">
+      <a href="/" target="_blank" rel="noopener" class="admin-sidebar__enlace">Ver sitio <span aria-hidden="true">↗</span></a>
+      <form method="post" action="/admin/logout">
+        <?= \App\Helpers\Csrf::field() ?>
+        <button type="submit" class="admin-sidebar__enlace">Cerrar sesión</button>
+      </form>
+    </div>
   </aside>
 
   <div class="admin-main">
@@ -50,7 +89,7 @@
     </header>
 
     <?php foreach (\App\Helpers\Flash::pull() as $flash): ?>
-      <div class="admin-flash admin-flash--<?= htmlspecialchars($flash['tipo'], ENT_QUOTES, 'UTF-8') ?>">
+      <div class="admin-flash admin-flash--<?= htmlspecialchars($flash['tipo'], ENT_QUOTES, 'UTF-8') ?>" role="<?= $flash['tipo'] === 'error' ? 'alert' : 'status' ?>">
         <?= htmlspecialchars($flash['mensaje'], ENT_QUOTES, 'UTF-8') ?>
       </div>
     <?php endforeach; ?>

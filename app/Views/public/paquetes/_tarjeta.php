@@ -5,7 +5,7 @@
 $resumenPaquete = isset($resumenes) ? ($resumenes[$paquete['id']] ?? null) : null;
 $galeriaPaquete = isset($galerias) ? ($galerias[$paquete['id']] ?? []) : [];
 ?>
-<article class="tarjeta animar-entrada">
+<article class="tarjeta tarjeta--paquete animar-entrada">
   <a href="/paquetes/<?= htmlspecialchars($paquete['slug'], ENT_QUOTES, 'UTF-8') ?>">
     <?php
     $portada = $paquete['imagen_portada'] ?? '/assets/img/logo.avif';

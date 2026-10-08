@@ -63,7 +63,7 @@ foreach ($coloresClaves as $claveColor) {
     <a href="/" class="header__logo" aria-label="Dream Go - Inicio">
       <img src="/assets/img/logo.avif" alt="Dream Go Operadora Turística">
     </a>
-    <button type="button" class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-principal">&#9776;</button>
+    <button type="button" class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-principal" aria-label="Abrir menú"><span aria-hidden="true">&#9776;</span></button>
     <nav class="nav" id="nav-principal" data-nav>
       <a href="/">Inicio</a>
       <a href="/destinos">Destinos</a>

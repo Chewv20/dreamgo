@@ -9,6 +9,7 @@
     toggle.addEventListener('click', function () {
       var isOpen = nav.classList.toggle('is-open');
       toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      toggle.setAttribute('aria-label', isOpen ? 'Cerrar menú' : 'Abrir menú');
     });
   }
 
@@ -220,7 +221,7 @@
         var quitar = document.createElement('button');
         quitar.type = 'button';
         quitar.className = 'chip-comparador__quitar';
-        quitar.setAttribute('aria-label', 'Quitar ' + p.titulo + ' de la comparacion');
+        quitar.setAttribute('aria-label', 'Quitar ' + p.titulo + ' de la comparación');
         quitar.textContent = '×';
         quitar.addEventListener('click', function () {
           alternar(p.slug, p.titulo, false);

@@ -85,12 +85,14 @@
 
     <div class="campo">
       <label for="meta_title_default">Título SEO por defecto</label>
-      <input type="text" id="meta_title_default" name="meta_title_default" value="<?= htmlspecialchars($valores['meta_title_default'], ENT_QUOTES, 'UTF-8') ?>">
+      <input type="text" id="meta_title_default" name="meta_title_default" aria-describedby="ayuda-meta-title" value="<?= htmlspecialchars($valores['meta_title_default'], ENT_QUOTES, 'UTF-8') ?>">
+      <small class="op-70" id="ayuda-meta-title">Se usa en la página de inicio y al compartir el sitio. Recomendado: 50-60 caracteres, con el nombre de la agencia y qué ofrece (p. ej. «Dream Go Operadora Turística | Excursiones nacionales e internacionales»).</small>
     </div>
 
     <div class="campo">
       <label for="meta_description_default">Descripción SEO por defecto</label>
-      <textarea id="meta_description_default" name="meta_description_default"><?= htmlspecialchars($valores['meta_description_default'], ENT_QUOTES, 'UTF-8') ?></textarea>
+      <textarea id="meta_description_default" name="meta_description_default" aria-describedby="ayuda-meta-description"><?= htmlspecialchars($valores['meta_description_default'], ENT_QUOTES, 'UTF-8') ?></textarea>
+      <small class="op-70" id="ayuda-meta-description">Aparece bajo el título en Google. Recomendado: 140-160 caracteres que expliquen qué hace la agencia y para quién.</small>
     </div>
   </div>
 

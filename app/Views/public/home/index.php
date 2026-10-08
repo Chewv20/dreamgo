@@ -167,7 +167,7 @@ $bloquesColor = array_filter(
   </div>
   <form method="post" action="/suscribir" class="newsletter-form">
     <?= \App\Helpers\Csrf::field() ?>
-    <input type="email" name="email" autocomplete="email" required placeholder="tu@correo.com">
+    <input type="email" name="email" autocomplete="email" required placeholder="tu@correo.com" aria-label="Correo electrónico">
     <button type="submit" class="btn btn-primario">Suscribirme</button>
   </form>
 </section>
