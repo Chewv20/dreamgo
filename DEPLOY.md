@@ -23,7 +23,15 @@ Esto asegura que ninguna URL exponga `/public/` y que `app/`, `core/`, `config/`
 2. Anota host, nombre de BD, usuario y contrasena.
 3. Importa el esquema y los datos iniciales via **phpMyAdmin**:
    - `database/schema.sql` primero.
-   - `database/seeds/seed_demo.sql` despues (o solo la parte de `roles`/`permisos` si no quieres el contenido de ejemplo en produccion).
+   - `database/seeds/seed_produccion.sql` despues: roles, permisos, usuario admin,
+     configuracion y bloques de pagina, **sin** paquetes/categorias/salidas de ejemplo.
+     (`seed_demo.sql` es el mismo seed con contenido de ejemplo, para local.)
+4. Registra las migraciones como aplicadas (una sola vez, tras crear el `.env` del paso 4):
+   `php database/migrate.php --baseline`. `schema.sql` ya las incluye; sin este paso, el
+   primer `migrate.php` de un deploy futuro intentaria reaplicarlas todas y fallaria.
+   Sin SSH, ejecuta en phpMyAdmin el `CREATE TABLE schema_migrations` de
+   `database/migrate.php` y un `INSERT INTO schema_migrations (migracion) VALUES (...)` con
+   el nombre de cada archivo de `database/migrations/`.
    - En despliegues futuros (la BD de produccion ya existe y no vas a reimportar
      `schema.sql`), corre `php database/migrate.php` desde la raiz del proyecto para aplicar
      los cambios de esquema pendientes. Ver `database/migrations/README.md`.
@@ -98,7 +106,7 @@ Activa el certificado SSL gratuito (Let's Encrypt) desde hPanel → **SSL**. Una
 
 ## 8. Cron Jobs
 
-Sigue `cron/README.md` para las 9 tareas programadas. Ajusta las rutas de ejemplo a la ruta real de tu
+Sigue `cron/README.md` para las 11 tareas programadas (10 scripts; `reporte_periodico` va dos veces: diario y semanal). Ajusta las rutas de ejemplo a la ruta real de tu
 cuenta de Hostinger (hPanel te la muestra al crear el primer cron job).
 
 ## 9. Primer acceso al panel
@@ -117,7 +125,7 @@ El panel **obliga a cambiarla** en el primer login (`debe_cambiar_password = 1`)
 - [ ] Razon social, direccion fiscal, telefono y correo de contacto capturados en
       `/admin/configuracion` (alimentan el Aviso de Privacidad; si falta alguno, la pagina
       `/aviso-de-privacidad` lo muestra entre `[CORCHETES]`).
-- [ ] Los 9 cron jobs configurados en hPanel.
+- [ ] Los 11 cron jobs configurados en hPanel.
 - [ ] SSL activo y `APP_URL` con `https://`.
 - [ ] (Opcional) `GA4_MEASUREMENT_ID` / `META_PIXEL_ID` en `.env` para activar Google
       Analytics 4 y/o Meta Pixel. Antes de activarlos: que un abogado revise

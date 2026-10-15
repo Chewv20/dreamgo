@@ -14,6 +14,18 @@ Crea la tabla `schema_migrations` si no existe, aplica en orden los archivos `.s
 carpeta que todavia no esten registrados ahi, y va marcando cada uno como aplicado. Correrlo
 de nuevo cuando no hay nada pendiente no hace nada (imprime "Nada que aplicar").
 
+### Instalacion nueva
+
+Despues de importar `schema.sql` en una BD vacia, corre **una sola vez**:
+
+```
+php database/migrate.php --baseline
+```
+
+Registra todas las migraciones actuales como aplicadas sin ejecutarlas (`schema.sql` ya las
+incluye). Sin este paso, el primer `migrate.php` de un deploy posterior intentaria reaplicar
+todas desde la `0001` y fallaria.
+
 ## Agregar un cambio nuevo
 
 1. Crea `NNNN_descripcion_corta.sql` (siguiente numero, 4 digitos, orden alfabetico =

@@ -31,6 +31,7 @@ INSERT INTO permisos (clave, modulo, descripcion) VALUES
   ('configuracion.gestionar', 'configuracion', 'Editar la configuración global del sitio'),
   ('reportes.ver', 'reportes', 'Ver reportes y métricas del negocio'),
   ('contenido.gestionar', 'contenido', 'Editar textos, orden y colores de las páginas públicas'),
+  ('modales.gestionar', 'modales', 'Crear y editar los modales promocionales del sitio'),
   ('resenas.ver', 'resenas', 'Ver el listado de reseñas de clientes'),
   ('resenas.gestionar', 'resenas', 'Aprobar o rechazar reseñas de clientes'),
   ('suscriptores.ver', 'suscriptores', 'Ver el listado de suscriptores al newsletter'),

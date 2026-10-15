@@ -27,6 +27,18 @@ $aplicadas = array_flip($aplicadas);
 $archivos = glob(__DIR__ . '/migrations/*.sql') ?: [];
 sort($archivos, SORT_STRING);
 
+// --baseline: para una instalacion nueva hecha importando schema.sql, que ya incluye todas
+// las migraciones existentes. Las registra como aplicadas SIN ejecutarlas; sin esto, el primer
+// migrate.php de un deploy posterior intentaria reaplicarlas todas sobre la BD ya completa.
+if (in_array('--baseline', $argv, true)) {
+    $registrar = $db->prepare('INSERT IGNORE INTO schema_migrations (migracion) VALUES (:migracion)');
+    foreach ($archivos as $ruta) {
+        $registrar->execute(['migracion' => basename($ruta)]);
+    }
+    migrate_log('Baseline: ' . count($archivos) . ' migracion(es) registradas como aplicadas sin ejecutarlas.');
+    exit(0);
+}
+
 $pendientes = array_values(array_filter(
     $archivos,
     fn (string $ruta): bool => !isset($aplicadas[basename($ruta)])
