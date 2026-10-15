@@ -4,7 +4,13 @@
 
   <div class="admin-panel ancho-760">
     <h2 class="mt-0">Contacto</h2>
-    <p class="op-75 mt-neg">Estos datos se muestran en el pie de página del sitio.</p>
+    <p class="op-75 mt-neg">Estos datos se muestran en el pie de página del sitio y en el Aviso de Privacidad.</p>
+
+    <div class="campo">
+      <label for="razon_social">Razón social o nombre del titular</label>
+      <input type="text" id="razon_social" name="razon_social" aria-describedby="ayuda-razon-social" value="<?= htmlspecialchars((string) $valores['razon_social'], ENT_QUOTES, 'UTF-8') ?>" placeholder="Dream Go Operadora Turística, S.A. de C.V.">
+      <small class="op-70" id="ayuda-razon-social">Aparece como responsable de los datos personales en el Aviso de Privacidad, junto con la dirección de abajo (usa el domicilio fiscal).</small>
+    </div>
 
     <div class="campo">
       <label for="direccion">Dirección (opcional)</label>

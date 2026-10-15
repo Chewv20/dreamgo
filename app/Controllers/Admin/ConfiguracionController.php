@@ -14,7 +14,11 @@ class ConfiguracionController extends AdminController
     /** Claves cuyo valor se renderiza como href en el footer: se validan con Url::segura. */
     private const CLAVES_URL = ['facebook_url', 'instagram_url', 'tiktok_url', 'youtube_url'];
 
+    /** Claves que se muestran en /aviso-de-privacidad: al cambiar, se fecha la actualización del aviso. */
+    private const CLAVES_AVISO_PRIVACIDAD = ['razon_social', 'direccion', 'email_contacto', 'telefono_contacto'];
+
     private const CLAVES_EDITABLES = [
+        'razon_social',
         'direccion',
         'telefono_contacto',
         'email_contacto',
@@ -63,6 +67,10 @@ class ConfiguracionController extends AdminController
                 $cambiadas[] = $clave;
             }
             ConfiguracionSitio::set($clave, $valor);
+        }
+
+        if (array_intersect($cambiadas, self::CLAVES_AVISO_PRIVACIDAD) !== []) {
+            ConfiguracionSitio::set('aviso_privacidad_actualizado', date('Y-m-d'));
         }
 
         if ($cambiadas !== []) {

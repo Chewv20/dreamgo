@@ -1,23 +1,24 @@
 <?php
 /** @var array $contacto */
+/** @var string $actualizado */
 /*
- * PLANTILLA GENERICA de Aviso de Privacidad (LFPDPPP - Mexico). Antes de difundirla:
- *  1) Reemplazar todos los campos entre [CORCHETES] con los datos reales de la empresa.
- *  2) Que un abogado la revise contra la operacion real (finalidades, transferencias, plazos).
- * Los datos de contacto se toman de /admin/configuracion cuando existen; si no, quedan como
- * marcador entre corchetes.
+ * Aviso de Privacidad (LFPDPPP - Mexico). Que un abogado lo revise contra la operacion real
+ * (finalidades, transferencias, plazos). Titular y datos de contacto vienen de
+ * /admin/configuracion; si alguno esta vacio queda como marcador entre corchetes.
+ * Al editar este texto, sube LegalController::AVISO_TEXTO_REVISADO.
  */
 $e = static fn (string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
+$razonSocial = $contacto['razon_social'] !== '' ? $e($contacto['razon_social']) : '[RAZÓN SOCIAL / NOMBRE DEL TITULAR]';
 $direccion = $contacto['direccion'] !== '' ? $e($contacto['direccion']) : '[DOMICILIO FISCAL]';
 $email = $contacto['email'] !== '' ? $e($contacto['email']) : '[CORREO DE CONTACTO]';
 $telefono = $contacto['telefono'] !== '' ? $e($contacto['telefono']) : '[TELÉFONO DE CONTACTO]';
 ?>
 <section class="seccion contenedor ancho-820">
   <h1>Aviso de Privacidad</h1>
-  <p><em>Última actualización: [FECHA DE ÚLTIMA ACTUALIZACIÓN].</em></p>
+  <p><em>Última actualización: <?= $e($actualizado) ?>.</em></p>
 
   <p>
-    <strong>[RAZÓN SOCIAL / NOMBRE DEL TITULAR]</strong> (en adelante, &laquo;Dream Go&raquo; o
+    <strong><?= $razonSocial ?></strong> (en adelante, &laquo;Dream Go&raquo; o
     &laquo;el Responsable&raquo;), con domicilio en <?= $direccion ?>, es responsable del
     tratamiento y protección de tus datos personales conforme a la Ley Federal de Protección de
     Datos Personales en Posesión de los Particulares (LFPDPPP), su Reglamento y los Lineamientos
@@ -30,8 +31,8 @@ $telefono = $contacto['telefono'] !== '' ? $e($contacto['telefono']) : '[TELÉFO
     <li><strong>Identificación y contacto:</strong> nombre, correo electrónico, teléfono.</li>
     <li><strong>Datos sobre el viaje:</strong> fechas tentativas, número de personas, destino o
       paquete de interés, preferencias y comentarios que nos compartas.</li>
-    <li><strong>Datos de facturación:</strong> únicamente si solicitas factura ([RFC, razón
-      social y domicilio fiscal, uso de CFDI]).</li>
+    <li><strong>Datos de facturación:</strong> únicamente si solicitas factura (RFC, razón
+      social, domicilio fiscal, régimen fiscal y uso de CFDI).</li>
     <li><strong>Datos de pago:</strong> el cobro del anticipo y del saldo se procesa
       directamente en la plataforma de <strong>Mercado Pago</strong>. Dream Go <u>no almacena</u>
       los datos de tu tarjeta; solo conservamos la referencia y el monto del pago.</li>
@@ -103,7 +104,8 @@ $telefono = $contacto['telefono'] !== '' ? $e($contacto['telefono']) : '[TELÉFO
 
   <h2>6. Conservación de los datos</h2>
   <p>Conservamos tus datos durante el tiempo necesario para cumplir las finalidades descritas
-    y los plazos legales y fiscales aplicables ([por ejemplo, 5 años para efectos fiscales]),
+    y los plazos legales y fiscales aplicables (5 años para efectos fiscales, conforme al artículo 30 del Código Fiscal de
+    la Federación),
     tras lo cual se suprimen o anonimizan.</p>
 
   <h2>7. Cambios al Aviso de Privacidad</h2>

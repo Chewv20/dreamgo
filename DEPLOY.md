@@ -58,9 +58,8 @@ META_PIXEL_ID=<opcional: ID numerico del pixel de Meta>
 
 `GA4_MEASUREMENT_ID` / `META_PIXEL_ID` son opcionales. Al ponerlos, el sitio publico carga
 GA4 / Meta Pixel **solo despues** de que el visitante acepte en el banner de cookies. Antes
-de activarlos hay que completar los datos entre `[CORCHETES]` de la pagina
-`/aviso-de-privacidad` (`app/Views/public/legal/aviso-privacidad.php`) y que la revise un
-abogado.
+de activarlos, que un abogado revise la pagina `/aviso-de-privacidad`
+(`app/Views/public/legal/aviso-privacidad.php`).
 
 ### 4.1. Configurar Mercado Pago (reserva y pago en linea)
 
@@ -115,11 +114,14 @@ El panel **obliga a cambiarla** en el primer login (`debe_cambiar_password = 1`)
 - [ ] Numero de WhatsApp real configurado en `/admin/configuracion`.
 - [ ] Correo del equipo (`email_equipo_reportes`) configurado en `/admin/configuracion`.
 - [ ] Contenido placeholder (paquetes/categorias de ejemplo) reemplazado o eliminado por contenido real.
+- [ ] Razon social, direccion fiscal, telefono y correo de contacto capturados en
+      `/admin/configuracion` (alimentan el Aviso de Privacidad; si falta alguno, la pagina
+      `/aviso-de-privacidad` lo muestra entre `[CORCHETES]`).
 - [ ] Los 9 cron jobs configurados en hPanel.
 - [ ] SSL activo y `APP_URL` con `https://`.
 - [ ] (Opcional) `GA4_MEASUREMENT_ID` / `META_PIXEL_ID` en `.env` para activar Google
-      Analytics 4 y/o Meta Pixel. Antes de activarlos: completar los `[CORCHETES]` de
-      `/aviso-de-privacidad` y que un abogado lo revise (al activarlos se usan cookies de
+      Analytics 4 y/o Meta Pixel. Antes de activarlos: que un abogado revise
+      `/aviso-de-privacidad` (al activarlos se usan cookies de
       analitica/publicidad de terceros, previo consentimiento del visitante).
 - [ ] Enviar una cotizacion de prueba real y confirmar que llega el correo (valida SMTP en produccion).
 - [ ] `MP_ACCESS_TOKEN`/`MP_WEBHOOK_SECRET` configurados y una reserva de prueba pagada de
