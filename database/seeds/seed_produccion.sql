@@ -67,7 +67,7 @@ INSERT INTO usuarios_admin (nombre, email, password_hash, debe_cambiar_password,
 INSERT INTO configuracion_sitio (clave, valor, descripcion) VALUES
   ('direccion', '', 'Dirección física mostrada en el pie de página'),
   ('telefono_contacto', '', 'Teléfono de contacto mostrado en el pie de página'),
-  ('email_contacto', 'contacto@dreamgooperadoraturistica.com', 'Correo público mostrado en el pie de página'),
+  ('email_contacto', 'ventas@dreamgooperadoraturistica.com', 'Correo público mostrado en el pie de página'),
   ('whatsapp_numero', '5215500000000', 'Número de WhatsApp destino para cotizaciones (formato internacional sin +)'),
   ('facebook_url', '', 'URL de la página de Facebook (vacío = icono oculto)'),
   ('instagram_url', '', 'URL del perfil de Instagram (vacío = icono oculto)'),
