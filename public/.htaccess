@@ -18,6 +18,13 @@ RewriteCond %{HTTPS} off
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
+# Proyecto servido desde public_html (ver .htaccess de la raiz): /public/... pedido directo
+# -> URL canonica sin /public. Va aqui y no en la raiz porque Apache solo aplica las reglas
+# del .htaccess mas profundo. THE_REQUEST es la linea original del navegador: lo reescrito
+# internamente desde la raiz no coincide, y en local (/dreamgo/public/...) tampoco.
+RewriteCond %{THE_REQUEST} \s/+public/([^\s?]*) [NC]
+RewriteRule ^ /%1 [R=301,L]
+
 # Auditoria 2026-08-25, hallazgo CFG-04: sin esto, cada visita revalidaba CSS/JS/fuentes/
 # imagenes de assets/ sin ningun cache de largo plazo ni compresion.
 #

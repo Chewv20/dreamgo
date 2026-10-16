@@ -28,3 +28,7 @@
 .DS_Store
 Thumbs.db
 /.phpunit.cache/
+
+# Lo genera cron/regenerar_sitemap.php con el APP_URL de cada entorno; versionarlo hacia
+# que un deploy pisara el de produccion con URLs locales.
+/public/sitemap.xml

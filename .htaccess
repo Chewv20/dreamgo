@@ -6,17 +6,17 @@
 # archivo ni se lee.
 RewriteEngine On
 
+# www -> dominio sin www (evita contenido duplicado; el canonical ya apunta sin www).
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
 # HTTPS antes de reescribir, para que el redirect no exponga /public en la URL. Misma
 # condicion que public/.htaccess (cubre el CDN de Hostinger, que termina el TLS).
 RewriteCond %{HTTPS} off
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-# /public/... pedido directamente -> URL canonica sin /public. THE_REQUEST es la linea
-# original del navegador, asi que la reescritura interna de abajo no provoca bucle.
-RewriteCond %{THE_REQUEST} \s/+public/([^\s?]*) [NC]
-RewriteRule ^ /%1 [R=301,L]
-
+# El /public/... pedido directo lo redirige public/.htaccess a la URL sin /public.
 RewriteRule ^(.*)$ public/$1 [L]
 
 # Defensa extra si mod_rewrite fallara: archivos sensibles de la raiz.
