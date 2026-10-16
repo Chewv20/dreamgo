@@ -18,7 +18,15 @@ if (!defined('BASE_URL_PATH')) {
     $scriptDir = PHP_SAPI !== 'cli' && isset($_SERVER['SCRIPT_NAME'])
         ? str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']))
         : '/';
-    define('BASE_URL_PATH', $scriptDir === '/' ? '' : rtrim($scriptDir, '/'));
+    $scriptDir = $scriptDir === '/' ? '' : rtrim($scriptDir, '/');
+    // Si el .htaccess de la raiz reescribio la peticion a public/ (Hostinger: proyecto en
+    // public_html), la URL pedida no lleva "/public": la base es la carpeta del proyecto.
+    $rutaPedida = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    if ($scriptDir !== '' && str_ends_with($scriptDir, '/public')
+        && $rutaPedida !== $scriptDir && !str_starts_with($rutaPedida, $scriptDir . '/')) {
+        $scriptDir = substr($scriptDir, 0, -strlen('/public'));
+    }
+    define('BASE_URL_PATH', $scriptDir);
 }
 
 require BASE_PATH . '/vendor/autoload.php';

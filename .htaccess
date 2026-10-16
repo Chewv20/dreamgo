@@ -1,4 +1,25 @@
-# Bloquea el acceso web directo a todo el proyecto.
-# Solo la carpeta public/ debe ser accesible (ver public/.htaccess,
-# que revierte este bloqueo explícitamente para su propio contenido).
-Require all denied
+# Raiz del proyecto. En Hostinger el proyecto queda directo en public_html (el Document Root
+# no se puede mover a public/ y no se usan virtual hosts), asi que toda peticion se reescribe
+# internamente a public/. Con eso app/, core/, config/, storage/, vendor/ y .env nunca se
+# sirven: /app/... o /.env acaban en public/app/... o public/.env, que no existen o estan
+# denegados, y responde el 404 de la app. Si el Document Root si apunta a public/, este
+# archivo ni se lee.
+RewriteEngine On
+
+# HTTPS antes de reescribir, para que el redirect no exponga /public en la URL. Misma
+# condicion que public/.htaccess (cubre el CDN de Hostinger, que termina el TLS).
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# /public/... pedido directamente -> URL canonica sin /public. THE_REQUEST es la linea
+# original del navegador, asi que la reescritura interna de abajo no provoca bucle.
+RewriteCond %{THE_REQUEST} \s/+public/([^\s?]*) [NC]
+RewriteRule ^ /%1 [R=301,L]
+
+RewriteRule ^(.*)$ public/$1 [L]
+
+# Defensa extra si mod_rewrite fallara: archivos sensibles de la raiz.
+<FilesMatch "^(\.env.*|composer\.(json|lock)|.*\.(md|sql|log))$">
+    Require all denied
+</FilesMatch>
