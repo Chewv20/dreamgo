@@ -24,29 +24,31 @@ php cron/regenerar_sitemap.php
 ## Configuracion en Hostinger (hPanel > Avanzado > Cron Jobs)
 
 Sustituye `USUARIO` y el dominio por los datos reales de la cuenta de Hostinger.
-La ruta base normalmente es `/home/USUARIO/domains/dreamgooperadoraturistica.com/`.
+La ruta base normalmente es `/home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/`
+(el proyecto vive directo en `public_html`; ver el `.htaccess` de la raiz). En hPanel, el tipo
+de cron "PHP" ya trae `/usr/bin/php /home/USUARIO/` y solo se completa el resto de la ruta.
 
 ```
-*/15 * * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/liberar_reservas_expiradas.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+*/15 * * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/cron/liberar_reservas_expiradas.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/storage/logs/cron-output.log 2>&1
 
-0 3 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/desactivar_ofertas_vencidas.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+0 3 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/cron/desactivar_ofertas_vencidas.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/storage/logs/cron-output.log 2>&1
 
-0 8 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/recordatorio_viaje.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+0 8 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/cron/recordatorio_viaje.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/storage/logs/cron-output.log 2>&1
 
-0 8 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/recordatorio_saldo.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+0 8 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/cron/recordatorio_saldo.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/storage/logs/cron-output.log 2>&1
 
-0 9 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/solicitar_resena.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+0 9 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/cron/solicitar_resena.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/storage/logs/cron-output.log 2>&1
 
-0 7 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/reporte_periodico.php --periodo=diario >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
-0 7 * * 1 /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/reporte_periodico.php --periodo=semanal >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+0 7 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/cron/reporte_periodico.php --periodo=diario >> /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/storage/logs/cron-output.log 2>&1
+0 7 * * 1 /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/cron/reporte_periodico.php --periodo=semanal >> /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/storage/logs/cron-output.log 2>&1
 
-30 2 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/backup_bd.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+30 2 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/cron/backup_bd.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/storage/logs/cron-output.log 2>&1
 
-0 4 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/limpiar_intentos_login.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+0 4 * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/cron/limpiar_intentos_login.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/storage/logs/cron-output.log 2>&1
 
-*/5 * * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/enviar_avisos_oferta.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+*/5 * * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/cron/enviar_avisos_oferta.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/storage/logs/cron-output.log 2>&1
 
-0 * * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/cron/regenerar_sitemap.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/storage/logs/cron-output.log 2>&1
+0 * * * * /usr/bin/php /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/cron/regenerar_sitemap.php >> /home/USUARIO/domains/dreamgooperadoraturistica.com/public_html/storage/logs/cron-output.log 2>&1
 ```
 
 ## Que hace cada script
