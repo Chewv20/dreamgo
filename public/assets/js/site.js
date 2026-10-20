@@ -101,11 +101,11 @@
     }, 6000);
   }
 
-  // Marca las imagenes horizontales de las tarjetas de paquete para que llenen el marco
-  // 4:5 (ver .is-apaisada en site.css). Se mide la imagen real: el ancho/alto declarado en
-  // el HTML es generico.
+  // Marca las imagenes horizontales de las tarjetas de paquete y destino para que llenen el
+  // marco 4:5 (ver .is-apaisada en site.css). Se mide la imagen real: el ancho/alto declarado
+  // en el HTML es generico.
   function initOrientacionMedia() {
-    document.querySelectorAll('.tarjeta__media--paquete .tarjeta__media-img').forEach(function (img) {
+    document.querySelectorAll('.tarjeta__media--paquete .tarjeta__media-img, .tarjeta__media--destino .tarjeta__media-img').forEach(function (img) {
       function medir() {
         if (img.naturalWidth && img.naturalWidth / img.naturalHeight >= 1.15) {
           img.classList.add('is-apaisada');

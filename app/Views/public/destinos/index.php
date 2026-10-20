@@ -16,7 +16,7 @@
           $alt = $categoria['nombre'];
           $variante = 'destino';
           $width = 480;
-          $height = 270;
+          $height = 600;
           require __DIR__ . '/../../partials/_tarjeta_media.php';
           ?>
         <?php else: ?>

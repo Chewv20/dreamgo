@@ -25,6 +25,7 @@ $imagenesDestino ??= [];
     <?php $imgPrincipal = $imagenesDestino[0]; ?>
     <figure class="galeria" data-galeria>
       <button type="button" class="galeria__abrir" data-galeria-abrir aria-label="Ampliar imagen">
+        <img class="media-fondo" data-galeria-fondo src="<?= htmlspecialchars($imgPrincipal['ruta_original'], ENT_QUOTES, 'UTF-8') ?>" alt="" aria-hidden="true" loading="lazy">
         <img
           class="galeria__principal"
           data-galeria-principal

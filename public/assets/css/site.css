@@ -477,7 +477,8 @@ summary:focus-visible {
 }
 
 .tarjeta__media--destino {
-  aspect-ratio: 16 / 9;
+  /* 4:5 vertical, igual que paquete: las imagenes de destino tambien suelen ser flyers. */
+  aspect-ratio: 4 / 5;
   border-radius: var(--radio);
   margin-bottom: 1rem;
 }
@@ -504,9 +505,10 @@ summary:focus-visible {
 }
 
 /* Fotos horizontales (ver initOrientacionMedia en site.js): en el marco vertical 4:5 de
-   paquete, contain dejaba dos franjas desenfocadas enormes. Una foto apaisada no suele
-   llevar texto, asi que se recorta para llenar el marco; los flyers siguen en contain. */
-.tarjeta__media--paquete .tarjeta__media-img.is-apaisada {
+   paquete y destino, contain dejaba dos franjas desenfocadas enormes. Una foto apaisada no
+   suele llevar texto, asi que se recorta para llenar el marco; los flyers siguen en contain. */
+.tarjeta__media--paquete .tarjeta__media-img.is-apaisada,
+.tarjeta__media--destino .tarjeta__media-img.is-apaisada {
   object-fit: cover;
 }
 
