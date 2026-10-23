@@ -450,7 +450,7 @@ CREATE TABLE IF NOT EXISTS bloques_pagina (
 -- ==========================================================
 CREATE TABLE IF NOT EXISTS log_correos_enviados (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  tipo ENUM('cotizacion_equipo','confirmacion_reserva','reserva_pendiente','recordatorio_viaje','reporte_periodico','solicitud_resena','confirmacion_suscripcion','aviso_oferta','recordatorio_saldo','pago_recibido','recuperar_password','otro') NOT NULL,
+  tipo ENUM('cotizacion_equipo','cotizacion_cliente','confirmacion_reserva','reserva_pendiente','recordatorio_viaje','reporte_periodico','solicitud_resena','confirmacion_suscripcion','aviso_oferta','recordatorio_saldo','pago_recibido','recuperar_password','otro') NOT NULL,
   destinatario VARCHAR(150) NOT NULL,
   asunto VARCHAR(200) NOT NULL,
   referencia_tipo VARCHAR(30) NULL,

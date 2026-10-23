@@ -77,36 +77,37 @@ class CotizadorController extends Controller
 
         $paquete = !empty($datos['paquete_slug']) ? Paquete::porSlugPublicado($datos['paquete_slug']) : null;
 
-        $cotizacionId = Cotizacion::insert([
-            'paquete_id' => $paquete['id'] ?? null,
+        // Los opcionales vacios van como null (no ''): asi los correos y el mensaje de WhatsApp
+        // muestran "No especificado"/"Por definir" en vez de una celda en blanco.
+        $cotizacion = [
             'nombre' => $datos['nombre'],
             'email' => $datos['email'],
             'telefono' => $datos['telefono'],
             'num_personas' => $datos['num_personas'] !== '' ? (int) $datos['num_personas'] : null,
             'fecha_tentativa' => $datos['fecha_tentativa'] !== '' ? $datos['fecha_tentativa'] : null,
             'mensaje' => $datos['mensaje'] !== '' ? $datos['mensaje'] : null,
+        ];
+
+        $cotizacionId = Cotizacion::insert($cotizacion + [
+            'paquete_id' => $paquete['id'] ?? null,
             'ip_origen' => $this->request->ip(),
         ] + Atribucion::desdeFormulario(
             $this->request->only(Atribucion::campos()),
             $_SERVER['HTTP_REFERER'] ?? null
         ));
 
-        $mailer = new MailerService($this->db);
-        $mailer->enviarNotificacionCotizacion([
+        $cotizacion += [
             'id' => $cotizacionId,
-            'nombre' => $datos['nombre'],
-            'email' => $datos['email'],
-            'telefono' => $datos['telefono'],
-            'num_personas' => $datos['num_personas'],
-            'fecha_tentativa' => $datos['fecha_tentativa'],
-            'mensaje' => $datos['mensaje'],
+            'origen' => 'cotizador',
             'paquete_titulo' => $paquete['titulo'] ?? null,
-        ]);
+        ];
 
-        $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionGeneral(
-            ConfiguracionSitio::get('whatsapp_numero', ''),
-            $datos
-        );
+        $numeroWhatsapp = (string) ConfiguracionSitio::get('whatsapp_numero', '');
+        $whatsapp = (new WhatsAppLinkService())->generarLinkCotizacionGeneral($numeroWhatsapp, $cotizacion);
+
+        $mailer = new MailerService($this->db);
+        $mailer->enviarNotificacionCotizacion($cotizacion);
+        $mailer->enviarConfirmacionCotizacion($cotizacion, $numeroWhatsapp !== '' ? $whatsapp : '');
 
         $this->view('public/cotizador/gracias', [
             'whatsapp' => $whatsapp,

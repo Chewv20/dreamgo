@@ -72,16 +72,26 @@ class ContactoController extends Controller
             $_SERVER['HTTP_REFERER'] ?? null
         ));
 
-        (new MailerService($this->db))->enviarNotificacionCotizacion([
+        $cotizacion = [
             'id' => $cotizacionId,
+            'origen' => 'contacto',
             'nombre' => $datos['nombre'],
             'email' => $datos['email'],
             'telefono' => $datos['telefono'],
-            'num_personas' => '',
-            'fecha_tentativa' => '',
+            'num_personas' => null,
+            'fecha_tentativa' => null,
             'mensaje' => $datos['mensaje'],
             'paquete_titulo' => null,
-        ]);
+        ];
+
+        $numeroWhatsapp = (string) ConfiguracionSitio::get('whatsapp_numero', '');
+        $whatsapp = $numeroWhatsapp !== ''
+            ? (new WhatsAppLinkService())->generarLink($numeroWhatsapp, 'Hola, les escribí por el formulario de contacto del sitio.')
+            : '';
+
+        $mailer = new MailerService($this->db);
+        $mailer->enviarNotificacionCotizacion($cotizacion);
+        $mailer->enviarConfirmacionCotizacion($cotizacion, $whatsapp);
 
         Flash::set('exito', 'Gracias por escribirnos. Un asesor te contactará pronto.');
         $this->redirect('/contacto');

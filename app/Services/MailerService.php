@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use PDO;
-use PHPMailer\PHPMailer\Exception as PHPMailerException;
 use PHPMailer\PHPMailer\PHPMailer;
 
 final class MailerService
@@ -14,17 +13,79 @@ final class MailerService
     {
     }
 
+    /**
+     * Aviso al equipo de una cotizacion nueva (cotizador o formulario de contacto). El Reply-To
+     * es el correo del cliente, para que "Responder" le escriba directo a el.
+     *
+     * @param array{id:int|string, origen?:string, nombre:string, email:string, telefono:string,
+     *   num_personas:?int, fecha_tentativa:?string, mensaje:?string, paquete_titulo:?string} $cotizacion
+     *   Los campos opcionales del formulario van como null (no ''), para que la plantilla
+     *   muestre "No especificado".
+     */
     public function enviarNotificacionCotizacion(array $cotizacion): bool
     {
         $destino = \App\Models\ConfiguracionSitio::get('email_equipo_reportes');
         if (empty($destino)) {
+            error_log('[MailerService] La cotizacion ' . ($cotizacion['id'] ?? '?') . ' no se notifico al equipo: falta email_equipo_reportes en /admin/configuracion.');
+
             return false;
         }
 
-        $asunto = 'Nueva cotización de ' . $cotizacion['nombre'];
-        $html = $this->renderPlantilla('notificacion_cotizacion', ['cotizacion' => $cotizacion]);
+        $esContacto = ($cotizacion['origen'] ?? 'cotizador') === 'contacto';
+        $asunto = ($esContacto ? 'Nuevo mensaje de contacto de ' : 'Nueva cotización de ') . $cotizacion['nombre']
+            . (!empty($cotizacion['paquete_titulo']) ? ' - ' . $cotizacion['paquete_titulo'] : '');
+        $html = $this->renderPlantilla('notificacion_cotizacion', [
+            'cotizacion' => $cotizacion,
+            'esContacto' => $esContacto,
+            'urlAdmin' => rtrim($_ENV['APP_URL'] ?? '', '/') . '/admin/cotizaciones/' . (int) $cotizacion['id'],
+            'notaPie' => 'Notificación interna. Si respondes a este correo, la respuesta le llega directo al cliente.',
+        ]);
 
-        return $this->enviar($destino, $asunto, $html, 'cotizacion_equipo', 'cotizacion', (int) ($cotizacion['id'] ?? 0));
+        return $this->enviar(
+            $destino,
+            $asunto,
+            $html,
+            'cotizacion_equipo',
+            'cotizacion',
+            (int) ($cotizacion['id'] ?? 0),
+            null,
+            $cotizacion['email']
+        );
+    }
+
+    /**
+     * Acuse al cliente de que su solicitud llego. El Reply-To es el correo del equipo (si esta
+     * configurado), asi que el cliente puede contestar este mismo correo.
+     *
+     * @param array $cotizacion  Mismo formato que enviarNotificacionCotizacion().
+     * @param string $urlWhatsapp  '' si no hay numero de WhatsApp configurado.
+     */
+    public function enviarConfirmacionCotizacion(array $cotizacion, string $urlWhatsapp): bool
+    {
+        $esContacto = ($cotizacion['origen'] ?? 'cotizador') === 'contacto';
+        $asunto = $esContacto
+            ? 'Recibimos tu mensaje - Dream Go'
+            : 'Recibimos tu solicitud de cotización - Dream Go';
+        $equipo = (string) \App\Models\ConfiguracionSitio::get('email_equipo_reportes', '');
+        $html = $this->renderPlantilla('confirmacion_cotizacion', [
+            'cotizacion' => $cotizacion,
+            'esContacto' => $esContacto,
+            'urlWhatsapp' => $urlWhatsapp,
+            'notaPie' => $equipo !== ''
+                ? 'Puedes responder a este correo si quieres agregar algo a tu solicitud.'
+                : null,
+        ]);
+
+        return $this->enviar(
+            $cotizacion['email'],
+            $asunto,
+            $html,
+            'cotizacion_cliente',
+            'cotizacion',
+            (int) ($cotizacion['id'] ?? 0),
+            null,
+            $equipo !== '' ? $equipo : null
+        );
     }
 
     public function enviarReservaPendiente(array $reserva): bool
@@ -198,6 +259,9 @@ final class MailerService
     }
 
     /**
+     * Nunca lanza: el correo se manda despues de guardar el registro (cotizacion, reserva...),
+     * asi que un fallo aqui no debe convertirse en un 500 que invite a reenviar el formulario.
+     *
      * @param array{contenido:string, nombre:string}|null $adjunto
      */
     private function enviar(
@@ -207,7 +271,8 @@ final class MailerService
         string $tipo,
         ?string $referenciaTipo = null,
         ?int $referenciaId = null,
-        ?array $adjunto = null
+        ?array $adjunto = null,
+        ?string $replyTo = null
     ): bool {
         $exitoso = false;
         $errorDetalle = null;
@@ -215,14 +280,18 @@ final class MailerService
         try {
             $mail = $this->configurarPhpMailer();
             $mail->addAddress($destinatario);
+            if ($replyTo !== null && $replyTo !== '') {
+                $mail->addReplyTo($replyTo);
+            }
             $mail->Subject = $asunto;
             $mail->Body = $htmlBody;
+            $mail->AltBody = $this->textoPlano($htmlBody);
             if ($adjunto !== null) {
                 $mail->addStringAttachment($adjunto['contenido'], $adjunto['nombre'], PHPMailer::ENCODING_BASE64, 'application/pdf');
             }
             $mail->send();
             $exitoso = true;
-        } catch (PHPMailerException $e) {
+        } catch (\Throwable $e) {
             $errorDetalle = $e->getMessage();
             error_log('[MailerService] ' . $errorDetalle);
         }
@@ -230,6 +299,22 @@ final class MailerService
         $this->registrarLog($tipo, $destinatario, $asunto, $referenciaTipo, $referenciaId, $exitoso, $errorDetalle);
 
         return $exitoso;
+    }
+
+    /**
+     * Version en texto plano del correo (AltBody). html2text() de PHPMailer pega las celdas de
+     * una fila ("NombreAna") y pierde las URLs de los botones, que son lo importante aqui.
+     */
+    private function textoPlano(string $html): string
+    {
+        $texto = preg_replace('/<(head|style|script)\b[^>]*>.*?<\/\1>/is', '', $html);
+        $texto = preg_replace('/<a\b[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/is', '$2: $1', $texto);
+        $texto = preg_replace('/<\/td>/i', ' ', $texto);
+        $texto = preg_replace('/<(br|\/p|\/tr|\/h\d)\b[^>]*>/i', "\n", $texto);
+        $texto = html_entity_decode(strip_tags($texto), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $texto = preg_replace('/[ \t]+/', ' ', $texto);
+
+        return trim(preg_replace('/\s*\n\s*/', "\n", $texto));
     }
 
     private function configurarPhpMailer(): PHPMailer
@@ -266,14 +351,30 @@ final class MailerService
         bool $exitoso,
         ?string $errorDetalle
     ): void {
+        try {
+            $this->insertarLog($tipo, $destinatario, $asunto, $referenciaTipo, $referenciaId, $exitoso, $errorDetalle);
+        } catch (\Throwable $e) {
+            error_log('[MailerService] No se pudo registrar el correo "' . $tipo . '" a ' . $destinatario . ': ' . $e->getMessage());
+        }
+    }
+
+    private function insertarLog(
+        string $tipo,
+        string $destinatario,
+        string $asunto,
+        ?string $referenciaTipo,
+        ?int $referenciaId,
+        bool $exitoso,
+        ?string $errorDetalle
+    ): void {
         $stmt = $this->db->prepare(
             'INSERT INTO log_correos_enviados (tipo, destinatario, asunto, referencia_tipo, referencia_id, exitoso, error_detalle)
              VALUES (:tipo, :destinatario, :asunto, :referencia_tipo, :referencia_id, :exitoso, :error_detalle)'
         );
         $stmt->execute([
             'tipo' => $tipo,
-            'destinatario' => $destinatario,
-            'asunto' => $asunto,
+            'destinatario' => mb_substr($destinatario, 0, 150),
+            'asunto' => mb_substr($asunto, 0, 200),
             'referencia_tipo' => $referenciaTipo,
             'referencia_id' => $referenciaId,
             'exitoso' => $exitoso ? 1 : 0,

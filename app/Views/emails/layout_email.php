@@ -1,4 +1,7 @@
-<?php /** @var string $cuerpo */ ?>
+<?php
+/** @var string $cuerpo */
+/** @var string|null $notaPie  Reemplaza el aviso de "no respondas" cuando el correo sí admite respuesta. */
+?>
 <!doctype html>
 <html lang="es-MX">
 <head>
@@ -22,7 +25,7 @@
           </tr>
           <tr>
             <td style="background:#2f3e46;padding:16px 28px;color:#faf3ef;font-size:12px;">
-              Dream Go Operadora Turística &mdash; Este es un correo automático, por favor no respondas directamente.
+              Dream Go Operadora Turística &mdash; <?= htmlspecialchars($notaPie ?? 'Este es un correo automático, por favor no respondas directamente.', ENT_QUOTES, 'UTF-8') ?>
             </td>
           </tr>
         </table>
