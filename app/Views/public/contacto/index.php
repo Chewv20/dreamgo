@@ -24,6 +24,7 @@ $iconosContacto = [
 
   <form method="post" action="/contacto" data-atribucion>
     <?= \App\Helpers\Csrf::field() ?>
+    <?= \App\Helpers\AntiSpam::campos('contacto') ?>
 
     <div class="campo">
       <label for="nombre">Nombre completo</label>

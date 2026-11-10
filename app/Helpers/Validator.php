@@ -41,6 +41,27 @@ final class Validator
         return $this;
     }
 
+    /**
+     * Nombre de persona: letras (con acentos y ñ), espacios, apostrofes, puntos y guiones.
+     * Rechaza URLs, HTML y simbolos, y un punto pegado entre letras ("myxa.cc"), que es como se
+     * cuela un dominio; las iniciales normales llevan espacio despues del punto ("Ma. Luisa").
+     */
+    public function nombrePersona(string $campo, string $etiqueta): self
+    {
+        $valor = trim((string) ($this->datos[$campo] ?? ''));
+        if ($valor === '') {
+            return $this;
+        }
+
+        if (!preg_match("/^\\p{L}[\\p{L}\\p{M}\\s'’.\\-]*$/u", $valor)
+            || preg_match('/\p{L}\.\p{L}{2,}/u', $valor)
+            || preg_match('/\b(?:https?|www)\b/i', $valor)) {
+            $this->errores[$campo] = "{$etiqueta} solo puede contener letras, espacios, apóstrofes, puntos y guiones.";
+        }
+
+        return $this;
+    }
+
     public function maxLength(string $campo, int $max, string $etiqueta): self
     {
         $valor = (string) ($this->datos[$campo] ?? '');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers\Public;
 
+use App\Helpers\AntiSpam;
 use App\Helpers\Atribucion;
 use App\Helpers\Flash;
 use App\Helpers\RateLimiter;
@@ -40,6 +41,18 @@ class ContactoController extends Controller
         }
         RateLimiter::registrar('contacto', null, $ip);
 
+        // Honeypot lleno: se finge exito (sin guardar ni enviar correos) para que el bot no
+        // aprenda a esquivarlo.
+        if (AntiSpam::honeypotLleno($this->request->input(AntiSpam::CAMPO_HONEYPOT))) {
+            Flash::set('exito', 'Gracias por escribirnos. Un asesor te contactará pronto.');
+            $this->redirect('/contacto');
+
+            return;
+        }
+        // Un envio demasiado rapido puede ser una persona con autocompletado, asi que no se
+        // descarta en silencio: se vuelve a mostrar el formulario con sus datos.
+        $demasiadoRapido = AntiSpam::demasiadoRapido('contacto');
+
         $datos = array_merge(
             ['nombre' => '', 'email' => '', 'telefono' => '', 'mensaje' => ''],
             $this->request->only(['nombre', 'email', 'telefono', 'mensaje'])
@@ -47,12 +60,15 @@ class ContactoController extends Controller
 
         $validator = new Validator($datos);
         $validator->requerido('nombre', 'El nombre')->maxLength('nombre', 150, 'El nombre')
+            ->nombrePersona('nombre', 'El nombre')
             ->requerido('email', 'El correo')->email('email', 'El correo')
             ->requerido('telefono', 'El teléfono')->telefono('telefono', 'El teléfono')
             ->requerido('mensaje', 'El mensaje')->maxLength('mensaje', 2000, 'El mensaje');
 
-        if (!$validator->pasa()) {
-            Flash::set('error', 'Revisa los datos del formulario e intenta de nuevo.');
+        if (!$validator->pasa() || $demasiadoRapido) {
+            Flash::set('error', $validator->pasa()
+                ? 'No pudimos procesar el envío. Revisa tus datos y vuelve a enviar el formulario.'
+                : 'Revisa los datos del formulario e intenta de nuevo.');
             $this->render($validator->errores(), $datos);
 
             return;

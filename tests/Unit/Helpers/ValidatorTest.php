@@ -128,4 +128,31 @@ final class ValidatorTest extends TestCase
         $this->assertArrayHasKey('email', $errores);
         $this->assertArrayHasKey('num_personas', $errores);
     }
+
+    public function testNombrePersonaAceptaNombresReales(): void
+    {
+        foreach (['María José Núñez', "O'Connor", 'Ma. Luisa Pérez-Gómez', 'J. Ángel', 'Zoë Brontë'] as $nombre) {
+            $v = new Validator(['nombre' => $nombre]);
+            $v->nombrePersona('nombre', 'El nombre');
+            $this->assertTrue($v->pasa(), "Debió aceptar: {$nombre}");
+        }
+    }
+
+    /** Caso real del 2026-11-10: bot probando el acuse al cliente como relevo de spam. */
+    public function testNombrePersonaRechazaUrlsHtmlYDominios(): void
+    {
+        $casos = [
+            '* * * <a href="https://myxa.cc/">SCAM SERVICE 24/7</a> * * *',
+            'Visita myxa.cc',
+            'Gana dinero www.ejemplo.com',
+            'http ejemplo',
+            'Juan 123',
+            '<b>Juan</b>',
+        ];
+        foreach ($casos as $nombre) {
+            $v = new Validator(['nombre' => $nombre]);
+            $v->nombrePersona('nombre', 'El nombre');
+            $this->assertFalse($v->pasa(), "Debió rechazar: {$nombre}");
+        }
+    }
 }

@@ -19,6 +19,7 @@ $slugElegido = (string) ($valores['paquete_slug'] ?? '');
 
   <form method="post" action="/cotizador" data-atribucion>
     <?= \App\Helpers\Csrf::field() ?>
+    <?= \App\Helpers\AntiSpam::campos('cotizador') ?>
     <?php if ($paquete): ?>
       <input type="hidden" name="paquete_slug" value="<?= htmlspecialchars($paquete['slug'], ENT_QUOTES, 'UTF-8') ?>">
       <input type="hidden" name="paquete_desde_ficha" value="1">

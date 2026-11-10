@@ -3,7 +3,12 @@
 /** @var bool $esContacto */
 /** @var string $urlWhatsapp */
 ?>
-<h2 style="margin-top:0;color:#2f3e46;">¡Hola, <?= htmlspecialchars($cotizacion['nombre'], ENT_QUOTES, 'UTF-8') ?>!</h2>
+<?php
+// Este correo va a la direccion que escribio quien lleno el formulario, asi que NO repite
+// texto libre (nombre ni mensaje): si lo hiciera, cualquiera podria mandar spam a terceros
+// desde el dominio de Dream Go poniendo su anuncio en esos campos (2026-11-10).
+?>
+<h2 style="margin-top:0;color:#2f3e46;">¡Hola!</h2>
 <?php if ($esContacto): ?>
   <p>Recibimos tu mensaje. Un asesor de Dream Go te contactará muy pronto.</p>
 <?php else: ?>
@@ -14,10 +19,6 @@
     <tr><td style="font-weight:bold;">Personas</td><td><?= htmlspecialchars((string) ($cotizacion['num_personas'] ?? 'Por definir'), ENT_QUOTES, 'UTF-8') ?></td></tr>
     <tr><td style="font-weight:bold;">Fecha tentativa</td><td><?= !empty($cotizacion['fecha_tentativa']) ? date('d/m/Y', strtotime($cotizacion['fecha_tentativa'])) : 'Por definir' ?></td></tr>
   </table>
-<?php endif; ?>
-<?php if (!empty($cotizacion['mensaje'])): ?>
-  <p style="font-weight:bold;margin-bottom:4px;">Tu mensaje</p>
-  <p><?= nl2br(htmlspecialchars($cotizacion['mensaje'], ENT_QUOTES, 'UTF-8')) ?></p>
 <?php endif; ?>
 <?php if ($urlWhatsapp !== ''): ?>
   <p>Si quieres avanzar más rápido, escríbenos por WhatsApp:</p>
