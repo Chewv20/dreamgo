@@ -158,7 +158,10 @@
       "Bash(kill 5704)",
       "Bash(rm -f /tmp/cmp*.html /tmp/catalogo.html /tmp/ficha2.html /tmp/home2.html /tmp/php_server.log)",
       "Bash(git restore *)",
-      "Bash(git reset *)"
+      "Bash(git reset *)",
+      "ClaudeInChromeDomain(localhost)",
+      "ClaudeInChromeDomain(localhost:8090)",
+      "mcp__claude-in-chrome__tabs_context_mcp"
     ],
     "additionalDirectories": [
       "C:\\xampp\\apache\\conf\\extra"
